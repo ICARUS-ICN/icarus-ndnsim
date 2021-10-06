@@ -1,0 +1,66 @@
+# This is a basic workflow to help you get started with Actions
+
+name: CI
+
+# Controls when the workflow will run
+on:
+  # Triggers the workflow on push or pull request events but only for the main branch
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+  # Allows you to run this workflow manually from the Actions tab
+  workflow_dispatch:
+
+# A workflow run is made up of one or more jobs that can run sequentially or in parallel
+jobs:
+  build:
+    # The type of runner that the job will run on
+    runs-on: ubuntu-latest
+
+    # Steps represent a sequence of tasks that will be executed as part of the job
+    steps:
+      - name: Cache
+        uses: actions/cache@v2
+        id: cache
+        with:
+          path: ns-3
+          key: ${{ runner.os }}-ns3-icarus
+      - name: Checkout pybindgen
+        uses: actions/checkout@v2
+        with:
+          repository: gjcarneiro/pybindgen
+          path: pybindgen
+          ref: '0.22.0'
+      - name: Install dependencies
+        run: sudo apt install -y build-essential libsqlite3-dev libboost-all-dev libssl-dev git python3-setuptools castxml
+      - name: Checkout ns3 version of ndnSIM
+        if: steps.cache.outputs.cache-hit != 'true'
+        uses: actions/checkout@v2
+        with:
+          repository: named-data-ndnSIM/ns-3-dev
+          path: ns-3
+      - name: Checkout ndnSIM
+        if: steps.cache.outputs.cache-hit != 'true'
+        uses: actions/checkout@v2
+        with:
+          repository: named-data-ndnSIM/ndnSIM
+          path: ns-3/src/ndnSIM
+          submodules: recursive
+      - name: Checkout ICARUS
+        uses: actions/checkout@v2
+        with:
+          path: ns-3/src/icarus
+      - name: Configure
+        run: |
+          cd ns-3
+          ./waf configure --enable-tests -o build/ --enable-modules=icarus,point-to-point-layout
+      - name: Build
+        run: |
+          cd ns-3
+          ./waf build
+      - name: Check
+        run: |
+          cd ns-3
+          ./test.py -m -s icarus -v
