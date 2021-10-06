@@ -11,7 +11,6 @@ def build(bld):
     module.source = [
         'model/circular-orbit.cc',
         'model/satpos/planet.cc',
-        'helper/icarus-helper.cc',
     ]
 
     module_test = bld.create_ns3_module_test_library('icarus')
@@ -23,10 +22,9 @@ def build(bld):
     headers.module = 'icarus'
     headers.source = [
         'model/circular-orbit.h',
-        'helper/icarus-helper.h',
     ]
 
-    if bld.env.ENABLE_EXAMPLES:
-        bld.recurse('examples')
+    # if bld.env.ENABLE_EXAMPLES:
+    #    bld.recurse('examples')
 
     # bld.ns3_python_bindings()
