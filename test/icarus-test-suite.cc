@@ -19,8 +19,7 @@
  */
 
 // Include a header file from your module to test.
-#include "model/circular-orbit.h"
-#include "ns3/icarus.h"
+#include "ns3/circular-orbit.h"
 
 // An essential include is test.h
 #include "ns3/mobility-model.h"
