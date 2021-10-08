@@ -48,6 +48,8 @@ public:
   virtual ~CircularOrbitMobilityModel ();
 
   void LaunchSat (radians inclination, radians ascending_node, meters altitude, radians phase);
+  // Get the position without planet rotation correction
+  Vector getRawPosition () const;
 
 private:
   virtual Vector DoGetPosition (void) const;

@@ -22,11 +22,13 @@
 #include "satpos/planet.h"
 #include "ns3/log.h"
 #include "ns3/simulator.h"
-#include "src/mobility/model/mobility-model.h"
+#include "ns3/mobility-model.h"
+#include "ns3/geographic-positions.h"
 
 #include <boost/math/constants/constants.hpp>
 #include <boost/units/systems/si/length.hpp>
 #include <boost/units/systems/si/plane_angle.hpp>
+#include <boost/units/systems/angle/degrees.hpp>
 
 namespace ns3 {
 
@@ -95,7 +97,7 @@ CircularOrbitMobilityModel::DoGetVelocity () const
 }
 
 Vector
-CircularOrbitMobilityModel::DoGetPosition () const
+CircularOrbitMobilityModel::getRawPosition () const
 {
   using namespace boost::math::double_constants;
   using namespace boost::units;
@@ -136,6 +138,22 @@ CircularOrbitMobilityModel::DoGetPosition () const
                                         x * sin (ascending_node) + y * cos (ascending_node), z);
 
   return Vector (x.value (), y.value (), z.value ());
+}
+
+Vector
+CircularOrbitMobilityModel::DoGetPosition () const
+{
+  Vector rawPosition{getRawPosition ()};
+  const auto radius{rawPosition.GetLength ()};
+  const auto latitude{radian * asin (rawPosition.z / radius)};
+  const auto prime_meridian_ascension{0.0 * radian + second * ns3::Simulator::Now ().GetSeconds () *
+                                                         Earth.getRotationRate ()};
+  const auto sat_ascension{radian * atan2 (rawPosition.y, rawPosition.x)};
+
+  return GeographicPositions::GeographicToCartesianCoordinates (
+      quantity<degree::plane_angle> (latitude).value (),
+      quantity<degree::plane_angle> (sat_ascension - prime_meridian_ascension).value (),
+      radius - Earth.getRadius ().value (), GeographicPositions::SPHERE);
 }
 
 } // namespace ns3
