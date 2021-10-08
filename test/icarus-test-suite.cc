@@ -87,16 +87,16 @@ CircularOrbitTestCase1::DoRun (void)
   NS_TEST_ASSERT_MSG_EQ_TOL (sqrt (pow (mmodel->GetPosition ().x, 2) +
                                    pow (mmodel->GetPosition ().y, 2) +
                                    pow (mmodel->GetPosition ().z, 2)),
-                             6621009., 1, "Altitude is wrong!");
+                             6621000., 1, "Initial altitude is wrong!");
 
-  ns3::Simulator::Stop (Seconds (10296.2)); // Bird at maximum inclination
+  ns3::Simulator::Stop (Seconds (9384)); // Bird at maximum inclination South
   ns3::Simulator::Run ();
 
   NS_TEST_ASSERT_MSG_EQ_TOL (sqrt (pow (mmodel->GetPosition ().x, 2) +
                                    pow (mmodel->GetPosition ().y, 2) +
                                    pow (mmodel->GetPosition ().z, 2)),
-                             6621009., 1, "Altitude is wrong!");
-  NS_TEST_ASSERT_MSG_EQ_TOL (mmodel->GetPosition ().x, 5.80203e6, 1000, "Position is wrong");
+                             6621000., 1, "Final altitude is wrong!");
+  NS_TEST_ASSERT_MSG_EQ_TOL (mmodel->GetPosition ().x, -2.09605e6, 1000, "Position is wrong");
 }
 
 // The TestSuite class names the TestSuite, identifies what type of TestSuite,
