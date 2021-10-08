@@ -24,7 +24,7 @@ def build(bld):
         'model/circular-orbit.h',
     ]
 
-    # if bld.env.ENABLE_EXAMPLES:
-    #    bld.recurse('examples')
+    if bld.env.ENABLE_EXAMPLES:
+        bld.recurse('examples')
 
     # bld.ns3_python_bindings()
