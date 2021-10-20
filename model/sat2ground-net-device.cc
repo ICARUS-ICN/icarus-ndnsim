@@ -110,6 +110,19 @@ Sat2GroundNetDevice::~Sat2GroundNetDevice ()
 {
 }
 
+bool
+Sat2GroundNetDevice::Attach (Ptr<GroundSatChannel> channel)
+{
+  if (channel->AttachNewSat (this))
+    {
+      m_channel = channel;
+      m_linkChangeCallbacks ();
+      return true;
+    }
+
+  return false;
+}
+
 void
 Sat2GroundNetDevice::SetIfIndex (const uint32_t index)
 {
@@ -162,7 +175,7 @@ Sat2GroundNetDevice::IsLinkUp (void) const
 void
 Sat2GroundNetDevice::AddLinkChangeCallback (Callback<void> callback)
 {
-  m_linkChangeCallback = callback;
+  m_linkChangeCallbacks.ConnectWithoutContext (callback);
 }
 
 bool

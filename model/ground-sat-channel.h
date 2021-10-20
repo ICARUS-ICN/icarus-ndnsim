@@ -24,12 +24,13 @@
 #define GROUND_SAT_CHANNEL_H
 
 #include "ns3/channel.h"
+#include "ns3/net-device-container.h"
 #include "ns3/net-device.h"
 
 namespace ns3 {
 
-class NetDevice;
-
+class GroundStaNetDevice;
+class Sat2GroundNetDevice;
 class GroundSatChannel : public Channel
 {
 public:
@@ -41,8 +42,16 @@ public:
 
   GroundSatChannel ();
   virtual ~GroundSatChannel ();
-  virtual std::size_t GetNDevices (void) const;
-  virtual Ptr<NetDevice> GetDevice (std::size_t i) const;
+
+  bool AttachNewSat (Ptr<Sat2GroundNetDevice> device);
+  bool AttachGround (Ptr<GroundStaNetDevice> device);
+
+  virtual std::size_t GetNDevices (void) const override;
+  virtual Ptr<NetDevice> GetDevice (std::size_t i) const override;
+
+private:
+  NetDeviceContainer m_satellites;
+  Ptr<NetDevice> m_ground = 0;
 };
 } // namespace ns3
 

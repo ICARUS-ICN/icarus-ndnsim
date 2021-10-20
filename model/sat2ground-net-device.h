@@ -42,6 +42,8 @@ public:
   static TypeId GetTypeId (void);
   virtual ~Sat2GroundNetDevice ();
 
+  bool Attach (Ptr<GroundSatChannel> channel);
+
   virtual void SetIfIndex (const uint32_t index) override;
   virtual uint32_t GetIfIndex (void) const override;
 
@@ -88,7 +90,7 @@ private:
   Ptr<GroundSatChannel> m_channel;
   Ptr<Node> m_node;
   uint16_t m_mtu;
-  Callback<void> m_linkChangeCallback;
+  TracedCallback<> m_linkChangeCallbacks;
   ReceiveCallback m_receiveCallback;
 
   TracedCallback<Ptr<const Packet>> m_macTxTrace, m_macTxDropTrace, m_macRxTrace, m_phyTxBeginTrace,

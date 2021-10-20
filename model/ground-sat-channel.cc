@@ -21,9 +21,13 @@
  */
 
 #include "ground-sat-channel.h"
+#include "ns3/assert.h"
 #include "ns3/channel.h"
 #include "ns3/log.h"
 #include "ns3/abort.h"
+#include "ns3/net-device.h"
+#include "sat2ground-net-device.h"
+#include "ground-sta-net-device.h"
 
 namespace ns3 {
 
@@ -42,6 +46,26 @@ GroundSatChannel::GetTypeId (void)
   return tid;
 }
 
+bool
+GroundSatChannel::AttachNewSat (Ptr<Sat2GroundNetDevice> device)
+{
+  m_satellites.Add (device);
+
+  return true;
+}
+
+bool
+GroundSatChannel::AttachGround (Ptr<GroundStaNetDevice> device)
+{
+  if (m_ground == 0)
+    {
+      m_ground = device;
+      return true;
+    }
+
+  return false;
+}
+
 GroundSatChannel::GroundSatChannel () : Channel ()
 {
 }
@@ -53,12 +77,23 @@ GroundSatChannel::~GroundSatChannel ()
 std::size_t
 GroundSatChannel::GetNDevices (void) const
 {
-  NS_ABORT_MSG ("Not implemented");
+  return m_satellites.GetN () + (m_ground ? 1 : 0);
 }
 
 Ptr<NetDevice>
 GroundSatChannel::GetDevice (std::size_t i) const
 {
-  NS_ABORT_MSG ("Not implemented");
+  // Last device is ground station
+  NS_ABORT_MSG_UNLESS (i < GetNDevices (),
+                       "Asking for " << i << "-th device of a total of " << GetNDevices ());
+
+  if (i < m_satellites.GetN ())
+    {
+      return m_satellites.Get (i);
+    }
+  NS_ASSERT (i + 1 == GetNDevices ());
+  NS_ASSERT (m_ground);
+
+  return m_ground;
 }
 } // namespace ns3

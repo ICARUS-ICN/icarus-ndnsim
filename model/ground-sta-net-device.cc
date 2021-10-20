@@ -110,6 +110,20 @@ GroundStaNetDevice::~GroundStaNetDevice ()
 {
 }
 
+bool
+GroundStaNetDevice::Attach (Ptr<GroundSatChannel> channel)
+{
+  if (channel->AttachGround (this))
+    {
+      m_channel = channel;
+      m_linkChangeCallbacks ();
+
+      return true;
+    }
+
+  return false;
+}
+
 void
 GroundStaNetDevice::SetIfIndex (const uint32_t index)
 {
@@ -162,7 +176,7 @@ GroundStaNetDevice::IsLinkUp (void) const
 void
 GroundStaNetDevice::AddLinkChangeCallback (Callback<void> callback)
 {
-  m_linkChangeCallback = callback;
+  m_linkChangeCallbacks.ConnectWithoutContext (callback);
 }
 
 bool
