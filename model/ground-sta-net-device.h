@@ -44,6 +44,9 @@ public:
 
   bool Attach (Ptr<GroundSatChannel> channel);
 
+  DataRate GetDataRate () const;
+  void SetDataRate (DataRate rate);
+
   virtual void SetIfIndex (const uint32_t index) override;
   virtual uint32_t GetIfIndex (void) const override;
 
@@ -84,6 +87,8 @@ public:
 
 private:
   static constexpr uint16_t DEFAULT_MTU = 1500;
+
+  DataRate m_bps;
   Mac48Address m_address;
   uint32_t m_ifIndex;
   Ptr<Queue<Packet>> m_queue = 0;

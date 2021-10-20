@@ -24,8 +24,10 @@
 #define GROUND_SAT_CHANNEL_H
 
 #include "ns3/channel.h"
+#include "ns3/data-rate.h"
 #include "ns3/net-device-container.h"
 #include "ns3/net-device.h"
+#include "ns3/data-rate.h"
 
 namespace ns3 {
 

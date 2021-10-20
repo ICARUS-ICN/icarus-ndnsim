@@ -43,6 +43,11 @@ Sat2GroundNetDevice::GetTypeId (void)
                          Mac48AddressValue (Mac48Address ("ff:ff:ff:ff:ff:ff")),
                          MakeMac48AddressAccessor (&Sat2GroundNetDevice::m_address),
                          MakeMac48AddressChecker ())
+          .AddAttribute ("DataRate", "The default data rate for ground<->satellite channels",
+                         DataRateValue (DataRate ("1Gb/s")),
+                         MakeDataRateAccessor (&Sat2GroundNetDevice::SetDataRate,
+                                               &Sat2GroundNetDevice::GetDataRate),
+                         MakeDataRateChecker ())
           .AddAttribute (
               "Mtu", "The MAC-level Maximum Transmission Unit", UintegerValue (DEFAULT_MTU),
               MakeUintegerAccessor (&Sat2GroundNetDevice::SetMtu, &Sat2GroundNetDevice::GetMtu),
@@ -121,6 +126,18 @@ Sat2GroundNetDevice::Attach (Ptr<GroundSatChannel> channel)
     }
 
   return false;
+}
+
+DataRate
+Sat2GroundNetDevice::GetDataRate () const
+{
+  return m_bps;
+}
+
+void
+Sat2GroundNetDevice::SetDataRate (DataRate rate)
+{
+  m_bps = rate;
 }
 
 void
