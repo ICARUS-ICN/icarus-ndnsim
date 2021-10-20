@@ -10,6 +10,9 @@ def build(bld):
     module = bld.create_ns3_module('icarus', ['mobility', 'ndnSIM'])
     module.source = [
         'model/circular-orbit.cc',
+        'model/ground-sat-channel.cc',
+        'model/ground-sta-net-device.cc',
+        'model/sat2ground-net-device.cc',
         'model/satpos/planet.cc',
     ]
 
