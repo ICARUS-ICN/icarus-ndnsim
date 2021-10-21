@@ -25,6 +25,9 @@ def build(bld):
     headers.module = 'icarus'
     headers.source = [
         'model/circular-orbit.h',
+        'model/sat2ground-net-device.h',
+        'model/ground-sat-channel.h',
+        'model/ground-sta-net-device.h'
     ]
 
     if bld.env.ENABLE_EXAMPLES:

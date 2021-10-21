@@ -22,9 +22,11 @@
 
 #include "sat2ground-net-device.h"
 #include "ns3/log.h"
+#include "ns3/mac48-address.h"
 #include "ns3/pointer.h"
 #include "ns3/uinteger.h"
 #include "ns3/abort.h"
+#include "ns3/simulator.h"
 
 namespace ns3 {
 NS_LOG_COMPONENT_DEFINE ("Sat2GroundNetDevice");
@@ -40,7 +42,7 @@ Sat2GroundNetDevice::GetTypeId (void)
           .SetGroupName ("ICARUS")
           .AddConstructor<Sat2GroundNetDevice> ()
           .AddAttribute ("Address", "The MAC address of this device.",
-                         Mac48AddressValue (Mac48Address ("ff:ff:ff:ff:ff:ff")),
+                         Mac48AddressValue (Mac48Address ("00:00:00:00:00:00")),
                          MakeMac48AddressAccessor (&Sat2GroundNetDevice::m_address),
                          MakeMac48AddressChecker ())
           .AddAttribute ("DataRate", "The default data rate for ground<->satellite channels",
@@ -56,9 +58,10 @@ Sat2GroundNetDevice::GetTypeId (void)
           // Transmit queueing discipline for the device which includes its own set
           // of trace hooks.
           //
-          .AddAttribute ("TxQueue", "A queue to use as the transmit queue in the device.",
-                         PointerValue (), MakePointerAccessor (&Sat2GroundNetDevice::m_queue),
-                         MakePointerChecker<Queue<Packet>> ())
+          .AddAttribute (
+              "TxQueue", "A queue to use as the transmit queue in the device.", PointerValue (),
+              MakePointerAccessor (&Sat2GroundNetDevice::SetQueue, &Sat2GroundNetDevice::GetQueue),
+              MakePointerChecker<Queue<Packet>> ())
 
           //
           // Trace sources at the "top" of the net device, where packets transition
@@ -85,6 +88,11 @@ Sat2GroundNetDevice::GetTypeId (void)
           // Trace sources at the "bottom" of the net device, where packets transition
           // to/from the channel.
           //
+          .AddTraceSource ("PhyRxBegin",
+                           "Trace source indicating a packet has "
+                           "begun being received by the device",
+                           MakeTraceSourceAccessor (&Sat2GroundNetDevice::m_phyRxBeginTrace),
+                           "ns3::Packet::TracedCallback")
           .AddTraceSource ("PhyTxBegin",
                            "Trace source indicating a packet has "
                            "begun transmitting over the channel",
@@ -140,11 +148,44 @@ Sat2GroundNetDevice::SetDataRate (DataRate rate)
   m_bps = rate;
 }
 
+Ptr<Queue<Packet>>
+Sat2GroundNetDevice::GetQueue () const
+{
+  return m_queue;
+}
+
+void
+Sat2GroundNetDevice::SetQueue (Ptr<Queue<Packet>> queue)
+{
+  m_queue = queue;
+}
+
+void
+Sat2GroundNetDevice::ReceiveFromGround (Ptr<Packet> packet, DataRate bps, uint16_t protocolNumber)
+{
+  m_phyRxBeginTrace (packet);
+  Simulator::Schedule (bps.CalculateBytesTxTime (packet->GetSize ()),
+                       &Sat2GroundNetDevice::ReceiveFromGroundFinish, this, packet, protocolNumber);
+}
+
+void
+Sat2GroundNetDevice::ReceiveFromGroundFinish (Ptr<Packet> packet, uint16_t protocolNumber)
+{
+  m_phyRxEndTrace (packet);
+  m_snifferTrace (packet);
+  m_macRxTrace (packet);
+
+  NS_LOG_WARN ("FIXME: Missing source address.");
+  static auto macUnspecified = Mac48Address ("00:00:00:00:00:00");
+  m_receiveCallback (this, packet, protocolNumber, macUnspecified);
+}
+
 void
 Sat2GroundNetDevice::SetIfIndex (const uint32_t index)
 {
   m_ifIndex = index;
 }
+
 uint32_t
 Sat2GroundNetDevice::GetIfIndex (void) const
 {
@@ -206,7 +247,7 @@ Sat2GroundNetDevice::GetBroadcast (void) const
 {
   NS_LOG (LOG_WARN, "This is not supported");
 
-  return Mac48Address ("ff:ff:ff:ff:ff:ff");
+  return Mac48Address::GetBroadcast ();
 }
 
 bool
@@ -220,7 +261,7 @@ Sat2GroundNetDevice::GetMulticast (Ipv4Address multicastGroup) const
 {
   NS_LOG (LOG_WARN, "This is not supported");
 
-  return Mac48Address ("ff:ff:ff:ff:ff:ff");
+  return Mac48Address::GetBroadcast ();
 }
 
 Address
@@ -228,7 +269,7 @@ Sat2GroundNetDevice::GetMulticast (Ipv6Address addr) const
 {
   NS_LOG (LOG_WARN, "This is not supported");
 
-  return Mac48Address ("ff:ff:ff:ff:ff:ff");
+  return Mac48Address::GetBroadcast ();
 }
 
 bool

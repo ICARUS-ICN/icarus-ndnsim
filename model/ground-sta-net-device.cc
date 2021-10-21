@@ -25,6 +25,8 @@
 #include "ns3/pointer.h"
 #include "ns3/uinteger.h"
 #include "ns3/abort.h"
+#include "ns3/simulator.h"
+#include "ns3/log.h"
 
 namespace ns3 {
 NS_LOG_COMPONENT_DEFINE ("GroundStaNetDevice");
@@ -40,7 +42,7 @@ GroundStaNetDevice::GetTypeId (void)
           .SetGroupName ("ICARUS")
           .AddConstructor<GroundStaNetDevice> ()
           .AddAttribute ("Address", "The MAC address of this device.",
-                         Mac48AddressValue (Mac48Address ("ff:ff:ff:ff:ff:ff")),
+                         Mac48AddressValue (Mac48Address ("00:00:00:00:00:00")),
                          MakeMac48AddressAccessor (&GroundStaNetDevice::m_address),
                          MakeMac48AddressChecker ())
           .AddAttribute ("DataRate", "The default data rate for ground<->satellite channels",
@@ -56,9 +58,10 @@ GroundStaNetDevice::GetTypeId (void)
           // Transmit queueing discipline for the device which includes its own set
           // of trace hooks.
           //
-          .AddAttribute ("TxQueue", "A queue to use as the transmit queue in the device.",
-                         PointerValue (), MakePointerAccessor (&GroundStaNetDevice::m_queue),
-                         MakePointerChecker<Queue<Packet>> ())
+          .AddAttribute (
+              "TxQueue", "A queue to use as the transmit queue in the device.", PointerValue (),
+              MakePointerAccessor (&GroundStaNetDevice::SetQueue, &GroundStaNetDevice::GetQueue),
+              MakePointerChecker<Queue<Packet>> ())
 
           //
           // Trace sources at the "top" of the net device, where packets transition
@@ -85,6 +88,11 @@ GroundStaNetDevice::GetTypeId (void)
           // Trace sources at the "bottom" of the net device, where packets transition
           // to/from the channel.
           //
+          .AddTraceSource ("PhyRxBegin",
+                           "Trace source indicating a packet has "
+                           "begun being received by the device",
+                           MakeTraceSourceAccessor (&GroundStaNetDevice::m_phyRxBeginTrace),
+                           "ns3::Packet::TracedCallback")
           .AddTraceSource ("PhyTxBegin",
                            "Trace source indicating a packet has "
                            "begun transmitting over the channel",
@@ -141,11 +149,24 @@ GroundStaNetDevice::SetDataRate (DataRate rate)
   m_bps = rate;
 }
 
+Ptr<Queue<Packet>>
+GroundStaNetDevice::GetQueue () const
+{
+  return m_queue;
+}
+
+void
+GroundStaNetDevice::SetQueue (Ptr<Queue<Packet>> queue)
+{
+  m_queue = queue;
+}
+
 void
 GroundStaNetDevice::SetIfIndex (const uint32_t index)
 {
   m_ifIndex = index;
 }
+
 uint32_t
 GroundStaNetDevice::GetIfIndex (void) const
 {
@@ -207,7 +228,7 @@ GroundStaNetDevice::GetBroadcast (void) const
 {
   NS_LOG (LOG_WARN, "This is not supported");
 
-  return Mac48Address ("ff:ff:ff:ff:ff:ff");
+  return Mac48Address::GetBroadcast ();
 }
 
 bool
@@ -221,7 +242,7 @@ GroundStaNetDevice::GetMulticast (Ipv4Address multicastGroup) const
 {
   NS_LOG (LOG_WARN, "This is not supported");
 
-  return Mac48Address ("ff:ff:ff:ff:ff:ff");
+  return Mac48Address::GetBroadcast ();
 }
 
 Address
@@ -229,7 +250,7 @@ GroundStaNetDevice::GetMulticast (Ipv6Address addr) const
 {
   NS_LOG (LOG_WARN, "This is not supported");
 
-  return Mac48Address ("ff:ff:ff:ff:ff:ff");
+  return Mac48Address::GetBroadcast ();
 }
 
 bool
@@ -247,7 +268,52 @@ GroundStaNetDevice::IsPointToPoint (void) const
 bool
 GroundStaNetDevice::Send (Ptr<Packet> packet, const Address &dest, uint16_t protocolNumber)
 {
-  NS_ABORT_MSG ("Not implemented yet");
+  NS_LOG_WARN ("The protocol number should really be transmitted in a header somehow");
+
+  m_macTxTrace (packet);
+  if (m_queue->Enqueue (packet) == false)
+    {
+      m_macTxDropTrace (packet);
+      return false;
+    }
+
+  if (m_txMachineState == IDLE)
+    {
+      if (m_queue->IsEmpty () == false)
+        {
+          auto packet = m_queue->Dequeue ();
+          m_snifferTrace (packet);
+          TransmitStart (packet, protocolNumber);
+        }
+    }
+
+  return true;
+}
+
+void
+GroundStaNetDevice::TransmitStart (Ptr<Packet> packet, uint16_t protocolNumber)
+{
+  NS_ASSERT_MSG (m_txMachineState == IDLE,
+                 "Must be IDLE to transmit. Tx state is: " << m_txMachineState);
+  m_txMachineState = TRANSMITTING;
+
+  m_phyTxBeginTrace (packet);
+  Time endTx = m_channel->Transmit2Sat (packet, m_bps, protocolNumber);
+  Simulator::Schedule (endTx, &GroundStaNetDevice::TransmitComplete, this, packet, protocolNumber);
+}
+
+void
+GroundStaNetDevice::TransmitComplete (Ptr<Packet> packet, uint16_t protocolNumber)
+{
+  m_phyTxEndTrace (packet);
+  m_txMachineState = IDLE;
+
+  if (m_queue->IsEmpty () == false)
+    {
+      auto packet = m_queue->Dequeue ();
+      m_snifferTrace (packet);
+      TransmitStart (packet, protocolNumber);
+    }
 }
 
 bool

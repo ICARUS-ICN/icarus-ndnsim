@@ -47,6 +47,11 @@ public:
   DataRate GetDataRate () const;
   void SetDataRate (DataRate rate);
 
+  Ptr<Queue<Packet>> GetQueue () const;
+  void SetQueue (Ptr<Queue<Packet>> rate);
+
+  void ReceiveFromGround (Ptr<Packet> packet, DataRate bps, uint16_t protocolNumber);
+
   virtual void SetIfIndex (const uint32_t index) override;
   virtual uint32_t GetIfIndex (void) const override;
 
@@ -99,7 +104,9 @@ private:
   ReceiveCallback m_receiveCallback;
 
   TracedCallback<Ptr<const Packet>> m_macTxTrace, m_macTxDropTrace, m_macRxTrace, m_phyTxBeginTrace,
-      m_phyTxEndTrace, m_phyRxEndTrace, m_snifferTrace;
+      m_phyTxEndTrace, m_phyRxBeginTrace, m_phyRxEndTrace, m_snifferTrace;
+
+  void ReceiveFromGroundFinish (Ptr<Packet> packet, uint16_t protocolNumber);
 };
 
 } // namespace ns3

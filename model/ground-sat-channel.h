@@ -48,6 +48,8 @@ public:
   bool AttachNewSat (Ptr<Sat2GroundNetDevice> device);
   bool AttachGround (Ptr<GroundStaNetDevice> device);
 
+  Time Transmit2Sat (Ptr<Packet> packet, DataRate bps, uint16_t protocolNumber) const;
+
   virtual std::size_t GetNDevices (void) const override;
   virtual Ptr<NetDevice> GetDevice (std::size_t i) const override;
 
