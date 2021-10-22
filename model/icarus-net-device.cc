@@ -20,7 +20,7 @@
  *
  */
 
-#include "icarus-net-device.h"
+#include "ns3/icarus-net-device.h"
 #include "ns3/log-macros-enabled.h"
 
 namespace ns3 {

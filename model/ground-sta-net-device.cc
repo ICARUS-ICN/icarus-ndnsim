@@ -22,6 +22,7 @@
 
 #include "ground-sta-net-device.h"
 #include "ns3/log.h"
+#include "ns3/icarus-net-device.h"
 #include "ns3/log-macros-enabled.h"
 #include "ns3/pointer.h"
 #include "ns3/uinteger.h"
@@ -39,7 +40,7 @@ GroundStaNetDevice::GetTypeId (void)
 {
   static TypeId tid =
       TypeId ("ns3::GroundStaNetDevice")
-          .SetParent<NetDevice> ()
+          .SetParent<IcarusNetDevice> ()
           .SetGroupName ("ICARUS")
           .AddConstructor<GroundStaNetDevice> ()
           .AddAttribute ("Address", "The MAC address of this device.",

@@ -27,12 +27,14 @@
 #include "ns3/net-device.h"
 #include "ns3/internet-module.h"
 #include "ns3/applications-module.h"
+#include "ns3/trace-helper.h"
 #include "ns3/udp-echo-helper.h"
 #include "src/core/model/log.h"
 
 #include <boost/units/systems/si/length.hpp>
 #include <boost/units/systems/si/plane_angle.hpp>
 #include <boost/units/systems/angle/degrees.hpp>
+#include <limits>
 
 using namespace ns3;
 
@@ -82,7 +84,7 @@ main (int argc, char **argv) -> int
   ipInterfaces = address.Assign (netDevices);
 
   UdpEchoClientHelper echoClient (ipInterfaces.GetAddress (0), 7667);
-  echoClient.SetAttribute ("MaxPackets", UintegerValue (10000));
+  echoClient.SetAttribute ("MaxPackets", UintegerValue (std::numeric_limits<uint32_t>::max ()));
   echoClient.SetAttribute ("Interval", TimeValue (Seconds (1.0)));
   echoClient.SetAttribute ("PacketSize", UintegerValue (1280));
 
@@ -94,6 +96,12 @@ main (int argc, char **argv) -> int
   clientApps.Start (Seconds (0.0));
 
   LogComponentEnable ("UdpEchoServerApplication", ns3::LOG_INFO);
+
+  AsciiTraceHelper ascii;
+  auto stream = ascii.CreateFileStream ("/tmp/out.tr");
+  stream->GetStream ()->precision (9);
+  icarusHelper.EnableAsciiAll (stream);
+  icarusHelper.EnablePcapAll ("/tmp/pcap-sputping.pcap");
 
   ns3::Simulator::Stop (Days (7));
 

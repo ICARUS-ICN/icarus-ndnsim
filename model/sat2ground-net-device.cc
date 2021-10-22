@@ -21,6 +21,7 @@
  */
 
 #include "sat2ground-net-device.h"
+#include "ns3/icarus-net-device.h"
 #include "ns3/log-macros-enabled.h"
 #include "ns3/log.h"
 #include "ns3/mac48-address.h"
@@ -39,7 +40,7 @@ Sat2GroundNetDevice::GetTypeId (void)
 {
   static TypeId tid =
       TypeId ("ns3::Sat2GroundNetDevice")
-          .SetParent<NetDevice> ()
+          .SetParent<IcarusNetDevice> ()
           .SetGroupName ("ICARUS")
           .AddConstructor<Sat2GroundNetDevice> ()
           .AddAttribute ("Address", "The MAC address of this device.",
