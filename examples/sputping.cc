@@ -19,6 +19,7 @@
  */
 
 #include "ns3/drop-tail-queue.h"
+#include "ns3/icarus-helper.h"
 #include "ns3/mobility-module.h"
 #include "ns3/core-module.h"
 #include "ns3/icarus-module.h"
@@ -70,33 +71,8 @@ main (int argc, char **argv) -> int
   staticHelper.SetMobilityModel ("ns3::ConstantPositionMobilityModel");
   staticHelper.Install (ground);
 
-  ObjectFactory satChannelFactory ("ns3::GroundSatChannel");
-  ObjectFactory groundNetDeviceFactory ("ns3::GroundStaNetDevice");
-  ObjectFactory satNetDeviceFactory ("ns3::Sat2GroundNetDevice");
-
-  auto channel = satChannelFactory.Create<GroundSatChannel> ();
-
-  auto satNetDevice = satNetDeviceFactory.Create<Sat2GroundNetDevice> ();
-  bird->AddDevice (satNetDevice);
-  satNetDevice->Attach (channel);
-  auto queue = CreateObject<ns3::DropTailQueue<Packet>> ();
-  satNetDevice->SetQueue (queue);
-  auto ndqi = CreateObject<NetDeviceQueueInterface> ();
-  ndqi->GetTxQueue (0)->ConnectQueueTraces (queue);
-  satNetDevice->AggregateObject (ndqi);
-
-  auto groundNetDevice = groundNetDeviceFactory.Create<GroundStaNetDevice> ();
-  ground->AddDevice (groundNetDevice);
-  groundNetDevice->Attach (channel);
-  queue = CreateObject<ns3::DropTailQueue<Packet>> ();
-  groundNetDevice->SetQueue (queue);
-  ndqi = CreateObject<NetDeviceQueueInterface> ();
-  ndqi->GetTxQueue (0)->ConnectQueueTraces (queue);
-  groundNetDevice->AggregateObject (ndqi);
-
-  NetDeviceContainer netDevices;
-  netDevices.Add (groundNetDevice);
-  netDevices.Add (satNetDevice);
+  IcarusHelper icarusHelper;
+  NetDeviceContainer netDevices = icarusHelper.Install (nodes);
 
   InternetStackHelper ipStack;
   ipStack.Install (nodes);
@@ -105,7 +81,7 @@ main (int argc, char **argv) -> int
   Ipv4InterfaceContainer ipInterfaces;
   ipInterfaces = address.Assign (netDevices);
 
-  UdpEchoClientHelper echoClient (ipInterfaces.GetAddress (1), 7667);
+  UdpEchoClientHelper echoClient (ipInterfaces.GetAddress (0), 7667);
   echoClient.SetAttribute ("MaxPackets", UintegerValue (10000));
   echoClient.SetAttribute ("Interval", TimeValue (Seconds (1.0)));
   echoClient.SetAttribute ("PacketSize", UintegerValue (1280));

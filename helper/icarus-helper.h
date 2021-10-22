@@ -1,0 +1,186 @@
+/* -*- Mode:C++; c-file-style:"gnu"; indent-tabs-mode:nil; -*- */
+/*
+ * Copyright (c) 2021 Universidade de Vigo
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * 
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ * 
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ *
+ * Author: Miguel Rodríguez Pérez <miguel@det.uvigo.gal>
+ */
+#ifndef ICARUS_HELPER_H
+#define ICARUS_HELPER_H
+
+#include "ns3/icarus-module.h"
+
+#include "ns3/trace-helper.h"
+#include "ns3/ground-sat-channel.h"
+#include "ns3/icarus-net-device.h"
+
+namespace ns3 {
+
+class IcarusHelper //: public PcapHelperForDevice, public AsciiTraceHelperForDevice
+{
+public:
+  /**
+   * Construct a IcarusHelper.
+   */
+  IcarusHelper ();
+  virtual ~IcarusHelper ()
+  {
+  }
+
+  /**
+   * \param type the type of queue
+   * \param n1 the name of the attribute to set on the queue
+   * \param v1 the value of the attribute to set on the queue
+   * \param n2 the name of the attribute to set on the queue
+   * \param v2 the value of the attribute to set on the queue
+   * \param n3 the name of the attribute to set on the queue
+   * \param v3 the value of the attribute to set on the queue
+   * \param n4 the name of the attribute to set on the queue
+   * \param v4 the value of the attribute to set on the queue
+   *
+   * Set the type of queue to create and associated to each
+   * CsmaNetDevice created through IcarusHelper::Install.
+   */
+  void SetQueue (std::string type, std::string n1 = "",
+                 const AttributeValue &v1 = EmptyAttributeValue (), std::string n2 = "",
+                 const AttributeValue &v2 = EmptyAttributeValue (), std::string n3 = "",
+                 const AttributeValue &v3 = EmptyAttributeValue (), std::string n4 = "",
+                 const AttributeValue &v4 = EmptyAttributeValue ());
+
+  /**
+   * \param n1 the name of the attribute to set \param v1 the value of the
+   * attribute to set
+   *
+   * Set these attributes on each ns3::GroundStaNetDevice or
+   * ns3::Sat2GroundNetDevice created by IcarusHelper::Install
+   */
+  void SetDeviceAttribute (std::string n1, const AttributeValue &v1);
+
+  /**
+   * \param n1 the name of the attribute to set \param v1 the value of the
+   * attribute to set
+   *
+   * Set these attributes on each ns3::GroundSatChannel created by
+   * IcarusHelper::Install
+   */
+  void SetChannelAttribute (std::string n1, const AttributeValue &v1);
+
+  /**
+   * This method creates an ns3::GroundStaNetDevice or ns3::Sat2GroundNetDevice
+   * with the attributes configured by IcarusHelper::SetDeviceAttribute and then
+   * adds the device to the node and attaches the provided channel to the
+   * device.
+   *
+   * \param node The node to install the device in \param channel The channel to
+   * attach to the device. \returns A container holding the added net device.
+   */
+  NetDeviceContainer Install (Ptr<Node> node, Ptr<GroundSatChannel> channel) const;
+
+  /**
+   * This method creates an ns3::GroundStaNetDevice or ns3::Sat2GroundNetDevice
+   * with the attributes configured by IcarusHelper::SetDeviceAttribute and then
+   * adds the device to the node and attaches the provided channel to the
+   * device.
+   *
+   * \param node The node to install the device in \param channelName The name
+   * of the channel to attach to the device. \returns A container holding the
+   * added net device.
+   */
+  NetDeviceContainer Install (Ptr<Node> node, std::string channelName) const;
+
+  /**
+   * This method creates an ns3::GroundStaNetDevice or ns3::Sat2GroundNetDevice
+   * with the attributes configured by IcarusHelper::SetDeviceAttribute and then
+   * adds the device to the node and attaches the provided channel to the
+   * device.
+   *
+   * \param nodeName The name of the node to install the device in \param
+   * channel The channel to attach to the device. \returns A container holding
+   * the added net device.
+   */
+  NetDeviceContainer Install (std::string nodeName, Ptr<GroundSatChannel> channel) const;
+
+  /**
+   * This method creates an ns3::GroundStaNetDevice or ns3::Sat2GroundNetDevice
+   * with the attributes configured by IcarusHelper::SetDeviceAttribute and then
+   * adds the device to the node and attaches the provided channel to the
+   * device.
+   *
+   * \param nodeName The name of the node to install the device in \param
+   * channelName The name of the channel to attach to the device. \returns A
+   * container holding the added net device.
+   */
+  NetDeviceContainer Install (std::string nodeName, std::string channelName) const;
+
+  /**
+   * This method creates an ns3::GroundSatChannel with the attributes configured
+   * by IcarusHelper::SetChannelAttribute.  For each Ptr<node> in the provided
+   * container: it creates an ns3::GroundStaNetDevice or
+   * ns3::Sat2GroundNetDevice (with the attributes configured by
+   * IcarusHelper::SetDeviceAttribute); adds the device to the node; and
+   * attaches the channel to the device.
+   *
+   * \param c The NodeContainer holding the nodes to be changed. \returns A
+   * container holding the added net devices.
+   */
+  NetDeviceContainer Install (const NodeContainer &c) const;
+
+  /**
+   * For each Ptr<node> in the provided container, this method creates an
+   * ns3::GroundStaNetDevice or ns3::Sat2GroundNetDevice (with the attributes
+   * configured by IcarusHelper::SetDeviceAttribute); adds the device to the
+   * node; and attaches the provided channel to the device.
+   *
+   * \param c The NodeContainer holding the nodes to be changed. \param channel
+   * The channel to attach to the devices. \returns A container holding the
+   * added net devices.
+   */
+  NetDeviceContainer Install (const NodeContainer &c, Ptr<GroundSatChannel> channel) const;
+
+  /**
+   * For each Ptr<node> in the provided container, this method creates an
+   * ns3::GroundStaNetDevice or ns3::Sat2GroundNetDevice (with the attributes
+   * configured by IcarusHelper::SetDeviceAttribute); adds the device to the
+   * node; and attaches the provided channel to the device.
+   *
+   * \param c The NodeContainer holding the nodes to be changed. \param
+   * channelName The name of the channel to attach to the devices. \returns A
+   * container holding the added net devices.
+   */
+  NetDeviceContainer Install (const NodeContainer &c, std::string channelName) const;
+
+private:
+  /**
+   * This method creates an ns3::GroundStaNetDevice or ns3::Sat2GroundNetDevice
+   * with the attributes configured by CsmaHelper::SetDeviceAttribute and then
+   * adds the device to the node and attaches the provided channel to the
+   * device.
+   *
+   * \param node The node to install the device in \param channel The channel to
+   * attach to the device. \returns A container holding the added net device.
+   */
+  Ptr<NetDevice> InstallPriv (Ptr<Node> node, Ptr<GroundSatChannel> channel) const;
+
+  Ptr<IcarusNetDevice> CreateDeviceForNode (Ptr<Node> node) const;
+
+  ObjectFactory m_queueFactory; //!< factory for the queues
+  ObjectFactory m_sat2GroundFactory; //!< factory for downstream NetDevices
+  ObjectFactory m_groundStaFactory; //!< factory for downstream NetDevices
+  ObjectFactory m_channelFactory; //!< factory for the channel
+};
+
+} // namespace ns3
+
+#endif /* ICARUS_HELPER_H */

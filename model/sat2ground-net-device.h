@@ -27,12 +27,12 @@
 #include "ns3/net-device.h"
 #include "ns3/mac48-address.h"
 #include "ns3/queue.h"
-#include "src/icarus/model/ground-sat-channel.h"
-#include <cstdint>
+#include "ns3/ground-sat-channel.h"
+#include "ns3/icarus-net-device.h"
 
 namespace ns3 {
 
-class Sat2GroundNetDevice : public NetDevice
+class Sat2GroundNetDevice : public IcarusNetDevice
 {
 public:
   /**
@@ -42,13 +42,13 @@ public:
   static TypeId GetTypeId (void);
   virtual ~Sat2GroundNetDevice ();
 
-  bool Attach (Ptr<GroundSatChannel> channel);
+  bool Attach (Ptr<GroundSatChannel> channel) override;
 
-  DataRate GetDataRate () const;
-  void SetDataRate (DataRate rate);
+  DataRate GetDataRate () const override;
+  void SetDataRate (DataRate rate) override;
 
-  Ptr<Queue<Packet>> GetQueue () const;
-  void SetQueue (Ptr<Queue<Packet>> rate);
+  Ptr<Queue<Packet>> GetQueue () const override;
+  void SetQueue (Ptr<Queue<Packet>> rate) override;
 
   void ReceiveFromGround (Ptr<Packet> packet, DataRate bps, uint16_t protocolNumber);
 

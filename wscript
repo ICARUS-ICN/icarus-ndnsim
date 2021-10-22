@@ -14,6 +14,8 @@ def build(bld):
         'model/ground-sta-net-device.cc',
         'model/sat2ground-net-device.cc',
         'model/satpos/planet.cc',
+        'model/icarus-net-device.cc',
+        'helper/icarus-helper.cc'
     ]
 
     module_test = bld.create_ns3_module_test_library('icarus')
@@ -27,7 +29,9 @@ def build(bld):
         'model/circular-orbit.h',
         'model/sat2ground-net-device.h',
         'model/ground-sat-channel.h',
-        'model/ground-sta-net-device.h'
+        'model/ground-sta-net-device.h',
+        'model/icarus-net-device.h',
+        'helper/icarus-helper.h'
     ]
 
     if bld.env.ENABLE_EXAMPLES:
