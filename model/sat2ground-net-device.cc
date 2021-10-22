@@ -21,6 +21,7 @@
  */
 
 #include "sat2ground-net-device.h"
+#include "ns3/log-macros-enabled.h"
 #include "ns3/log.h"
 #include "ns3/mac48-address.h"
 #include "ns3/pointer.h"
@@ -121,11 +122,14 @@ Sat2GroundNetDevice::GetTypeId (void)
 
 Sat2GroundNetDevice::~Sat2GroundNetDevice ()
 {
+  NS_LOG_FUNCTION_NOARGS ();
 }
 
 bool
 Sat2GroundNetDevice::Attach (Ptr<GroundSatChannel> channel)
 {
+  NS_LOG_FUNCTION (this << channel);
+
   if (channel->AttachNewSat (this))
     {
       m_channel = channel;
@@ -139,30 +143,39 @@ Sat2GroundNetDevice::Attach (Ptr<GroundSatChannel> channel)
 DataRate
 Sat2GroundNetDevice::GetDataRate () const
 {
+  NS_LOG_FUNCTION (this);
+
   return m_bps;
 }
 
 void
 Sat2GroundNetDevice::SetDataRate (DataRate rate)
 {
+  NS_LOG_FUNCTION (this << rate);
   m_bps = rate;
 }
 
 Ptr<Queue<Packet>>
 Sat2GroundNetDevice::GetQueue () const
 {
+  NS_LOG_FUNCTION (this);
+
   return m_queue;
 }
 
 void
 Sat2GroundNetDevice::SetQueue (Ptr<Queue<Packet>> queue)
 {
+  NS_LOG_FUNCTION (this << queue);
+
   m_queue = queue;
 }
 
 void
 Sat2GroundNetDevice::ReceiveFromGround (Ptr<Packet> packet, DataRate bps, uint16_t protocolNumber)
 {
+  NS_LOG_FUNCTION (this << packet << bps << protocolNumber);
+
   m_phyRxBeginTrace (packet);
   Simulator::Schedule (bps.CalculateBytesTxTime (packet->GetSize ()),
                        &Sat2GroundNetDevice::ReceiveFromGroundFinish, this, packet, protocolNumber);
@@ -171,6 +184,8 @@ Sat2GroundNetDevice::ReceiveFromGround (Ptr<Packet> packet, DataRate bps, uint16
 void
 Sat2GroundNetDevice::ReceiveFromGroundFinish (Ptr<Packet> packet, uint16_t protocolNumber)
 {
+  NS_LOG_FUNCTION (this << packet << protocolNumber);
+
   m_phyRxEndTrace (packet);
   m_snifferTrace (packet);
   m_macRxTrace (packet);
@@ -183,36 +198,48 @@ Sat2GroundNetDevice::ReceiveFromGroundFinish (Ptr<Packet> packet, uint16_t proto
 void
 Sat2GroundNetDevice::SetIfIndex (const uint32_t index)
 {
+  NS_LOG_FUNCTION (this << index);
+
   m_ifIndex = index;
 }
 
 uint32_t
 Sat2GroundNetDevice::GetIfIndex (void) const
 {
+  NS_LOG_FUNCTION (this);
+
   return m_ifIndex;
 }
 
 Ptr<Channel>
 Sat2GroundNetDevice::GetChannel (void) const
 {
+  NS_LOG_FUNCTION (this);
+
   return m_channel;
 }
 
 void
 Sat2GroundNetDevice::SetAddress (Address address)
 {
+  NS_LOG_FUNCTION (this << address);
+
   m_address = Mac48Address::ConvertFrom (address);
 }
 
 Address
 Sat2GroundNetDevice::GetAddress (void) const
 {
+  NS_LOG_FUNCTION (this);
+
   return m_address;
 }
 
 bool
 Sat2GroundNetDevice::SetMtu (const uint16_t mtu)
 {
+  NS_LOG_FUNCTION (this << mtu);
+
   m_mtu = mtu;
 
   return true;
@@ -221,30 +248,39 @@ Sat2GroundNetDevice::SetMtu (const uint16_t mtu)
 uint16_t
 Sat2GroundNetDevice::GetMtu (void) const
 {
+  NS_LOG_FUNCTION (this);
+
   return m_mtu;
 }
 
 bool
 Sat2GroundNetDevice::IsLinkUp (void) const
 {
+  NS_LOG_FUNCTION (this);
+
   return m_channel != 0;
 }
 
 void
 Sat2GroundNetDevice::AddLinkChangeCallback (Callback<void> callback)
 {
+  NS_LOG_FUNCTION (this << &callback);
+
   m_linkChangeCallbacks.ConnectWithoutContext (callback);
 }
 
 bool
 Sat2GroundNetDevice::IsBroadcast (void) const
 {
+  NS_LOG_FUNCTION (this);
+
   return false;
 }
 
 Address
 Sat2GroundNetDevice::GetBroadcast (void) const
 {
+  NS_LOG_FUNCTION (this);
   NS_LOG (LOG_WARN, "This is not supported");
 
   return Mac48Address::GetBroadcast ();
@@ -253,12 +289,15 @@ Sat2GroundNetDevice::GetBroadcast (void) const
 bool
 Sat2GroundNetDevice::IsMulticast (void) const
 {
+  NS_LOG_FUNCTION (this);
+
   return false;
 }
 
 Address
 Sat2GroundNetDevice::GetMulticast (Ipv4Address multicastGroup) const
 {
+  NS_LOG_FUNCTION (this << multicastGroup);
   NS_LOG (LOG_WARN, "This is not supported");
 
   return Mac48Address::GetBroadcast ();
@@ -267,6 +306,7 @@ Sat2GroundNetDevice::GetMulticast (Ipv4Address multicastGroup) const
 Address
 Sat2GroundNetDevice::GetMulticast (Ipv6Address addr) const
 {
+  NS_LOG_FUNCTION (this << addr);
   NS_LOG (LOG_WARN, "This is not supported");
 
   return Mac48Address::GetBroadcast ();
@@ -275,18 +315,23 @@ Sat2GroundNetDevice::GetMulticast (Ipv6Address addr) const
 bool
 Sat2GroundNetDevice::IsBridge (void) const
 {
+  NS_LOG_FUNCTION (this);
+
   return false;
 }
 
 bool
 Sat2GroundNetDevice::IsPointToPoint (void) const
 {
+  NS_LOG_FUNCTION (this);
+
   return false;
 }
 
 bool
 Sat2GroundNetDevice::Send (Ptr<Packet> packet, const Address &dest, uint16_t protocolNumber)
 {
+  NS_LOG_FUNCTION (this << packet << dest << protocolNumber);
   NS_ABORT_MSG ("Not implemented yet");
 }
 
@@ -294,6 +339,7 @@ bool
 Sat2GroundNetDevice::SendFrom (Ptr<Packet> packet, const Address &source, const Address &dest,
                                uint16_t protocolNumber)
 {
+  NS_LOG_FUNCTION (this << packet << source << dest << protocolNumber);
   NS_LOG (LOG_WARN, "This is not supported");
 
   return false;
@@ -302,36 +348,47 @@ Sat2GroundNetDevice::SendFrom (Ptr<Packet> packet, const Address &source, const 
 Ptr<Node>
 Sat2GroundNetDevice::GetNode (void) const
 {
+  NS_LOG_FUNCTION (this);
+
   return m_node;
 }
 
 void
 Sat2GroundNetDevice::SetNode (Ptr<Node> node)
 {
+  NS_LOG_FUNCTION (this << node);
+
   m_node = node;
 }
 
 bool
 Sat2GroundNetDevice::NeedsArp (void) const
 {
+  NS_LOG_FUNCTION (this);
+
   return false;
 }
 
 void
 Sat2GroundNetDevice::SetReceiveCallback (ReceiveCallback cb)
 {
+  NS_LOG_FUNCTION (this << &cb);
+
   m_receiveCallback = cb;
 }
 
 void
 Sat2GroundNetDevice::SetPromiscReceiveCallback (PromiscReceiveCallback cb)
 {
+  NS_LOG_FUNCTION (this << &cb);
   NS_LOG (LOG_WARN, "This is not supported");
 }
 
 bool
 Sat2GroundNetDevice::SupportsSendFrom (void) const
 {
+  NS_LOG_FUNCTION (this);
+
   return false;
 }
 } // namespace ns3

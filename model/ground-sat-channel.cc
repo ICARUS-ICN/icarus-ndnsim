@@ -23,6 +23,7 @@
 #include "ground-sat-channel.h"
 #include "ns3/assert.h"
 #include "ns3/channel.h"
+#include "ns3/log-macros-enabled.h"
 #include "ns3/log.h"
 #include "ns3/abort.h"
 #include "ns3/mobility-model.h"
@@ -53,6 +54,7 @@ GroundSatChannel::GetTypeId (void)
 bool
 GroundSatChannel::AttachNewSat (Ptr<Sat2GroundNetDevice> device)
 {
+  NS_LOG_FUNCTION (this << device);
   NS_ABORT_MSG_UNLESS (device->GetNode ()->GetObject<MobilityModel> () != 0,
                        "Satellites need a mobility model");
   m_satellites.Add (device);
@@ -63,6 +65,7 @@ GroundSatChannel::AttachNewSat (Ptr<Sat2GroundNetDevice> device)
 bool
 GroundSatChannel::AttachGround (Ptr<GroundStaNetDevice> device)
 {
+  NS_LOG_FUNCTION (this << device);
   NS_ABORT_MSG_UNLESS (device->GetNode ()->GetObject<MobilityModel> () != 0,
                        "Ground stations need a mobility model");
   if (m_ground == 0)
@@ -76,15 +79,18 @@ GroundSatChannel::AttachGround (Ptr<GroundStaNetDevice> device)
 
 GroundSatChannel::GroundSatChannel () : Channel ()
 {
+  NS_LOG_FUNCTION (this);
 }
 
 GroundSatChannel::~GroundSatChannel ()
 {
+  NS_LOG_FUNCTION_NOARGS ();
 }
 
 Time
 GroundSatChannel::Transmit2Sat (Ptr<Packet> packet, DataRate bps, uint16_t protocolNumber) const
 {
+  NS_LOG_FUNCTION (this << packet << bps << protocolNumber);
   NS_ASSERT_MSG (m_ground, "We need a ground station");
   NS_ASSERT_MSG (m_satellites.GetN () == 1,
                  "WIP: Only 1 satellite en the constellation is supported");
@@ -119,12 +125,14 @@ GroundSatChannel::Transmit2Sat (Ptr<Packet> packet, DataRate bps, uint16_t proto
 std::size_t
 GroundSatChannel::GetNDevices (void) const
 {
+  NS_LOG_FUNCTION (this);
   return m_satellites.GetN () + (m_ground ? 1 : 0);
 }
 
 Ptr<NetDevice>
 GroundSatChannel::GetDevice (std::size_t i) const
 {
+  NS_LOG_FUNCTION (this << i);
   // Last device is ground station
   NS_ABORT_MSG_UNLESS (i < GetNDevices (),
                        "Asking for " << i << "-th device of a total of " << GetNDevices ());

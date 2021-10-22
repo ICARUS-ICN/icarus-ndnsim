@@ -22,6 +22,7 @@
 
 #include "ground-sta-net-device.h"
 #include "ns3/log.h"
+#include "ns3/log-macros-enabled.h"
 #include "ns3/pointer.h"
 #include "ns3/uinteger.h"
 #include "ns3/abort.h"
@@ -121,11 +122,14 @@ GroundStaNetDevice::GetTypeId (void)
 
 GroundStaNetDevice::~GroundStaNetDevice ()
 {
+  NS_LOG_FUNCTION_NOARGS ();
 }
 
 bool
 GroundStaNetDevice::Attach (Ptr<GroundSatChannel> channel)
 {
+  NS_LOG_FUNCTION (this << channel);
+
   if (channel->AttachGround (this))
     {
       m_channel = channel;
@@ -140,60 +144,80 @@ GroundStaNetDevice::Attach (Ptr<GroundSatChannel> channel)
 DataRate
 GroundStaNetDevice::GetDataRate () const
 {
+  NS_LOG_FUNCTION (this);
+
   return m_bps;
 }
 
 void
 GroundStaNetDevice::SetDataRate (DataRate rate)
 {
+  NS_LOG_FUNCTION (this << rate);
+
   m_bps = rate;
 }
 
 Ptr<Queue<Packet>>
 GroundStaNetDevice::GetQueue () const
 {
+  NS_LOG_FUNCTION (this);
+
   return m_queue;
 }
 
 void
 GroundStaNetDevice::SetQueue (Ptr<Queue<Packet>> queue)
 {
+  NS_LOG_FUNCTION (this << queue);
+
   m_queue = queue;
 }
 
 void
 GroundStaNetDevice::SetIfIndex (const uint32_t index)
 {
+  NS_LOG_FUNCTION (this << index);
+
   m_ifIndex = index;
 }
 
 uint32_t
 GroundStaNetDevice::GetIfIndex (void) const
 {
+  NS_LOG_FUNCTION (this);
+
   return m_ifIndex;
 }
 
 Ptr<Channel>
 GroundStaNetDevice::GetChannel (void) const
 {
+  NS_LOG_FUNCTION (this);
+
   return m_channel;
 }
 
 void
 GroundStaNetDevice::SetAddress (Address address)
 {
+  NS_LOG_FUNCTION (this << address);
+
   m_address = Mac48Address::ConvertFrom (address);
 }
 
 Address
 GroundStaNetDevice::GetAddress (void) const
 {
+  NS_LOG_FUNCTION (this);
+
   return m_address;
 }
 
 bool
 GroundStaNetDevice::SetMtu (const uint16_t mtu)
 {
+  NS_LOG_FUNCTION (this << mtu);
+
   m_mtu = mtu;
 
   return true;
@@ -202,30 +226,39 @@ GroundStaNetDevice::SetMtu (const uint16_t mtu)
 uint16_t
 GroundStaNetDevice::GetMtu (void) const
 {
+  NS_LOG_FUNCTION (this);
+
   return m_mtu;
 }
 
 bool
 GroundStaNetDevice::IsLinkUp (void) const
 {
+  NS_LOG_FUNCTION (this);
+
   return m_channel != 0;
 }
 
 void
 GroundStaNetDevice::AddLinkChangeCallback (Callback<void> callback)
 {
+  NS_LOG_FUNCTION (this << &callback);
+
   m_linkChangeCallbacks.ConnectWithoutContext (callback);
 }
 
 bool
 GroundStaNetDevice::IsBroadcast (void) const
 {
+  NS_LOG_FUNCTION (this);
+
   return false;
 }
 
 Address
 GroundStaNetDevice::GetBroadcast (void) const
 {
+  NS_LOG_FUNCTION (this);
   NS_LOG (LOG_WARN, "This is not supported");
 
   return Mac48Address::GetBroadcast ();
@@ -234,12 +267,15 @@ GroundStaNetDevice::GetBroadcast (void) const
 bool
 GroundStaNetDevice::IsMulticast (void) const
 {
+  NS_LOG_FUNCTION (this);
+
   return false;
 }
 
 Address
 GroundStaNetDevice::GetMulticast (Ipv4Address multicastGroup) const
 {
+  NS_LOG_FUNCTION (this << multicastGroup);
   NS_LOG (LOG_WARN, "This is not supported");
 
   return Mac48Address::GetBroadcast ();
@@ -248,6 +284,7 @@ GroundStaNetDevice::GetMulticast (Ipv4Address multicastGroup) const
 Address
 GroundStaNetDevice::GetMulticast (Ipv6Address addr) const
 {
+  NS_LOG_FUNCTION (this << addr);
   NS_LOG (LOG_WARN, "This is not supported");
 
   return Mac48Address::GetBroadcast ();
@@ -256,18 +293,23 @@ GroundStaNetDevice::GetMulticast (Ipv6Address addr) const
 bool
 GroundStaNetDevice::IsBridge (void) const
 {
+  NS_LOG_FUNCTION (this);
+
   return false;
 }
 
 bool
 GroundStaNetDevice::IsPointToPoint (void) const
 {
+  NS_LOG_FUNCTION (this);
+
   return false;
 }
 
 bool
 GroundStaNetDevice::Send (Ptr<Packet> packet, const Address &dest, uint16_t protocolNumber)
 {
+  NS_LOG_FUNCTION (this << packet << dest << protocolNumber);
   NS_LOG_WARN ("The protocol number should really be transmitted in a header somehow");
 
   m_macTxTrace (packet);
@@ -293,6 +335,7 @@ GroundStaNetDevice::Send (Ptr<Packet> packet, const Address &dest, uint16_t prot
 void
 GroundStaNetDevice::TransmitStart (Ptr<Packet> packet, uint16_t protocolNumber)
 {
+  NS_LOG_FUNCTION (this << packet << protocolNumber);
   NS_ASSERT_MSG (m_txMachineState == IDLE,
                  "Must be IDLE to transmit. Tx state is: " << m_txMachineState);
   m_txMachineState = TRANSMITTING;
@@ -305,6 +348,8 @@ GroundStaNetDevice::TransmitStart (Ptr<Packet> packet, uint16_t protocolNumber)
 void
 GroundStaNetDevice::TransmitComplete (Ptr<Packet> packet, uint16_t protocolNumber)
 {
+  NS_LOG_FUNCTION (this << packet << protocolNumber);
+
   m_phyTxEndTrace (packet);
   m_txMachineState = IDLE;
 
@@ -320,6 +365,7 @@ bool
 GroundStaNetDevice::SendFrom (Ptr<Packet> packet, const Address &source, const Address &dest,
                               uint16_t protocolNumber)
 {
+  NS_LOG_FUNCTION (this << packet << source << dest << protocolNumber);
   NS_LOG (LOG_WARN, "This is not supported");
 
   return false;
@@ -328,36 +374,47 @@ GroundStaNetDevice::SendFrom (Ptr<Packet> packet, const Address &source, const A
 Ptr<Node>
 GroundStaNetDevice::GetNode (void) const
 {
+  NS_LOG_FUNCTION (this);
+
   return m_node;
 }
 
 void
 GroundStaNetDevice::SetNode (Ptr<Node> node)
 {
+  NS_LOG_FUNCTION (this << node);
+
   m_node = node;
 }
 
 bool
 GroundStaNetDevice::NeedsArp (void) const
 {
+  NS_LOG_FUNCTION (this);
+
   return false;
 }
 
 void
 GroundStaNetDevice::SetReceiveCallback (ReceiveCallback cb)
 {
+  NS_LOG_FUNCTION (this << &cb);
+
   m_receiveCallback = cb;
 }
 
 void
 GroundStaNetDevice::SetPromiscReceiveCallback (PromiscReceiveCallback cb)
 {
+  NS_LOG_FUNCTION (this << &cb);
   NS_LOG (LOG_WARN, "This is not supported");
 }
 
 bool
 GroundStaNetDevice::SupportsSendFrom (void) const
 {
+  NS_LOG_FUNCTION (this);
+
   return false;
 }
 } // namespace ns3
