@@ -19,6 +19,7 @@
  */
 #include "circular-orbit.h"
 
+#include "ns3/log-macros-enabled.h"
 #include "satpos/planet.h"
 #include "ns3/log.h"
 #include "ns3/simulator.h"
@@ -65,12 +66,15 @@ getN (CircularOrbitMobilityModel::meters radius, const Planet &planet)
 
 CircularOrbitMobilityModel::CircularOrbitMobilityModel () : MobilityModel ()
 {
+  NS_LOG_FUNCTION (this);
 }
 
 void
 CircularOrbitMobilityModel::LaunchSat (radians inclination, radians ascending_node, meters altitude,
                                        radians phase)
 {
+  NS_LOG_FUNCTION (this << inclination << ascending_node << altitude << phase);
+
   this->inclination = inclination;
   this->ascending_node = ascending_node;
   this->radius = altitude + Earth.getRadius ();
@@ -79,11 +83,13 @@ CircularOrbitMobilityModel::LaunchSat (radians inclination, radians ascending_no
 
 CircularOrbitMobilityModel::~CircularOrbitMobilityModel ()
 {
+  NS_LOG_FUNCTION_NOARGS ();
 }
 
 void
 CircularOrbitMobilityModel::DoSetPosition (const Vector &position)
 {
+  NS_LOG_FUNCTION (this << position);
   NS_ABORT_MSG (
       "It is not supported to directly set the position in the CircularOrbitMobilityModel");
 }
@@ -91,6 +97,7 @@ CircularOrbitMobilityModel::DoSetPosition (const Vector &position)
 Vector
 CircularOrbitMobilityModel::DoGetVelocity () const
 {
+  NS_LOG_FUNCTION (this);
   NS_LOG_WARN ("We do not support reporting the proper velocity");
 
   return Vector ();
@@ -99,6 +106,8 @@ CircularOrbitMobilityModel::DoGetVelocity () const
 Vector
 CircularOrbitMobilityModel::getRawPosition () const
 {
+  NS_LOG_FUNCTION (this);
+
   using namespace boost::math::double_constants;
   using namespace boost::units;
   using namespace boost::units::si;
@@ -143,6 +152,8 @@ CircularOrbitMobilityModel::getRawPosition () const
 Vector
 CircularOrbitMobilityModel::DoGetPosition () const
 {
+  NS_LOG_FUNCTION (this);
+
   Vector rawPosition{getRawPosition ()};
   const auto radius{rawPosition.GetLength ()};
   const auto latitude{radian * asin (rawPosition.z / radius)};
