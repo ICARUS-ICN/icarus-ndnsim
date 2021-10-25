@@ -122,6 +122,40 @@ GroundSatChannel::Transmit2Sat (Ptr<Packet> packet, DataRate bps, uint16_t proto
   return endTx;
 }
 
+Time
+GroundSatChannel::Transmit2Ground (Ptr<Packet> packet, DataRate bps, uint16_t protocolNumber) const
+{
+  NS_LOG_FUNCTION (this << packet << bps << protocolNumber);
+  NS_ASSERT_MSG (m_ground, "We need a ground station");
+  NS_ASSERT_MSG (m_satellites.GetN () == 1,
+                 "WIP: Only 1 satellite en the constellation is supported");
+
+  Time endTx = bps.CalculateBytesTxTime (packet->GetSize ());
+  auto posGround = m_ground->GetNode ()->GetObject<MobilityModel> ();
+  auto posSat = m_satellites.Get (0)->GetNode ()->GetObject<MobilityModel> ();
+  auto distanceMeters = posGround->GetDistanceFrom (posSat);
+
+  Time delay (Seconds (distanceMeters / 3e8));
+
+  if (distanceMeters < 2000e3)
+    {
+      NS_LOG_WARN ("We should perform a real visibility test with the cone angle of the receiving "
+                   "satellite");
+      NS_ASSERT (DynamicCast<GroundStaNetDevice> (m_ground) != 0);
+
+      Simulator::ScheduleWithContext (
+          m_ground->GetNode ()->GetId (), delay, &GroundStaNetDevice::ReceiveFromSat,
+          DynamicCast<GroundStaNetDevice> (m_ground), packet, bps, protocolNumber);
+    }
+  else
+    {
+      NS_LOG_DEBUG ("Dropped packet " << packet << " as distance " << distanceMeters / 1000.0
+                                      << "km was too high.");
+    }
+
+  return endTx;
+}
+
 std::size_t
 GroundSatChannel::GetNDevices (void) const
 {

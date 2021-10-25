@@ -51,6 +51,8 @@ public:
   Ptr<Queue<Packet>> GetQueue () const override;
   void SetQueue (Ptr<Queue<Packet>> rate) override;
 
+  void ReceiveFromSat (Ptr<Packet> packet, DataRate bps, uint16_t protocolNumber);
+
   virtual void SetIfIndex (const uint32_t index) override;
   virtual uint32_t GetIfIndex (void) const override;
 
@@ -107,6 +109,7 @@ private:
   TracedCallback<Ptr<const Packet>> m_macTxTrace, m_macTxDropTrace, m_macRxTrace, m_phyTxBeginTrace,
       m_phyTxEndTrace, m_phyRxBeginTrace, m_phyRxEndTrace, m_snifferTrace;
 
+  void ReceiveFromSatFinish (Ptr<Packet> packet, uint16_t protocolNumber);
   void TransmitStart (Ptr<Packet> packet, uint16_t protocolNumber);
   void TransmitComplete (Ptr<Packet> packet, uint16_t protocolNumber);
 };

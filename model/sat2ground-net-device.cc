@@ -332,7 +332,57 @@ bool
 Sat2GroundNetDevice::Send (Ptr<Packet> packet, const Address &dest, uint16_t protocolNumber)
 {
   NS_LOG_FUNCTION (this << packet << dest << protocolNumber);
-  NS_ABORT_MSG ("Not implemented yet");
+  NS_LOG_WARN ("The protocol number should really be transmitted in a header somehow");
+
+  m_macTxTrace (packet);
+  if (m_queue->Enqueue (packet) == false)
+    {
+      m_macTxDropTrace (packet);
+      return false;
+    }
+
+  NS_LOG_INFO (
+      "Should we be able to perform simultaneous transmissions to DIFFERENT ground stations?");
+  if (m_txMachineState == IDLE)
+    {
+      if (m_queue->IsEmpty () == false)
+        {
+          auto packet = m_queue->Dequeue ();
+          m_snifferTrace (packet);
+          TransmitStart (packet, protocolNumber);
+        }
+    }
+
+  return true;
+}
+
+void
+Sat2GroundNetDevice::TransmitStart (Ptr<Packet> packet, uint16_t protocolNumber)
+{
+  NS_LOG_FUNCTION (this << packet << protocolNumber);
+  NS_ASSERT_MSG (m_txMachineState == IDLE,
+                 "Must be IDLE to transmit. Tx state is: " << m_txMachineState);
+  m_txMachineState = TRANSMITTING;
+
+  m_phyTxBeginTrace (packet);
+  Time endTx = m_channel->Transmit2Ground (packet, m_bps, protocolNumber);
+  Simulator::Schedule (endTx, &Sat2GroundNetDevice::TransmitComplete, this, packet, protocolNumber);
+}
+
+void
+Sat2GroundNetDevice::TransmitComplete (Ptr<Packet> packet, uint16_t protocolNumber)
+{
+  NS_LOG_FUNCTION (this << packet << protocolNumber);
+
+  m_phyTxEndTrace (packet);
+  m_txMachineState = IDLE;
+
+  if (m_queue->IsEmpty () == false)
+    {
+      auto packet = m_queue->Dequeue ();
+      m_snifferTrace (packet);
+      TransmitStart (packet, protocolNumber);
+    }
 }
 
 bool

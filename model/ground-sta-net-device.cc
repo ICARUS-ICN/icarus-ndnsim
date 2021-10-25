@@ -174,6 +174,30 @@ GroundStaNetDevice::SetQueue (Ptr<Queue<Packet>> queue)
 }
 
 void
+GroundStaNetDevice::ReceiveFromSat (Ptr<Packet> packet, DataRate bps, uint16_t protocolNumber)
+{
+  NS_LOG_FUNCTION (this << packet << bps << protocolNumber);
+
+  m_phyRxBeginTrace (packet);
+  Simulator::Schedule (bps.CalculateBytesTxTime (packet->GetSize ()),
+                       &GroundStaNetDevice::ReceiveFromSatFinish, this, packet, protocolNumber);
+}
+
+void
+GroundStaNetDevice::ReceiveFromSatFinish (Ptr<Packet> packet, uint16_t protocolNumber)
+{
+  NS_LOG_FUNCTION (this << packet << protocolNumber);
+
+  m_phyRxEndTrace (packet);
+  m_snifferTrace (packet);
+  m_macRxTrace (packet);
+
+  NS_LOG_WARN ("FIXME: Missing source address.");
+  static auto macUnspecified = Mac48Address ("00:00:00:00:00:00");
+  m_receiveCallback (this, packet, protocolNumber, macUnspecified);
+}
+
+void
 GroundStaNetDevice::SetIfIndex (const uint32_t index)
 {
   NS_LOG_FUNCTION (this << index);

@@ -91,6 +91,8 @@ public:
   virtual bool SupportsSendFrom (void) const override;
 
 private:
+  enum { IDLE, TRANSMITTING } m_txMachineState = IDLE;
+
   static constexpr uint16_t DEFAULT_MTU = 1500;
 
   DataRate m_bps;
@@ -107,6 +109,8 @@ private:
       m_phyTxEndTrace, m_phyRxBeginTrace, m_phyRxEndTrace, m_snifferTrace;
 
   void ReceiveFromGroundFinish (Ptr<Packet> packet, uint16_t protocolNumber);
+  void TransmitStart (Ptr<Packet> packet, uint16_t protocolNumber);
+  void TransmitComplete (Ptr<Packet> packet, uint16_t protocolNumber);
 };
 
 } // namespace ns3
