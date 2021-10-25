@@ -42,26 +42,26 @@ public:
 
   virtual bool Attach (Ptr<GroundSatChannel> channel) = 0;
 
-  virtual DataRate GetDataRate () const = 0;
-  virtual void SetDataRate (DataRate rate) = 0;
+  virtual DataRate GetDataRate () const;
+  virtual void SetDataRate (DataRate rate);
 
-  virtual Ptr<Queue<Packet>> GetQueue () const = 0;
-  virtual void SetQueue (Ptr<Queue<Packet>> rate) = 0;
+  virtual Ptr<Queue<Packet>> GetQueue () const;
+  virtual void SetQueue (Ptr<Queue<Packet>> rate);
 
-  virtual void SetIfIndex (const uint32_t index) override = 0;
-  virtual uint32_t GetIfIndex (void) const override = 0;
+  virtual void SetIfIndex (const uint32_t index) override;
+  virtual uint32_t GetIfIndex (void) const override;
 
-  virtual Ptr<Channel> GetChannel (void) const override = 0;
+  virtual Ptr<Channel> GetChannel (void) const override;
 
-  virtual void SetAddress (Address address) override = 0;
-  virtual Address GetAddress (void) const override = 0;
+  virtual void SetAddress (Address address) override;
+  virtual Address GetAddress (void) const override;
 
-  virtual bool SetMtu (const uint16_t mtu) override = 0;
+  virtual bool SetMtu (const uint16_t mtu) override;
+  virtual uint16_t GetMtu (void) const override;
+  virtual bool IsLinkUp (void) const override;
 
-  virtual uint16_t GetMtu (void) const override = 0;
-  virtual bool IsLinkUp (void) const override = 0;
+  virtual void AddLinkChangeCallback (Callback<void> callback) override;
 
-  virtual void AddLinkChangeCallback (Callback<void> callback) override = 0;
   virtual bool IsBroadcast (void) const override = 0;
   virtual Address GetBroadcast (void) const override = 0;
 
@@ -78,13 +78,32 @@ public:
   virtual bool Send (Ptr<Packet> packet, const Address &dest, uint16_t protocolNumber) override = 0;
   virtual bool SendFrom (Ptr<Packet> packet, const Address &source, const Address &dest,
                          uint16_t protocolNumber) override = 0;
-  virtual Ptr<Node> GetNode (void) const override = 0;
-  virtual void SetNode (Ptr<Node> node) override = 0;
+  virtual Ptr<Node> GetNode (void) const override;
+  virtual void SetNode (Ptr<Node> node) override;
   virtual bool NeedsArp (void) const override = 0;
 
-  virtual void SetReceiveCallback (ReceiveCallback cb) override = 0;
-  virtual void SetPromiscReceiveCallback (PromiscReceiveCallback cb) override = 0;
+  virtual void SetReceiveCallback (ReceiveCallback cb) override;
+  virtual void SetPromiscReceiveCallback (PromiscReceiveCallback cb) override;
   virtual bool SupportsSendFrom (void) const override = 0;
+
+protected:
+  TracedCallback<> m_linkChangeCallbacks;
+  TracedCallback<Ptr<const Packet>> m_macTxTrace, m_macTxDropTrace, m_macRxTrace, m_phyTxBeginTrace,
+      m_phyTxEndTrace, m_phyRxBeginTrace, m_phyRxEndTrace, m_snifferTrace;
+  ReceiveCallback m_receiveCallback;
+
+  void SetChannel (Ptr<GroundSatChannel> channel);
+  Ptr<GroundSatChannel> GetInternalChannel (void) const;
+
+private:
+  DataRate m_bps;
+  Mac48Address m_address;
+  uint32_t m_ifIndex;
+  Ptr<Queue<Packet>> m_queue;
+  Ptr<GroundSatChannel> m_channel;
+  Ptr<Node> m_node;
+  uint16_t m_mtu;
+  static constexpr uint16_t DEFAULT_MTU = 1500;
 };
 } // namespace ns3
 
