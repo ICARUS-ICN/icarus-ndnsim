@@ -28,6 +28,7 @@
 #include "ns3/net-device-container.h"
 #include "ns3/net-device.h"
 #include "ns3/data-rate.h"
+#include "ns3/traced-callback.h"
 
 namespace ns3 {
 
@@ -57,6 +58,8 @@ public:
 private:
   NetDeviceContainer m_satellites;
   Ptr<NetDevice> m_ground = 0;
+
+  TracedCallback<Ptr<const Packet>> m_phyTxDropTrace;
 };
 } // namespace ns3
 

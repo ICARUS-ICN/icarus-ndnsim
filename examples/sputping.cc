@@ -103,6 +103,10 @@ main (int argc, char **argv) -> int
   icarusHelper.EnableAsciiAll (stream);
   icarusHelper.EnablePcapAll ("/tmp/pcap-sputping.pcap");
 
+  // Add channel drops to the ASCII trace
+  Config::Connect ("/NodeList/0/DeviceList/0/$ns3::IcarusNetDevice/Channel/PhyTxDrop",
+                   MakeBoundCallback (&AsciiTraceHelper::DefaultDropSinkWithContext, stream));
+
   ns3::Simulator::Stop (Days (7));
 
   ns3::Simulator::Run ();

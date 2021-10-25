@@ -30,6 +30,7 @@
 #include "ns3/ptr.h"
 #include "ns3/ground-sat-channel.h"
 #include "ns3/config.h"
+#include "ns3/assert.h"
 
 namespace ns3 {
 
@@ -348,7 +349,6 @@ IcarusHelper::EnableAsciiInternal (Ptr<OutputStreamWrapper> stream, std::string 
       << "/TxQueue/Drop";
   Config::Connect (oss.str (),
                    MakeBoundCallback (&AsciiTraceHelper::DefaultDropSinkWithContext, stream));
-    }
 }
 
 } // namespace ns3

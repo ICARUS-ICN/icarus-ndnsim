@@ -25,6 +25,7 @@
 #include "ns3/pointer.h"
 #include "ns3/node.h"
 #include "ns3/ptr.h"
+#include "ground-sat-channel.h"
 
 namespace ns3 {
 NS_LOG_COMPONENT_DEFINE ("IcarusNetDevice");
@@ -38,6 +39,9 @@ IcarusNetDevice::GetTypeId (void)
       TypeId ("ns3::IcarusNetDevice")
           .SetParent<NetDevice> ()
           .SetGroupName ("ICARUS")
+          .AddAttribute ("Channel", "The channel attached to this device", PointerValue (),
+                         MakePointerAccessor (&IcarusNetDevice::m_channel),
+                         MakePointerChecker<GroundSatChannel> ())
           .AddAttribute ("Address", "The MAC address of this device.",
                          Mac48AddressValue (Mac48Address ("00:00:00:00:00:00")),
                          MakeMac48AddressAccessor (&IcarusNetDevice::m_address),

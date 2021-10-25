@@ -43,10 +43,16 @@ NS_OBJECT_ENSURE_REGISTERED (GroundSatChannel);
 TypeId
 GroundSatChannel::GetTypeId (void)
 {
-  static TypeId tid = TypeId ("ns3::GroundSatChannel")
-                          .SetParent<Channel> ()
-                          .SetGroupName ("ICARUS")
-                          .AddConstructor<GroundSatChannel> ();
+  static TypeId tid =
+      TypeId ("ns3::GroundSatChannel")
+          .SetParent<Channel> ()
+          .SetGroupName ("ICARUS")
+          .AddConstructor<GroundSatChannel> ()
+          .AddTraceSource ("PhyTxDrop",
+                           "Trace source indicating a packet has been "
+                           "completely received by the device",
+                           MakeTraceSourceAccessor (&GroundSatChannel::m_phyTxDropTrace),
+                           "ns3::Packet::TracedCallback");
 
   return tid;
 }
@@ -117,6 +123,7 @@ GroundSatChannel::Transmit2Sat (Ptr<Packet> packet, DataRate bps, uint16_t proto
     {
       NS_LOG_DEBUG ("Dropped packet " << packet << " as distance " << distanceMeters / 1000.0
                                       << "km was too high.");
+      m_phyTxDropTrace (packet);
     }
 
   return endTx;
@@ -151,6 +158,7 @@ GroundSatChannel::Transmit2Ground (Ptr<Packet> packet, DataRate bps, uint16_t pr
     {
       NS_LOG_DEBUG ("Dropped packet " << packet << " as distance " << distanceMeters / 1000.0
                                       << "km was too high.");
+      m_phyTxDropTrace (packet);
     }
 
   return endTx;
