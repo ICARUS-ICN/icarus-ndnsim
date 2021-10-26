@@ -88,7 +88,14 @@ GroundStaNetDevice::ReceiveFromSatFinish (Ptr<Packet> packet, uint16_t protocolN
   m_macRxTrace (packet);
 
   NS_LOG_WARN ("FIXME: Missing source address.");
+  NS_LOG_WARN ("FIXME: Have to specify packet type properly");
+
   static auto macUnspecified = Mac48Address ("00:00:00:00:00:00");
+  if (m_promiscReceiveCallback.IsNull () != true)
+    {
+      m_promiscReceiveCallback (this, packet, protocolNumber, macUnspecified, macUnspecified,
+                                PACKET_HOST);
+    }
   m_receiveCallback (this, packet, protocolNumber, macUnspecified);
 }
 

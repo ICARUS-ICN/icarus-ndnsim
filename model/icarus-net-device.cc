@@ -258,7 +258,8 @@ void
 IcarusNetDevice::SetPromiscReceiveCallback (PromiscReceiveCallback cb)
 {
   NS_LOG_FUNCTION (this << &cb);
-  NS_LOG (LOG_WARN, "This is not supported");
+
+  m_promiscReceiveCallback = cb;
 }
 
 void

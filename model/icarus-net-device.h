@@ -91,6 +91,7 @@ protected:
   TracedCallback<> m_linkChangeCallbacks;
   TracedCallback<Ptr<const Packet>> m_macTxTrace, m_macTxDropTrace, m_macRxTrace, m_phyTxBeginTrace,
       m_phyTxEndTrace, m_phyRxBeginTrace, m_phyRxEndTrace, m_snifferTrace;
+  PromiscReceiveCallback m_promiscReceiveCallback;
   ReceiveCallback m_receiveCallback;
 
   void SetChannel (Ptr<GroundSatChannel> channel);
