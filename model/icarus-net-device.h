@@ -29,6 +29,7 @@
 #include "ns3/ground-sat-channel.h"
 
 namespace ns3 {
+namespace icarus {
 
 class IcarusNetDevice : public NetDevice
 {
@@ -105,6 +106,7 @@ private:
   uint16_t m_mtu;
   static constexpr uint16_t DEFAULT_MTU = 1500;
 };
+} // namespace icarus
 } // namespace ns3
 
 #endif

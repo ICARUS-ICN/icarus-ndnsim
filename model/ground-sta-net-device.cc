@@ -31,14 +31,15 @@
 #include "ns3/log.h"
 
 namespace ns3 {
-NS_LOG_COMPONENT_DEFINE ("GroundStaNetDevice");
+namespace icarus {
+NS_LOG_COMPONENT_DEFINE ("icarus.GroundStaNetDevice");
 
 NS_OBJECT_ENSURE_REGISTERED (GroundStaNetDevice);
 
 TypeId
 GroundStaNetDevice::GetTypeId (void)
 {
-  static TypeId tid = TypeId ("ns3::GroundStaNetDevice")
+  static TypeId tid = TypeId ("ns3::icarus::GroundStaNetDevice")
                           .SetParent<IcarusNetDevice> ()
                           .SetGroupName ("ICARUS")
                           .AddConstructor<GroundStaNetDevice> ();
@@ -238,4 +239,5 @@ GroundStaNetDevice::SupportsSendFrom (void) const
 
   return false;
 }
+} // namespace icarus
 } // namespace ns3

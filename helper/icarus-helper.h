@@ -27,6 +27,7 @@
 #include "ns3/icarus-net-device.h"
 
 namespace ns3 {
+namespace icarus {
 
 class IcarusHelper : public PcapHelperForDevice, public AsciiTraceHelperForDevice
 {
@@ -63,8 +64,8 @@ public:
    * \param n1 the name of the attribute to set \param v1 the value of the
    * attribute to set
    *
-   * Set these attributes on each ns3::GroundStaNetDevice or
-   * ns3::Sat2GroundNetDevice created by IcarusHelper::Install
+   * Set these attributes on each ns3::icarus::GroundStaNetDevice or
+   * ns3::icarus::Sat2GroundNetDevice created by IcarusHelper::Install
    */
   void SetDeviceAttribute (std::string n1, const AttributeValue &v1);
 
@@ -78,10 +79,10 @@ public:
   void SetChannelAttribute (std::string n1, const AttributeValue &v1);
 
   /**
-   * This method creates an ns3::GroundStaNetDevice or ns3::Sat2GroundNetDevice
-   * with the attributes configured by IcarusHelper::SetDeviceAttribute and then
-   * adds the device to the node and attaches the provided channel to the
-   * device.
+   * This method creates an ns3::icarus::GroundStaNetDevice or
+   * ns3::icarus::Sat2GroundNetDevice with the attributes configured by
+   * IcarusHelper::SetDeviceAttribute and then adds the device to the node and
+   * attaches the provided channel to the device.
    *
    * \param node The node to install the device in \param channel The channel to
    * attach to the device. \returns A container holding the added net device.
@@ -89,10 +90,10 @@ public:
   NetDeviceContainer Install (Ptr<Node> node, Ptr<GroundSatChannel> channel) const;
 
   /**
-   * This method creates an ns3::GroundStaNetDevice or ns3::Sat2GroundNetDevice
-   * with the attributes configured by IcarusHelper::SetDeviceAttribute and then
-   * adds the device to the node and attaches the provided channel to the
-   * device.
+   * This method creates an ns3::icarus::GroundStaNetDevice or
+   * ns3::icarus::Sat2GroundNetDevice with the attributes configured by
+   * IcarusHelper::SetDeviceAttribute and then adds the device to the node and
+   * attaches the provided channel to the device.
    *
    * \param node The node to install the device in \param channelName The name
    * of the channel to attach to the device. \returns A container holding the
@@ -101,10 +102,10 @@ public:
   NetDeviceContainer Install (Ptr<Node> node, std::string channelName) const;
 
   /**
-   * This method creates an ns3::GroundStaNetDevice or ns3::Sat2GroundNetDevice
-   * with the attributes configured by IcarusHelper::SetDeviceAttribute and then
-   * adds the device to the node and attaches the provided channel to the
-   * device.
+   * This method creates an ns3::icarus::GroundStaNetDevice or
+   * ns3::icarus::Sat2GroundNetDevice with the attributes configured by
+   * IcarusHelper::SetDeviceAttribute and then adds the device to the node and
+   * attaches the provided channel to the device.
    *
    * \param nodeName The name of the node to install the device in \param
    * channel The channel to attach to the device. \returns A container holding
@@ -113,10 +114,10 @@ public:
   NetDeviceContainer Install (std::string nodeName, Ptr<GroundSatChannel> channel) const;
 
   /**
-   * This method creates an ns3::GroundStaNetDevice or ns3::Sat2GroundNetDevice
-   * with the attributes configured by IcarusHelper::SetDeviceAttribute and then
-   * adds the device to the node and attaches the provided channel to the
-   * device.
+   * This method creates an ns3::icarus::GroundStaNetDevice or
+   * ns3::icarus::Sat2GroundNetDevice with the attributes configured by
+   * IcarusHelper::SetDeviceAttribute and then adds the device to the node and
+   * attaches the provided channel to the device.
    *
    * \param nodeName The name of the node to install the device in \param
    * channelName The name of the channel to attach to the device. \returns A
@@ -127,8 +128,8 @@ public:
   /**
    * This method creates an ns3::GroundSatChannel with the attributes configured
    * by IcarusHelper::SetChannelAttribute.  For each Ptr<node> in the provided
-   * container: it creates an ns3::GroundStaNetDevice or
-   * ns3::Sat2GroundNetDevice (with the attributes configured by
+   * container: it creates an ns3::icarus::GroundStaNetDevice or
+   * ns3::icarus::Sat2GroundNetDevice (with the attributes configured by
    * IcarusHelper::SetDeviceAttribute); adds the device to the node; and
    * attaches the channel to the device.
    *
@@ -139,9 +140,9 @@ public:
 
   /**
    * For each Ptr<node> in the provided container, this method creates an
-   * ns3::GroundStaNetDevice or ns3::Sat2GroundNetDevice (with the attributes
-   * configured by IcarusHelper::SetDeviceAttribute); adds the device to the
-   * node; and attaches the provided channel to the device.
+   * ns3::icarus::GroundStaNetDevice or ns3::icarus::Sat2GroundNetDevice (with
+   * the attributes configured by IcarusHelper::SetDeviceAttribute); adds the
+   * device to the node; and attaches the provided channel to the device.
    *
    * \param c The NodeContainer holding the nodes to be changed. \param channel
    * The channel to attach to the devices. \returns A container holding the
@@ -151,9 +152,9 @@ public:
 
   /**
    * For each Ptr<node> in the provided container, this method creates an
-   * ns3::GroundStaNetDevice or ns3::Sat2GroundNetDevice (with the attributes
-   * configured by IcarusHelper::SetDeviceAttribute); adds the device to the
-   * node; and attaches the provided channel to the device.
+   * ns3::icarus::GroundStaNetDevice or ns3::icarus::Sat2GroundNetDevice (with
+   * the attributes configured by IcarusHelper::SetDeviceAttribute); adds the
+   * device to the node; and attaches the provided channel to the device.
    *
    * \param c The NodeContainer holding the nodes to be changed. \param
    * channelName The name of the channel to attach to the devices. \returns A
@@ -167,10 +168,10 @@ public:
    * NetDevice-specific implementation mechanism for hooking the trace and
    * writing to the trace file.
    *
-   * \param prefix Filename prefix to use for pcap files.
-   * \param nd Net device for which you want to enable tracing.
-   * \param promiscuous If true capture all possible packets available at the device.
-   * \param explicitFilename Treat the prefix as an explicit filename if true
+   * \param prefix Filename prefix to use for pcap files. \param nd Net device
+   * for which you want to enable tracing. \param promiscuous If true capture
+   * all possible packets available at the device. \param explicitFilename Treat
+   * the prefix as an explicit filename if true
    */
   virtual void EnablePcapInternal (std::string prefix, Ptr<NetDevice> nd, bool promiscuous,
                                    bool explicitFilename);
@@ -182,19 +183,19 @@ public:
    * writing to the trace file.
    *
    * \param stream The output stream object to use when logging ascii traces.
-   * \param prefix Filename prefix to use for ascii trace files.
-   * \param nd Net device for which you want to enable tracing.
-   * \param explicitFilename Treat the prefix as an explicit filename if true
+   * \param prefix Filename prefix to use for ascii trace files. \param nd Net
+   * device for which you want to enable tracing. \param explicitFilename Treat
+   * the prefix as an explicit filename if true
    */
   virtual void EnableAsciiInternal (Ptr<OutputStreamWrapper> stream, std::string prefix,
                                     Ptr<NetDevice> nd, bool explicitFilename);
 
 private:
   /**
-   * This method creates an ns3::GroundStaNetDevice or ns3::Sat2GroundNetDevice
-   * with the attributes configured by CsmaHelper::SetDeviceAttribute and then
-   * adds the device to the node and attaches the provided channel to the
-   * device.
+   * This method creates an ns3::icarus::GroundStaNetDevice or
+   * ns3::icarus::Sat2GroundNetDevice with the attributes configured by
+   * CsmaHelper::SetDeviceAttribute and then adds the device to the node and
+   * attaches the provided channel to the device.
    *
    * \param node The node to install the device in \param channel The channel to
    * attach to the device. \returns A container holding the added net device.
@@ -209,6 +210,7 @@ private:
   ObjectFactory m_channelFactory; //!< factory for the channel
 };
 
+} // namespace icarus
 } // namespace ns3
 
 #endif /* ICARUS_HELPER_H */

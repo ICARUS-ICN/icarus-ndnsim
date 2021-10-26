@@ -28,7 +28,8 @@
 #include "ground-sat-channel.h"
 
 namespace ns3 {
-NS_LOG_COMPONENT_DEFINE ("IcarusNetDevice");
+namespace icarus {
+NS_LOG_COMPONENT_DEFINE ("icarus.IcarusNetDevice");
 
 NS_OBJECT_ENSURE_REGISTERED (IcarusNetDevice);
 
@@ -36,7 +37,7 @@ TypeId
 IcarusNetDevice::GetTypeId (void)
 {
   static TypeId tid =
-      TypeId ("ns3::IcarusNetDevice")
+      TypeId ("ns3::icarus::IcarusNetDevice")
           .SetParent<NetDevice> ()
           .SetGroupName ("ICARUS")
           .AddAttribute ("Channel", "The channel attached to this device", PointerValue (),
@@ -272,4 +273,5 @@ IcarusNetDevice::GetInternalChannel (void) const
   return m_channel;
 }
 
+} // namespace icarus
 } // namespace ns3

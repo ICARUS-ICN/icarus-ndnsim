@@ -31,14 +31,15 @@
 #include "ns3/simulator.h"
 
 namespace ns3 {
-NS_LOG_COMPONENT_DEFINE ("Sat2GroundNetDevice");
+namespace icarus {
+NS_LOG_COMPONENT_DEFINE ("icarus.Sat2GroundNetDevice");
 
 NS_OBJECT_ENSURE_REGISTERED (Sat2GroundNetDevice);
 
 TypeId
 Sat2GroundNetDevice::GetTypeId (void)
 {
-  static TypeId tid = TypeId ("ns3::Sat2GroundNetDevice")
+  static TypeId tid = TypeId ("ns3::icarus::Sat2GroundNetDevice")
                           .SetParent<IcarusNetDevice> ()
                           .SetGroupName ("ICARUS")
                           .AddConstructor<Sat2GroundNetDevice> ();
@@ -231,4 +232,5 @@ Sat2GroundNetDevice::SupportsSendFrom (void) const
 
   return false;
 }
+} // namespace icarus
 } // namespace ns3

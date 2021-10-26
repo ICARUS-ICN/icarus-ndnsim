@@ -21,7 +21,7 @@
 #include "planet.h"
 #include <boost/units/systems/si/prefixes.hpp>
 
-using namespace satpos::planet;
+using namespace icarus::satpos::planet;
 using namespace boost::units::si;
 
 const Planet constants::Earth (5.97e24 * kilogram, quantity<length> (6371.009 * kilo * meter),

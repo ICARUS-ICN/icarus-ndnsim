@@ -32,18 +32,18 @@
 #include <boost/units/systems/angle/degrees.hpp>
 
 namespace ns3 {
+namespace icarus {
+NS_LOG_COMPONENT_DEFINE ("icarus.CircularOrbitMobilityModel");
 
-NS_LOG_COMPONENT_DEFINE ("CircularOrbitMobilityModel");
-
-using namespace satpos::planet;
-using satpos::planet::constants::Earth;
+using namespace ::icarus::satpos::planet;
+using constants::Earth;
 
 NS_OBJECT_ENSURE_REGISTERED (CircularOrbitMobilityModel);
 
 TypeId
 CircularOrbitMobilityModel::GetTypeId (void)
 {
-  static TypeId tid = TypeId ("ns3::CircularOrbitMobilityModel")
+  static TypeId tid = TypeId ("ns3::icarus::CircularOrbitMobilityModel")
                           .AddConstructor<CircularOrbitMobilityModel> ()
                           .SetParent<MobilityModel> ()
                           .SetGroupName ("Mobility");
@@ -166,5 +166,5 @@ CircularOrbitMobilityModel::DoGetPosition () const
       quantity<degree::plane_angle> (sat_ascension - prime_meridian_ascension).value (),
       radius - Earth.getRadius ().value (), GeographicPositions::SPHERE);
 }
-
+} // namespace icarus
 } // namespace ns3

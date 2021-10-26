@@ -27,9 +27,10 @@
 #include <boost/units/systems/si/length.hpp>
 #include <boost/units/systems/si/mass.hpp>
 
+namespace icarus {
 namespace satpos {
-
 namespace planet {
+
 using namespace boost::units;
 using namespace boost::units::si;
 
@@ -68,7 +69,7 @@ extern const Planet Earth;
 } // namespace constants
 
 } // namespace planet
-
 } // namespace satpos
+} // namespace icarus
 
 #endif // PLANET_H

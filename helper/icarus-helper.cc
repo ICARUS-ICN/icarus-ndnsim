@@ -33,17 +33,18 @@
 #include "ns3/assert.h"
 
 namespace ns3 {
+namespace icarus {
 
-NS_LOG_COMPONENT_DEFINE ("IcarusHelper");
+NS_LOG_COMPONENT_DEFINE ("icarus.IcarusHelper");
 
 IcarusHelper::IcarusHelper ()
 {
   NS_LOG_FUNCTION (this);
 
   m_queueFactory.SetTypeId ("ns3::DropTailQueue<Packet>");
-  m_channelFactory.SetTypeId ("ns3::GroundSatChannel");
-  m_sat2GroundFactory.SetTypeId ("ns3::Sat2GroundNetDevice");
-  m_groundStaFactory.SetTypeId ("ns3::GroundStaNetDevice");
+  m_channelFactory.SetTypeId ("ns3::icarus::GroundSatChannel");
+  m_sat2GroundFactory.SetTypeId ("ns3::icarus::Sat2GroundNetDevice");
+  m_groundStaFactory.SetTypeId ("ns3::icarus::GroundStaNetDevice");
 }
 
 void
@@ -203,7 +204,7 @@ IcarusHelper::EnablePcapInternal (std::string prefix, Ptr<NetDevice> nd, bool pr
   if (device == 0)
     {
       NS_LOG_INFO ("IcarusHelper::EnablePcapInternal(): Device "
-                   << device << " not of type ns3::IcarusNetDevice");
+                   << device << " not of type ns3::icarus::IcarusNetDevice");
       return;
     }
 
@@ -243,7 +244,7 @@ IcarusHelper::EnableAsciiInternal (Ptr<OutputStreamWrapper> stream, std::string 
   if (device == 0)
     {
       NS_LOG_INFO ("IcarusHelper::EnableAsciiInternal(): Device "
-                   << device << " not of type ns3::IcarusNetDevice");
+                   << device << " not of type ns3::icarus::IcarusNetDevice");
       return;
     }
 
@@ -315,10 +316,10 @@ IcarusHelper::EnableAsciiInternal (Ptr<OutputStreamWrapper> stream, std::string 
   uint32_t nodeid = nd->GetNode ()->GetId ();
   uint32_t deviceid = nd->GetIfIndex ();
 
-  std::string name = "Sat2GroundNetDevice";
+  std::string name = "icarus::Sat2GroundNetDevice";
   if (DynamicCast<GroundStaNetDevice> (device) != 0)
     {
-      name = "GroundStaNetDevice";
+      name = "icarus::GroundStaNetDevice";
     }
   else
     {
@@ -351,4 +352,5 @@ IcarusHelper::EnableAsciiInternal (Ptr<OutputStreamWrapper> stream, std::string 
                    MakeBoundCallback (&AsciiTraceHelper::DefaultDropSinkWithContext, stream));
 }
 
+} // namespace icarus
 } // namespace ns3

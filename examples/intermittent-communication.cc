@@ -41,8 +41,9 @@
 #include <limits>
 
 using namespace ns3;
+using namespace icarus;
 
-NS_LOG_COMPONENT_DEFINE ("IntermittentConnectionExample");
+NS_LOG_COMPONENT_DEFINE ("icarus.IntermittentConnectionExample");
 
 namespace {
 void
@@ -83,7 +84,7 @@ main (int argc, char **argv) -> int
   auto bird = nodes.Get (0);
   auto ground = nodes.Get (1);
 
-  ObjectFactory circularOrbitFactory ("ns3::CircularOrbitMobilityModel");
+  ObjectFactory circularOrbitFactory ("ns3::icarus::CircularOrbitMobilityModel");
 
   auto mmodel = circularOrbitFactory.Create<CircularOrbitMobilityModel> ();
   mmodel->LaunchSat (quantity<plane_angle> (60.0 * degrees), 0.0 * radians, 250e3 * meters,

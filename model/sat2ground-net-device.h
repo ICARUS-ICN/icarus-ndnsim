@@ -31,6 +31,7 @@
 #include "icarus-net-device.h"
 
 namespace ns3 {
+namespace icarus {
 
 class Sat2GroundNetDevice : public IcarusNetDevice
 {
@@ -74,6 +75,7 @@ private:
   void TransmitComplete (Ptr<Packet> packet, uint16_t protocolNumber);
 };
 
+} // namespace icarus
 } // namespace ns3
 
 #endif

@@ -37,8 +37,9 @@
 #include <limits>
 
 using namespace ns3;
+using namespace icarus;
 
-NS_LOG_COMPONENT_DEFINE ("SputPingExample");
+NS_LOG_COMPONENT_DEFINE ("icarus.SputPingExample");
 
 auto
 main (int argc, char **argv) -> int
@@ -57,7 +58,7 @@ main (int argc, char **argv) -> int
   auto bird = nodes.Get (0);
   auto ground = nodes.Get (1);
 
-  ObjectFactory circularOrbitFactory ("ns3::CircularOrbitMobilityModel");
+  ObjectFactory circularOrbitFactory ("ns3::icarus::CircularOrbitMobilityModel");
 
   auto mmodel = circularOrbitFactory.Create<CircularOrbitMobilityModel> ();
   mmodel->LaunchSat (quantity<plane_angle> (60.0 * degrees), 0.0 * radians, 250e3 * meters,
@@ -104,7 +105,7 @@ main (int argc, char **argv) -> int
   icarusHelper.EnablePcapAll ("/tmp/pcap-sputping.pcap");
 
   // Add channel drops to the ASCII trace
-  Config::Connect ("/NodeList/0/DeviceList/0/$ns3::IcarusNetDevice/Channel/PhyTxDrop",
+  Config::Connect ("/NodeList/0/DeviceList/0/$ns3::icarus::IcarusNetDevice/Channel/PhyTxDrop",
                    MakeBoundCallback (&AsciiTraceHelper::DefaultDropSinkWithContext, stream));
 
   ns3::Simulator::Stop (Days (7));

@@ -35,8 +35,8 @@
 #include "ns3/assert.h"
 
 namespace ns3 {
-
-NS_LOG_COMPONENT_DEFINE ("GroundSatChannel");
+namespace icarus {
+NS_LOG_COMPONENT_DEFINE ("icarus.GroundSatChannel");
 
 NS_OBJECT_ENSURE_REGISTERED (GroundSatChannel);
 
@@ -44,7 +44,7 @@ TypeId
 GroundSatChannel::GetTypeId (void)
 {
   static TypeId tid =
-      TypeId ("ns3::GroundSatChannel")
+      TypeId ("ns3::icarus::GroundSatChannel")
           .SetParent<Channel> ()
           .SetGroupName ("ICARUS")
           .AddConstructor<GroundSatChannel> ()
@@ -188,4 +188,5 @@ GroundSatChannel::GetDevice (std::size_t i) const
 
   return m_ground;
 }
+} // namespace icarus
 } // namespace ns3

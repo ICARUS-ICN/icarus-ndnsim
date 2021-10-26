@@ -31,7 +31,7 @@
 #include "ns3/traced-callback.h"
 
 namespace ns3 {
-
+namespace icarus {
 class GroundStaNetDevice;
 class Sat2GroundNetDevice;
 class GroundSatChannel : public Channel
@@ -61,6 +61,7 @@ private:
 
   TracedCallback<Ptr<const Packet>> m_phyTxDropTrace;
 };
+} // namespace icarus
 } // namespace ns3
 
 #endif

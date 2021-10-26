@@ -27,7 +27,7 @@
 #include <boost/units/systems/si/length.hpp>
 
 namespace ns3 {
-
+namespace icarus {
 /**
  * \ingroup icarus
  *
@@ -61,7 +61,7 @@ private:
   meters radius;
   radians phase;
 };
-
+} // namespace icarus
 } // namespace ns3
 
 #endif /* CIRCULAR_ORBIT_H */

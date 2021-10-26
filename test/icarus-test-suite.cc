@@ -36,7 +36,7 @@
 // Do not put your test classes in namespace ns3.  You may find it useful
 // to use the using directive to access the ns3 namespace directly
 using namespace ns3;
-
+using namespace icarus;
 // This is an example TestCase.
 class CircularOrbitTestCase1 : public TestCase
 {
@@ -75,7 +75,7 @@ CircularOrbitTestCase1::DoRun (void)
   using boost::units::si::radians;
 
   // set types
-  m_circularOrbit.SetTypeId ("ns3::CircularOrbitMobilityModel");
+  m_circularOrbit.SetTypeId ("ns3::icarus::CircularOrbitMobilityModel");
 
   Ptr<Node> node = CreateObject<Node> ();
 
