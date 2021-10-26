@@ -48,9 +48,9 @@ IcarusHelper::IcarusHelper ()
 }
 
 void
-IcarusHelper::SetQueue (std::string type, std::string n1, const AttributeValue &v1, std::string n2,
-                        const AttributeValue &v2, std::string n3, const AttributeValue &v3,
-                        std::string n4, const AttributeValue &v4)
+IcarusHelper::SetQueue (std::string type, const std::string &n1, const AttributeValue &v1,
+                        const std::string &n2, const AttributeValue &v2, const std::string &n3,
+                        const AttributeValue &v3, const std::string &n4, const AttributeValue &v4)
 {
   NS_LOG_FUNCTION (this << type << n1 << n2 << n3 << n4);
 
@@ -64,7 +64,7 @@ IcarusHelper::SetQueue (std::string type, std::string n1, const AttributeValue &
 }
 
 void
-IcarusHelper::SetDeviceAttribute (std::string n1, const AttributeValue &v1)
+IcarusHelper::SetDeviceAttribute (const std::string &n1, const AttributeValue &v1)
 {
   NS_LOG_FUNCTION (this << n1);
 
@@ -73,7 +73,7 @@ IcarusHelper::SetDeviceAttribute (std::string n1, const AttributeValue &v1)
 }
 
 void
-IcarusHelper::SetChannelAttribute (std::string n1, const AttributeValue &v1)
+IcarusHelper::SetChannelAttribute (const std::string &n1, const AttributeValue &v1)
 {
   NS_LOG_FUNCTION (this << n1);
 
@@ -89,7 +89,7 @@ IcarusHelper::Install (Ptr<Node> node, Ptr<GroundSatChannel> channel) const
 }
 
 NetDeviceContainer
-IcarusHelper::Install (Ptr<Node> node, std::string channelName) const
+IcarusHelper::Install (Ptr<Node> node, const std::string &channelName) const
 {
   NS_LOG_FUNCTION (this << node << channelName);
 
@@ -98,7 +98,7 @@ IcarusHelper::Install (Ptr<Node> node, std::string channelName) const
 }
 
 NetDeviceContainer
-IcarusHelper::Install (std::string nodeName, Ptr<GroundSatChannel> channel) const
+IcarusHelper::Install (const std::string &nodeName, Ptr<GroundSatChannel> channel) const
 {
   NS_LOG_FUNCTION (this << nodeName << channel);
 
@@ -107,7 +107,7 @@ IcarusHelper::Install (std::string nodeName, Ptr<GroundSatChannel> channel) cons
 }
 
 NetDeviceContainer
-IcarusHelper::Install (std::string nodeName, std::string channelName) const
+IcarusHelper::Install (const std::string &nodeName, const std::string &channelName) const
 {
   NS_LOG_FUNCTION (this << nodeName << channelName);
 
@@ -142,7 +142,7 @@ IcarusHelper::Install (const NodeContainer &c, Ptr<GroundSatChannel> channel) co
 }
 
 NetDeviceContainer
-IcarusHelper::Install (const NodeContainer &c, std::string channelName) const
+IcarusHelper::Install (const NodeContainer &c, const std::string &channelName) const
 {
   NS_LOG_FUNCTION (this << &c << channelName);
 
@@ -174,9 +174,9 @@ IcarusHelper::CreateDeviceForNode (Ptr<Node> node) const
 {
   NS_LOG_FUNCTION (this << node);
 
-  NS_ABORT_MSG_UNLESS (node->GetObject<MobilityModel> () != 0,
+  NS_ABORT_MSG_UNLESS (node->GetObject<MobilityModel> () != nullptr,
                        "Must assign a mobility model to the node BEFORE installing its netdevice.");
-  if (node->GetObject<CircularOrbitMobilityModel> () != 0)
+  if (node->GetObject<CircularOrbitMobilityModel> () != nullptr)
     {
       // This is a satellite
       return m_sat2GroundFactory.Create<Sat2GroundNetDevice> ();
@@ -316,7 +316,7 @@ IcarusHelper::EnableAsciiInternal (Ptr<OutputStreamWrapper> stream, std::string 
   uint32_t nodeid = nd->GetNode ()->GetId ();
   uint32_t deviceid = nd->GetIfIndex ();
 
-  std::string name = "icarus::Sat2GroundNetDevice";
+  std::string name{"icarus::Sat2GroundNetDevice"};
   if (DynamicCast<GroundStaNetDevice> (device) != 0)
     {
       name = "icarus::GroundStaNetDevice";

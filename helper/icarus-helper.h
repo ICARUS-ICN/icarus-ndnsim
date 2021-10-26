@@ -54,10 +54,10 @@ public:
    * Set the type of queue to create and associated to each
    * CsmaNetDevice created through IcarusHelper::Install.
    */
-  void SetQueue (std::string type, std::string n1 = "",
-                 const AttributeValue &v1 = EmptyAttributeValue (), std::string n2 = "",
-                 const AttributeValue &v2 = EmptyAttributeValue (), std::string n3 = "",
-                 const AttributeValue &v3 = EmptyAttributeValue (), std::string n4 = "",
+  void SetQueue (std::string type, const std::string &n1 = "",
+                 const AttributeValue &v1 = EmptyAttributeValue (), const std::string &n2 = "",
+                 const AttributeValue &v2 = EmptyAttributeValue (), const std::string &n3 = "",
+                 const AttributeValue &v3 = EmptyAttributeValue (), const std::string &n4 = "",
                  const AttributeValue &v4 = EmptyAttributeValue ());
 
   /**
@@ -67,7 +67,7 @@ public:
    * Set these attributes on each ns3::icarus::GroundStaNetDevice or
    * ns3::icarus::Sat2GroundNetDevice created by IcarusHelper::Install
    */
-  void SetDeviceAttribute (std::string n1, const AttributeValue &v1);
+  void SetDeviceAttribute (const std::string &n1, const AttributeValue &v1);
 
   /**
    * \param n1 the name of the attribute to set \param v1 the value of the
@@ -76,7 +76,7 @@ public:
    * Set these attributes on each ns3::GroundSatChannel created by
    * IcarusHelper::Install
    */
-  void SetChannelAttribute (std::string n1, const AttributeValue &v1);
+  void SetChannelAttribute (const std::string &n1, const AttributeValue &v1);
 
   /**
    * This method creates an ns3::icarus::GroundStaNetDevice or
@@ -99,7 +99,7 @@ public:
    * of the channel to attach to the device. \returns A container holding the
    * added net device.
    */
-  NetDeviceContainer Install (Ptr<Node> node, std::string channelName) const;
+  NetDeviceContainer Install (Ptr<Node> node, const std::string &channelName) const;
 
   /**
    * This method creates an ns3::icarus::GroundStaNetDevice or
@@ -111,7 +111,7 @@ public:
    * channel The channel to attach to the device. \returns A container holding
    * the added net device.
    */
-  NetDeviceContainer Install (std::string nodeName, Ptr<GroundSatChannel> channel) const;
+  NetDeviceContainer Install (const std::string &nodeName, Ptr<GroundSatChannel> channel) const;
 
   /**
    * This method creates an ns3::icarus::GroundStaNetDevice or
@@ -123,7 +123,7 @@ public:
    * channelName The name of the channel to attach to the device. \returns A
    * container holding the added net device.
    */
-  NetDeviceContainer Install (std::string nodeName, std::string channelName) const;
+  NetDeviceContainer Install (const std::string &nodeName, const std::string &channelName) const;
 
   /**
    * This method creates an ns3::GroundSatChannel with the attributes configured
@@ -160,7 +160,7 @@ public:
    * channelName The name of the channel to attach to the devices. \returns A
    * container holding the added net devices.
    */
-  NetDeviceContainer Install (const NodeContainer &c, std::string channelName) const;
+  NetDeviceContainer Install (const NodeContainer &c, const std::string &channelName) const;
 
   /**
    * \brief Enable pcap output on the indicated net device.
