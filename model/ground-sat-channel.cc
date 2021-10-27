@@ -23,11 +23,13 @@
 #include "ground-sat-channel.h"
 #include "ns3/assert.h"
 #include "ns3/channel.h"
+#include "ground-sat-success-model.h"
 #include "ns3/log-macros-enabled.h"
 #include "ns3/log.h"
 #include "ns3/abort.h"
 #include "ns3/mobility-model.h"
 #include "ns3/net-device.h"
+#include "ns3/pointer.h"
 #include "ns3/ptr.h"
 #include "ns3/simulator.h"
 #include "sat2ground-net-device.h"
@@ -48,6 +50,11 @@ GroundSatChannel::GetTypeId (void)
           .SetParent<Channel> ()
           .SetGroupName ("ICARUS")
           .AddConstructor<GroundSatChannel> ()
+          .AddAttribute ("TxSuccess",
+                         "The object used to decide whether there is sufficient "
+                         "visibility for a successful transmission",
+                         PointerValue (), MakePointerAccessor (&GroundSatChannel::m_txSuccessModel),
+                         MakePointerChecker<GroundSatSuccessModel> ())
           .AddTraceSource ("PhyTxDrop",
                            "Trace source indicating a packet has been "
                            "completely received by the device",
@@ -108,22 +115,20 @@ GroundSatChannel::Transmit2Sat (Ptr<Packet> packet, DataRate bps, uint16_t proto
 
   Time delay (Seconds (distanceMeters / 3e8));
 
-  if (distanceMeters < 2000e3)
+  if (m_txSuccessModel != nullptr &&
+      m_txSuccessModel->TramsmitSuccess (m_ground->GetNode (), m_satellites.Get (0)->GetNode (),
+                                         packet) != true)
     {
-      NS_LOG_WARN ("We should perform a real visibility test with the cone angle of the receiving "
-                   "satellite");
+      m_phyTxDropTrace (packet);
+    }
+  else
+    {
       NS_ASSERT (DynamicCast<Sat2GroundNetDevice> (m_satellites.Get (0)) != 0);
       auto sat = StaticCast<Sat2GroundNetDevice> (m_satellites.Get (0));
 
       Simulator::ScheduleWithContext (sat->GetNode ()->GetId (), delay,
                                       &Sat2GroundNetDevice::ReceiveFromGround, sat, packet, bps,
                                       protocolNumber);
-    }
-  else
-    {
-      NS_LOG_DEBUG ("Dropped packet " << packet << " as distance " << distanceMeters / 1000.0
-                                      << "km was too high.");
-      m_phyTxDropTrace (packet);
     }
 
   return endTx;
@@ -144,21 +149,20 @@ GroundSatChannel::Transmit2Ground (Ptr<Packet> packet, DataRate bps, uint16_t pr
 
   Time delay (Seconds (distanceMeters / 3e8));
 
-  if (distanceMeters < 2000e3)
+  if (m_txSuccessModel != nullptr &&
+      m_txSuccessModel->TramsmitSuccess (m_ground->GetNode (), m_satellites.Get (0)->GetNode (),
+                                         packet) != true)
     {
-      NS_LOG_WARN ("We should perform a real visibility test with the cone angle of the receiving "
-                   "satellite");
+      NS_LOG_DEBUG ("Dropped packet " << packet);
+      m_phyTxDropTrace (packet);
+    }
+  else
+    {
       NS_ASSERT (DynamicCast<GroundStaNetDevice> (m_ground) != 0);
 
       Simulator::ScheduleWithContext (
           m_ground->GetNode ()->GetId (), delay, &GroundStaNetDevice::ReceiveFromSat,
           DynamicCast<GroundStaNetDevice> (m_ground), packet, bps, protocolNumber);
-    }
-  else
-    {
-      NS_LOG_DEBUG ("Dropped packet " << packet << " as distance " << distanceMeters / 1000.0
-                                      << "km was too high.");
-      m_phyTxDropTrace (packet);
     }
 
   return endTx;

@@ -25,6 +25,7 @@
 
 #include "ns3/channel.h"
 #include "ns3/data-rate.h"
+#include "ns3/ground-sat-success-model.h"
 #include "ns3/net-device-container.h"
 #include "ns3/net-device.h"
 #include "ns3/data-rate.h"
@@ -34,6 +35,7 @@ namespace ns3 {
 namespace icarus {
 class GroundStaNetDevice;
 class Sat2GroundNetDevice;
+class GroundSatSuccessModel;
 class GroundSatChannel : public Channel
 {
 public:
@@ -58,6 +60,7 @@ public:
 private:
   NetDeviceContainer m_satellites;
   Ptr<NetDevice> m_ground = 0;
+  Ptr<GroundSatSuccessModel> m_txSuccessModel = nullptr;
 
   TracedCallback<Ptr<const Packet>> m_phyTxDropTrace;
 };
