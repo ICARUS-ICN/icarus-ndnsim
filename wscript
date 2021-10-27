@@ -11,6 +11,7 @@ def build(bld):
     module.source = [
         'model/circular-orbit.cc',
         'model/ground-sat-channel.cc',
+        'model/ground-sat-success-model.cc',
         'model/ground-sta-net-device.cc',
         'model/sat2ground-net-device.cc',
         'model/satpos/planet.cc',
@@ -29,6 +30,7 @@ def build(bld):
         'model/circular-orbit.h',
         'model/sat2ground-net-device.h',
         'model/ground-sat-channel.h',
+        'model/ground-sat-success-model.h',
         'model/ground-sta-net-device.h',
         'model/icarus-net-device.h',
         'helper/icarus-helper.h'
