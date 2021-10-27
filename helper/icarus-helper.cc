@@ -27,10 +27,12 @@
 #include "ns3/mobility-model.h"
 #include "ns3/names.h"
 #include "ns3/net-device-queue-interface.h"
+#include "ns3/pointer.h"
 #include "ns3/ptr.h"
 #include "ns3/ground-sat-channel.h"
 #include "ns3/config.h"
 #include "ns3/assert.h"
+#include "src/icarus/model/ground-sat-success-model.h"
 
 namespace ns3 {
 namespace icarus {
@@ -45,6 +47,7 @@ IcarusHelper::IcarusHelper ()
   m_channelFactory.SetTypeId ("ns3::icarus::GroundSatChannel");
   m_sat2GroundFactory.SetTypeId ("ns3::icarus::Sat2GroundNetDevice");
   m_groundStaFactory.SetTypeId ("ns3::icarus::GroundStaNetDevice");
+  m_successModelFactory.SetTypeId ("ns3::icarus::GroundSatSuccessDistance");
 }
 
 void
@@ -61,6 +64,23 @@ IcarusHelper::SetQueue (std::string type, const std::string &n1, const Attribute
   m_queueFactory.Set (n2, v2);
   m_queueFactory.Set (n3, v3);
   m_queueFactory.Set (n4, v4);
+}
+
+void
+IcarusHelper::SetSuccessModel (std::string type, const std::string &n1, const AttributeValue &v1,
+                               const std::string &n2, const AttributeValue &v2,
+                               const std::string &n3, const AttributeValue &v3,
+                               const std::string &n4, const AttributeValue &v4)
+{
+  NS_LOG_FUNCTION (this << type << n1 << n2 << n3 << n4);
+
+  QueueBase::AppendItemTypeIfNotPresent (type, "Packet");
+
+  m_successModelFactory.SetTypeId (type);
+  m_successModelFactory.Set (n1, v1);
+  m_successModelFactory.Set (n2, v2);
+  m_successModelFactory.Set (n3, v3);
+  m_successModelFactory.Set (n4, v4);
 }
 
 void
@@ -122,6 +142,9 @@ IcarusHelper::Install (const NodeContainer &c) const
   NS_LOG_FUNCTION (this << &c);
 
   Ptr<GroundSatChannel> channel = m_channelFactory.Create ()->GetObject<GroundSatChannel> ();
+  channel->SetAttribute (
+      "TxSuccess",
+      PointerValue (m_successModelFactory.Create ()->GetObject<GroundSatSuccessModel> ()));
 
   return Install (c, channel);
 }
