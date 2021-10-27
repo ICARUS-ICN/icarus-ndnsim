@@ -52,13 +52,35 @@ public:
    * \param v4 the value of the attribute to set on the queue
    *
    * Set the type of queue to create and associated to each
-   * CsmaNetDevice created through IcarusHelper::Install.
+   * ns3::icarus::GroundStaNetDevice or
+   * ns3::icarus::Sat2GroundNetDevice created through IcarusHelper::Install.
    */
   void SetQueue (std::string type, const std::string &n1 = "",
                  const AttributeValue &v1 = EmptyAttributeValue (), const std::string &n2 = "",
                  const AttributeValue &v2 = EmptyAttributeValue (), const std::string &n3 = "",
                  const AttributeValue &v3 = EmptyAttributeValue (), const std::string &n4 = "",
                  const AttributeValue &v4 = EmptyAttributeValue ());
+
+  /**
+   * \param type the type of success model
+   * \param n1 the name of the attribute to set on the queue
+   * \param v1 the value of the attribute to set on the queue
+   * \param n2 the name of the attribute to set on the queue
+   * \param v2 the value of the attribute to set on the queue
+   * \param n3 the name of the attribute to set on the queue
+   * \param v3 the value of the attribute to set on the queue
+   * \param n4 the name of the attribute to set on the queue
+   * \param v4 the value of the attribute to set on the queue
+   *
+   * Set the type of success model to create and associated to each
+   * ns3::icarus::GroundSatChannel created through IcarusHelper::Install.
+   */
+  void
+  SetSuccessModel (std::string type, const std::string &n1 = "",
+                   const AttributeValue &v1 = EmptyAttributeValue (), const std::string &n2 = "",
+                   const AttributeValue &v2 = EmptyAttributeValue (), const std::string &n3 = "",
+                   const AttributeValue &v3 = EmptyAttributeValue (), const std::string &n4 = "",
+                   const AttributeValue &v4 = EmptyAttributeValue ());
 
   /**
    * \param n1 the name of the attribute to set \param v1 the value of the
@@ -208,6 +230,7 @@ private:
   ObjectFactory m_sat2GroundFactory; //!< factory for downstream NetDevices
   ObjectFactory m_groundStaFactory; //!< factory for downstream NetDevices
   ObjectFactory m_channelFactory; //!< factory for the channel
+  ObjectFactory m_successModelFactory; //!> factory for the success models
 };
 
 } // namespace icarus
