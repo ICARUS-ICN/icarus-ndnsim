@@ -18,6 +18,7 @@ def build(bld):
         'model/sat2ground-net-device.cc',
         'model/satpos/planet.cc',
         'model/icarus-net-device.cc',
+        'helper/constellation-helper.cc',
         'helper/icarus-helper.cc',
         'utils/sat-address.cc',
     ]
@@ -39,6 +40,7 @@ def build(bld):
         'model/ground-sat-success-model.h',
         'model/ground-sta-net-device.h',
         'model/icarus-net-device.h',
+        'helper/constellation-helper.h',
         'helper/icarus-helper.h',
         'utils/sat-address.h',
     ]
