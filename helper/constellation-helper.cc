@@ -82,7 +82,7 @@ ConstellationHelper::CreateConstellation (quantity<length> altitude,
 
           auto orbit = m_circularOrbitFactory.Create<CircularOrbitMobilityModel> ();
           orbit->LaunchSat (inclination, quantity<plane_angle> (ascending_node), altitude,
-                            quantity<plane_angle> (phase));
+                            quantity<plane_angle> (phase + offset));
 
           (*satIterator)->AggregateObject (orbit);
           constellation->AddSatellite (plane_index, orbit_index, *satIterator);
