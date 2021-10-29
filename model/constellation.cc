@@ -100,5 +100,25 @@ Constellation::GetClosest (Vector3D cartesianCoordinates) const
   return closest;
 }
 
+NodeContainer
+Constellation::CreateNodeContainer () const
+{
+  NS_LOG_FUNCTION (this);
+  NodeContainer nodes;
+
+  for (const auto &plane : m_planes)
+    {
+      for (const auto &sat : plane)
+        {
+          if (sat != nullptr)
+            {
+              nodes.Add (sat);
+            }
+        }
+    }
+
+  return nodes;
+}
+
 } // namespace icarus
 } // namespace ns3

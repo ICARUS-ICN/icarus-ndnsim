@@ -41,6 +41,8 @@ public:
   void AddSatellite (unsigned plane, unsigned plane_order, Ptr<Node> satellite);
   Ptr<Node> GetClosest (Vector3D cartesianCoordinates) const;
 
+  NodeContainer CreateNodeContainer () const;
+
 private:
   typedef std::vector<Ptr<Node>> plane;
 
