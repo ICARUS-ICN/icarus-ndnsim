@@ -20,6 +20,7 @@
 #ifndef CONSTELLATION_H
 #define CONSTELLATION_H
 
+#include "ns3/node-container.h"
 #include "ns3/ptr.h"
 #include "ns3/simple-ref-count.h"
 #include "ns3/vector.h"
@@ -41,11 +42,16 @@ public:
   void AddSatellite (unsigned plane, unsigned plane_order, Ptr<Node> satellite);
   Ptr<Node> GetClosest (Vector3D cartesianCoordinates) const;
 
+  unsigned GetNPlanes () const;
+  unsigned GetPlaneSize () const;
+  Ptr<Node> GetSatellite (unsigned plane, unsigned index) const;
+
   NodeContainer CreateNodeContainer () const;
 
 private:
   typedef std::vector<Ptr<Node>> plane;
 
+  unsigned m_nPlanes, m_planeSize;
   std::vector<plane> m_planes;
 };
 } // namespace icarus

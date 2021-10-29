@@ -22,9 +22,11 @@
 #include "circular-orbit.h"
 
 #include "ns3/abort.h"
+#include "ns3/assert.h"
 #include "ns3/log-macros-enabled.h"
 #include "ns3/log.h"
 #include "ns3/mobility-model.h"
+#include "ns3/node-container.h"
 #include "ns3/node.h"
 
 #include <limits>
@@ -44,7 +46,8 @@ getSqDistance (const Vector &a, const Vector &b)
 }
 } // namespace
 
-Constellation::Constellation (unsigned n_planes, unsigned plane_size) : m_planes (n_planes)
+Constellation::Constellation (unsigned n_planes, unsigned plane_size)
+    : m_nPlanes (n_planes), m_planeSize (plane_size), m_planes (n_planes)
 {
   NS_LOG_FUNCTION (this << n_planes << plane_size);
 
@@ -98,6 +101,33 @@ Constellation::GetClosest (Vector3D cartesianCoordinates) const
     }
 
   return closest;
+}
+
+unsigned
+Constellation::GetNPlanes () const
+{
+  NS_LOG_FUNCTION (this);
+
+  return m_nPlanes;
+}
+
+unsigned
+Constellation::GetPlaneSize () const
+{
+  NS_LOG_FUNCTION (this);
+
+  return m_planeSize;
+}
+
+Ptr<Node>
+Constellation::GetSatellite (unsigned plane, unsigned index) const
+{
+  NS_LOG_FUNCTION (this << plane << index);
+
+  NS_ASSERT_MSG (plane <= GetNPlanes (), "Plane " << plane << " is outside range");
+  NS_ASSERT_MSG (index <= GetPlaneSize (), "Index " << plane << " is outside range");
+
+  return m_planes[plane][index];
 }
 
 NodeContainer
