@@ -22,6 +22,7 @@
 
 #include "ns3/icarus-module.h"
 
+#include "ns3/simple-ref-count.h"
 #include "ns3/trace-helper.h"
 #include "ns3/ground-sat-channel.h"
 #include "ns3/icarus-net-device.h"
@@ -29,7 +30,9 @@
 namespace ns3 {
 namespace icarus {
 
-class IcarusHelper : public PcapHelperForDevice, public AsciiTraceHelperForDevice
+class IcarusHelper : public PcapHelperForDevice,
+                     public AsciiTraceHelperForDevice,
+                     public SimpleRefCount<IcarusHelper>
 {
 public:
   /**

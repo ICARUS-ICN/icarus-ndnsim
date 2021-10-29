@@ -21,6 +21,7 @@
 #define CONSTELLATION_H
 
 #include "ns3/ptr.h"
+#include "ns3/simple-ref-count.h"
 #include "ns3/vector.h"
 
 #include <vector>
@@ -31,7 +32,7 @@ class Node;
 
 namespace icarus {
 
-class Constellation
+class Constellation : public SimpleRefCount<Constellation>
 {
 public:
   Constellation (unsigned n_planes, unsigned plane_size);
