@@ -32,7 +32,7 @@
 #include "ns3/ground-sat-channel.h"
 #include "ns3/config.h"
 #include "ns3/assert.h"
-#include "src/icarus/model/ground-sat-success-model.h"
+#include "ns3/ground-sat-success-model.h"
 
 namespace ns3 {
 namespace icarus {
