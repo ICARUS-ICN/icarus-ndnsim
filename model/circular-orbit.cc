@@ -166,5 +166,11 @@ CircularOrbitMobilityModel::DoGetPosition () const
       quantity<degree::plane_angle> (sat_ascension - prime_meridian_ascension).value (),
       radius - Earth.getRadius ().value (), GeographicPositions::SPHERE);
 }
+
+double CircularOrbitMobilityModel::getRadius () const
+{
+  return radius.value();
+}
+
 } // namespace icarus
 } // namespace ns3
