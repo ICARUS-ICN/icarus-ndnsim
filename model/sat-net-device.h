@@ -108,6 +108,7 @@ private:
   void ReceiveFinish (Ptr<Packet> packet, uint16_t protocolNumber);
   void TransmitStart (Ptr<Packet> packet, uint16_t protocolNumber);
   void TransmitComplete (Ptr<Packet> packet, uint16_t protocolNumber);
+  Ptr<Sat2SatChannel> GetInternalChannel (void) const;
 
   TracedCallback<> m_linkChangeCallbacks;
   TracedCallback<Ptr<const Packet>> m_macTxTrace, m_macTxDropTrace, m_macRxTrace, m_phyTxBeginTrace,

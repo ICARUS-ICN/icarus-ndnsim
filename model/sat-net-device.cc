@@ -64,10 +64,10 @@ SatNetDevice::GetTypeId (void)
           // Transmit queueing discipline for the device which includes its own set
           // of trace hooks.
           //
-          .AddAttribute (
-              "TxQueue", "A queue to use as the transmit queue in the device.", PointerValue (),
-              MakePointerAccessor (&SatNetDevice::SetQueue, &SatNetDevice::GetQueue),
-              MakePointerChecker<Queue<Packet>> ()) //
+          .AddAttribute ("TxQueue", "A queue to use as the transmit queue in the device.",
+                         PointerValue (),
+                         MakePointerAccessor (&SatNetDevice::SetQueue, &SatNetDevice::GetQueue),
+                         MakePointerChecker<Queue<Packet>> ()) //
           // Trace sources at the "top" of the net device, where packets transition
           // to/from higher layers.
           //
@@ -124,10 +124,7 @@ SatNetDevice::GetTypeId (void)
   return tid;
 }
 
-SatNetDevice::SatNetDevice () 
-  :
-    m_txMachineState (IDLE),
-    m_channel (0)
+SatNetDevice::SatNetDevice () : m_txMachineState (IDLE), m_channel (0)
 {
   NS_LOG_FUNCTION (this);
 }
@@ -161,8 +158,7 @@ SatNetDevice::TransmitStart (Ptr<Packet> packet, uint16_t protocolNumber)
   m_txMachineState = TRANSMITTING;
 
   m_phyTxBeginTrace (packet);
-  Time endTx = static_cast<Ptr<Sat2SatChannel>> (GetChannel ())
-                   ->TransmitStart (packet, this, GetDataRate (), protocolNumber);
+  Time endTx = GetInternalChannel ()->TransmitStart (packet, this, GetDataRate (), protocolNumber);
   Simulator::Schedule (endTx, &SatNetDevice::TransmitComplete, this, packet, protocolNumber);
 }
 
@@ -219,8 +215,8 @@ SatNetDevice::Receive (Ptr<Packet> packet, DataRate bps, uint16_t protocolNumber
   NS_LOG_FUNCTION (this << packet << bps << protocolNumber);
 
   m_phyRxBeginTrace (packet);
-  Simulator::Schedule (bps.CalculateBytesTxTime (packet->GetSize ()),
-                       &SatNetDevice::ReceiveFinish, this, packet, protocolNumber);
+  Simulator::Schedule (bps.CalculateBytesTxTime (packet->GetSize ()), &SatNetDevice::ReceiveFinish,
+                       this, packet, protocolNumber);
 }
 
 void
@@ -317,7 +313,6 @@ SatNetDevice::AddLinkChangeCallback (Callback<void> callback)
 
   m_linkChangeCallbacks.ConnectWithoutContext (callback);
 }
-
 
 bool
 SatNetDevice::IsBroadcast (void) const
@@ -461,5 +456,12 @@ SatNetDevice::SupportsSendFrom (void) const
 
   return false;
 }
+
+Ptr<Sat2SatChannel>
+SatNetDevice::GetInternalChannel (void) const
+{
+  return m_channel;
+}
+
 } // namespace icarus
 } // namespace ns3
