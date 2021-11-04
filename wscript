@@ -22,6 +22,9 @@ def build(bld):
         'helper/constellation-helper.cc',
         'helper/icarus-helper.cc',
         'utils/sat-address.cc',
+        'model/sat2sat-channel.cc',
+        'model/sat2sat-success-model.cc',
+        'model/sat-net-device.cc'
     ]
 
     module_test = bld.create_ns3_module_test_library('icarus')
@@ -45,6 +48,9 @@ def build(bld):
         'helper/constellation-helper.h',
         'helper/icarus-helper.h',
         'utils/sat-address.h',
+        'model/sat2sat-channel.h',
+        'model/sat2sat-success-model.h',
+        'model/sat-net-device.h'
     ]
 
     if bld.env.ENABLE_EXAMPLES:
