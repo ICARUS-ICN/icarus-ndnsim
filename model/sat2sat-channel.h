@@ -26,7 +26,7 @@
 
 #include "ns3/channel.h"
 #include "ns3/data-rate.h"
-#include "ns3/ground-sat-success-model.h"
+#include "ns3/sat2sat-success-model.h"
 #include "ns3/net-device-container.h"
 #include "ns3/net-device.h"
 #include "ns3/data-rate.h"
