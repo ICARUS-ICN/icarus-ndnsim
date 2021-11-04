@@ -83,9 +83,9 @@ Sat2SatSuccessModel::TramsmitSuccess (Ptr<Node> src, Ptr<Node> dst, Ptr<Packet>)
 void
 Sat2SatSuccessModel::CalcMaxDistance(double altitude)
 {
-  auto h = altitude + Earth.getRadius().value();
-  auto r = double (80000) + Earth.getRadius().value();
-  m_maxDistance = 2 * root<2> (pow<2> (h) - pow<2> (r));
+  auto h = altitude; //Radius of the satellite
+  auto r = double (80000) + Earth.getRadius().value(); // 80 km + Earth Radius
+  m_maxDistance = 2 * root<2> (pow<2> (h) - pow<2> (r)); //max distance = 2*sqrt(h^2 - r^2)
 }
 
 } // namespace icarus
