@@ -29,6 +29,7 @@
 #include "ns3/net-device-container.h"
 #include "ns3/net-device.h"
 #include "ns3/data-rate.h"
+#include "ns3/sat-address.h"
 #include "ns3/traced-callback.h"
 
 namespace ns3 {
@@ -51,8 +52,10 @@ public:
   bool AttachNewSat (Ptr<Sat2GroundNetDevice> device);
   bool AttachGround (Ptr<GroundStaNetDevice> device);
 
-  Time Transmit2Ground (Ptr<Packet> packet, DataRate bps, uint16_t protocolNumber) const;
-  Time Transmit2Sat (Ptr<Packet> packet, DataRate bps, uint16_t protocolNumber) const;
+  Time Transmit2Ground (Ptr<Packet> packet, DataRate bps, const SatAddress &src,
+                        uint16_t protocolNumber) const;
+  Time Transmit2Sat (Ptr<Packet> packet, DataRate bps, const SatAddress &dst,
+                     uint16_t protocolNumber) const;
 
   virtual std::size_t GetNDevices (void) const override;
   virtual Ptr<NetDevice> GetDevice (std::size_t i) const override;

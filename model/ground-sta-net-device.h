@@ -25,7 +25,7 @@
 
 #include "ns3/node.h"
 #include "ns3/net-device.h"
-#include "ns3/mac48-address.h"
+#include "ns3/sat-address.h"
 #include "ns3/queue.h"
 #include "ns3/ground-sat-channel.h"
 #include "icarus-net-device.h"
@@ -46,7 +46,11 @@ public:
 
   bool Attach (Ptr<GroundSatChannel> channel) override;
 
-  void ReceiveFromSat (Ptr<Packet> packet, DataRate bps, uint16_t protocolNumber);
+  void ReceiveFromSat (Ptr<Packet> packet, DataRate bps, const SatAddress &src,
+                       uint16_t protocolNumber);
+
+  Address GetAddress () const override;
+  void SetAddress (Address address) override;
 
   virtual void AddLinkChangeCallback (Callback<void> callback) override;
   virtual bool IsBroadcast (void) const override;
@@ -75,9 +79,9 @@ private:
   TracedCallback<Ptr<const Packet>> m_macTxTrace, m_macTxDropTrace, m_macRxTrace, m_phyTxBeginTrace,
       m_phyTxEndTrace, m_phyRxBeginTrace, m_phyRxEndTrace, m_snifferTrace;
 
-  void ReceiveFromSatFinish (Ptr<Packet> packet, uint16_t protocolNumber);
-  void TransmitStart (Ptr<Packet> packet, uint16_t protocolNumber);
-  void TransmitComplete (Ptr<Packet> packet, uint16_t protocolNumber);
+  void ReceiveFromSatFinish (Ptr<Packet> packet, const SatAddress &src, uint16_t protocolNumber);
+  void TransmitStart (Ptr<Packet> packet, const SatAddress &dst, uint16_t protocolNumber);
+  void TransmitComplete (Ptr<Packet> packet, const SatAddress &dst, uint16_t protocolNumber);
 };
 
 } // namespace icarus

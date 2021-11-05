@@ -25,10 +25,10 @@
 
 #include "ns3/node.h"
 #include "ns3/net-device.h"
-#include "ns3/mac48-address.h"
 #include "ns3/queue.h"
 #include "ns3/ground-sat-channel.h"
 #include "icarus-net-device.h"
+#include "ns3/sat-address.h"
 
 namespace ns3 {
 namespace icarus {
@@ -46,6 +46,9 @@ public:
   bool Attach (Ptr<GroundSatChannel> channel) override;
 
   void ReceiveFromGround (Ptr<Packet> packet, DataRate bps, uint16_t protocolNumber);
+
+  Address GetAddress () const override;
+  void SetAddress (Address address) override;
 
   virtual bool IsBroadcast (void) const override;
   virtual Address GetBroadcast (void) const override;
@@ -68,6 +71,7 @@ public:
   virtual bool SupportsSendFrom (void) const override;
 
 private:
+  SatAddress m_address;
   enum { IDLE, TRANSMITTING } m_txMachineState = IDLE;
 
   void ReceiveFromGroundFinish (Ptr<Packet> packet, uint16_t protocolNumber);

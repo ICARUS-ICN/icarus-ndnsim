@@ -54,8 +54,8 @@ public:
 
   virtual Ptr<Channel> GetChannel (void) const override;
 
-  virtual void SetAddress (Address address) override;
-  virtual Address GetAddress (void) const override;
+  virtual void SetAddress (Address address) override = 0;
+  virtual Address GetAddress (void) const override = 0;
 
   virtual bool SetMtu (const uint16_t mtu) override;
   virtual uint16_t GetMtu (void) const override;
@@ -99,7 +99,6 @@ protected:
 
 private:
   DataRate m_bps;
-  Mac48Address m_address;
   uint32_t m_ifIndex;
   Ptr<Queue<Packet>> m_queue;
   Ptr<GroundSatChannel> m_channel;

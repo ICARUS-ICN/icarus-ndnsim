@@ -101,12 +101,19 @@ GroundSatChannel::~GroundSatChannel ()
 }
 
 Time
-GroundSatChannel::Transmit2Sat (Ptr<Packet> packet, DataRate bps, uint16_t protocolNumber) const
+GroundSatChannel::Transmit2Sat (Ptr<Packet> packet, DataRate bps, const SatAddress &dst,
+                                uint16_t protocolNumber) const
 {
-  NS_LOG_FUNCTION (this << packet << bps << protocolNumber);
+  NS_LOG_FUNCTION (this << packet << bps << dst << protocolNumber);
   NS_ASSERT_MSG (m_ground, "We need a ground station");
   NS_ASSERT_MSG (m_satellites.GetN () == 1,
                  "WIP: Only 1 satellite en the constellation is supported");
+
+  if (SatAddress::ConvertFrom (m_satellites.Get (0)->GetAddress ()) != dst)
+    {
+      NS_LOG_DEBUG ("Dropping packet as destination address is not in orbit");
+      m_phyTxDropTrace (packet);
+    }
 
   Time endTx = bps.CalculateBytesTxTime (packet->GetSize ());
   auto posGround = m_ground->GetNode ()->GetObject<MobilityModel> ();
@@ -135,9 +142,10 @@ GroundSatChannel::Transmit2Sat (Ptr<Packet> packet, DataRate bps, uint16_t proto
 }
 
 Time
-GroundSatChannel::Transmit2Ground (Ptr<Packet> packet, DataRate bps, uint16_t protocolNumber) const
+GroundSatChannel::Transmit2Ground (Ptr<Packet> packet, DataRate bps, const SatAddress &src,
+                                   uint16_t protocolNumber) const
 {
-  NS_LOG_FUNCTION (this << packet << bps << protocolNumber);
+  NS_LOG_FUNCTION (this << packet << bps << src << protocolNumber);
   NS_ASSERT_MSG (m_ground, "We need a ground station");
   NS_ASSERT_MSG (m_satellites.GetN () == 1,
                  "WIP: Only 1 satellite en the constellation is supported");
@@ -162,7 +170,7 @@ GroundSatChannel::Transmit2Ground (Ptr<Packet> packet, DataRate bps, uint16_t pr
 
       Simulator::ScheduleWithContext (
           m_ground->GetNode ()->GetId (), delay, &GroundStaNetDevice::ReceiveFromSat,
-          DynamicCast<GroundStaNetDevice> (m_ground), packet, bps, protocolNumber);
+          DynamicCast<GroundStaNetDevice> (m_ground), packet, bps, src, protocolNumber);
     }
 
   return endTx;

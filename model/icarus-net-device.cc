@@ -43,10 +43,6 @@ IcarusNetDevice::GetTypeId (void)
           .AddAttribute ("Channel", "The channel attached to this device", PointerValue (),
                          MakePointerAccessor (&IcarusNetDevice::m_channel),
                          MakePointerChecker<GroundSatChannel> ())
-          .AddAttribute ("Address", "The MAC address of this device.",
-                         Mac48AddressValue (Mac48Address ("00:00:00:00:00:00")),
-                         MakeMac48AddressAccessor (&IcarusNetDevice::m_address),
-                         MakeMac48AddressChecker ())
           .AddAttribute (
               "DataRate", "The default data rate for ground<->satellite channels",
               DataRateValue (DataRate ("1Gb/s")),
@@ -178,22 +174,6 @@ IcarusNetDevice::GetChannel (void) const
   NS_LOG_FUNCTION (this);
 
   return m_channel;
-}
-
-void
-IcarusNetDevice::SetAddress (Address address)
-{
-  NS_LOG_FUNCTION (this << address);
-
-  m_address = Mac48Address::ConvertFrom (address);
-}
-
-Address
-IcarusNetDevice::GetAddress (void) const
-{
-  NS_LOG_FUNCTION (this);
-
-  return m_address;
 }
 
 bool
