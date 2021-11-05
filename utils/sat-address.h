@@ -55,6 +55,7 @@ private:
 ATTRIBUTE_HELPER_HEADER (SatAddress);
 
 bool operator== (const SatAddress &a, const SatAddress &b);
+bool operator!= (const SatAddress &a, const SatAddress &b);
 std::ostream &operator<< (std::ostream &os, const SatAddress &address);
 std::istream &operator>> (std::istream &is, SatAddress &address);
 
