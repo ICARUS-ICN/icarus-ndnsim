@@ -141,7 +141,7 @@ operator<< (std::ostream &os, const SatAddress &address)
   os.fill ('0');
 
   os << std::setw (4) << htons (address.getConstellationId ()) << ':';
-  os << std::setw (4) << htons (address.getPlaneIndex ()) << ':';
+  os << std::setw (4) << htons (address.getOrbitalPlane ()) << ':';
   os << std::setw (4) << htons (address.getPlaneIndex ());
 
   os.setf (std::ios::dec, std::ios::basefield);
