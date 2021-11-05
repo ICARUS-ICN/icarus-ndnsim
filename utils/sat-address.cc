@@ -28,12 +28,16 @@
 #include "ns3/log.h"
 #include <cstring>
 #include <iomanip>
+#include <ios>
 #include <netinet/in.h>
+#include <sstream>
 
 namespace ns3 {
 namespace icarus {
 
 NS_LOG_COMPONENT_DEFINE ("icarus.SatAddress");
+
+ATTRIBUTE_HELPER_CPP (SatAddress);
 
 const uint8_t SatAddress::m_type = Address::Register ();
 
@@ -43,6 +47,10 @@ SatAddress::GetType ()
   NS_LOG_FUNCTION_NOARGS ();
 
   return m_type;
+}
+
+SatAddress::SatAddress ()
+{
 }
 
 SatAddress::SatAddress (uint16_t constellationId, uint16_t orbitalPlane, uint16_t planeIndex)
@@ -134,6 +142,24 @@ operator<< (std::ostream &os, const SatAddress &address)
   os.fill (' ');
 
   return os;
+}
+
+std::istream &
+operator>> (std::istream &is, SatAddress &address)
+{
+  uint16_t constellation, plane, index;
+
+  std::string tmp;
+
+  std::getline (is, tmp, ':');
+  std::istringstream (tmp) >> std::hex >> constellation;
+  std::getline (is, tmp, ':');
+  std::istringstream (tmp) >> std::hex >> plane;
+  is >> std::hex >> index;
+
+  address = SatAddress (constellation, plane, index);
+
+  return is;
 }
 
 } // namespace icarus

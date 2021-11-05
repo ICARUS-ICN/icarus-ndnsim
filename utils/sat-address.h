@@ -24,8 +24,6 @@
 #define SAT_ADDRESS_H
 
 #include "ns3/address.h"
-#include <cstddef>
-#include <cstdint>
 
 namespace ns3 {
 namespace icarus {
@@ -33,6 +31,7 @@ namespace icarus {
 class SatAddress
 {
 public:
+  SatAddress ();
   SatAddress (uint16_t constellationId, uint16_t orbitalPlane, uint16_t planeIndex);
 
   Address ConvertTo () const;
@@ -46,15 +45,18 @@ private:
   const static uint8_t m_type;
   constexpr static std::size_t WIRE_SIZE = 6;
 
-  const uint16_t m_constellationId; // Stored in network byte order
-  const uint16_t m_orbitalPlane; // Stored in network byte order
-  const uint16_t m_planeIndex; // Stored in network byte order
+  uint16_t m_constellationId; // Stored in network byte order
+  uint16_t m_orbitalPlane; // Stored in network byte order
+  uint16_t m_planeIndex; // Stored in network byte order
 
   static uint8_t GetType ();
 };
 
+ATTRIBUTE_HELPER_HEADER (SatAddress);
+
 bool operator== (const SatAddress &a, const SatAddress &b);
 std::ostream &operator<< (std::ostream &os, const SatAddress &address);
+std::istream &operator>> (std::istream &is, SatAddress &address);
 
 } // namespace icarus
 } // namespace ns3
