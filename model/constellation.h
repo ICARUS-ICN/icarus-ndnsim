@@ -33,6 +33,8 @@ class Node;
 
 namespace icarus {
 
+class SatAddress;
+
 class Constellation : public SimpleRefCount<Constellation>
 {
 public:
@@ -45,6 +47,7 @@ public:
   std::size_t GetNPlanes () const;
   std::size_t GetPlaneSize () const;
   std::size_t GetConstellationId () const;
+  Ptr<Node> GetSatellite (const SatAddress &address) const;
   Ptr<Node> GetSatellite (std::size_t plane, std::size_t index) const;
 
   NodeContainer CreateNodeContainer () const;

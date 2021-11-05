@@ -28,6 +28,7 @@
 #include "ns3/mobility-model.h"
 #include "ns3/node-container.h"
 #include "ns3/node.h"
+#include "ns3/sat-address.h"
 
 #include <limits>
 
@@ -122,6 +123,19 @@ Constellation::GetPlaneSize () const
   NS_LOG_FUNCTION (this);
 
   return m_planeSize;
+}
+
+Ptr<Node>
+Constellation::GetSatellite (const SatAddress &address) const
+{
+  NS_LOG_FUNCTION (this << address);
+
+  NS_ASSERT_MSG (address.getConstellationId () == GetConstellationId (),
+                 "Cannot get an address from constellation " << address.getConstellationId ()
+                                                             << " in constellation "
+                                                             << GetConstellationId () << ".");
+
+  return GetSatellite (address.getOrbitalPlane (), address.getPlaneIndex ());
 }
 
 Ptr<Node>
