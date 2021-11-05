@@ -36,22 +36,22 @@ namespace icarus {
 class Constellation : public SimpleRefCount<Constellation>
 {
 public:
-  Constellation (unsigned n_planes, unsigned plane_size);
+  Constellation (std::size_t n_planes, std::size_t plane_size);
   Constellation (const Constellation &) = delete;
 
-  void AddSatellite (unsigned plane, unsigned plane_order, Ptr<Node> satellite);
+  void AddSatellite (std::size_t plane, std::size_t plane_order, Ptr<Node> satellite);
   Ptr<Node> GetClosest (Vector3D cartesianCoordinates) const;
 
-  unsigned GetNPlanes () const;
-  unsigned GetPlaneSize () const;
-  Ptr<Node> GetSatellite (unsigned plane, unsigned index) const;
+  std::size_t GetNPlanes () const;
+  std::size_t GetPlaneSize () const;
+  Ptr<Node> GetSatellite (std::size_t plane, std::size_t index) const;
 
   NodeContainer CreateNodeContainer () const;
 
 private:
   typedef std::vector<Ptr<Node>> plane;
 
-  unsigned m_nPlanes, m_planeSize;
+  std::size_t m_nPlanes, m_planeSize;
   std::vector<plane> m_planes;
 };
 } // namespace icarus

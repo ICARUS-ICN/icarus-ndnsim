@@ -46,7 +46,7 @@ getSqDistance (const Vector &a, const Vector &b)
 }
 } // namespace
 
-Constellation::Constellation (unsigned n_planes, unsigned plane_size)
+Constellation::Constellation (std::size_t n_planes, std::size_t plane_size)
     : m_nPlanes (n_planes), m_planeSize (plane_size), m_planes (n_planes)
 {
   NS_LOG_FUNCTION (this << n_planes << plane_size);
@@ -58,7 +58,7 @@ Constellation::Constellation (unsigned n_planes, unsigned plane_size)
 }
 
 void
-Constellation::AddSatellite (unsigned plane, unsigned plane_order, Ptr<Node> satellite)
+Constellation::AddSatellite (std::size_t plane, std::size_t plane_order, Ptr<Node> satellite)
 {
   NS_LOG_FUNCTION (this << plane << plane_order << satellite);
 
@@ -103,7 +103,7 @@ Constellation::GetClosest (Vector3D cartesianCoordinates) const
   return closest;
 }
 
-unsigned
+std::size_t
 Constellation::GetNPlanes () const
 {
   NS_LOG_FUNCTION (this);
@@ -111,7 +111,7 @@ Constellation::GetNPlanes () const
   return m_nPlanes;
 }
 
-unsigned
+std::size_t
 Constellation::GetPlaneSize () const
 {
   NS_LOG_FUNCTION (this);
@@ -120,7 +120,7 @@ Constellation::GetPlaneSize () const
 }
 
 Ptr<Node>
-Constellation::GetSatellite (unsigned plane, unsigned index) const
+Constellation::GetSatellite (std::size_t plane, std::size_t index) const
 {
   NS_LOG_FUNCTION (this << plane << index);
 
