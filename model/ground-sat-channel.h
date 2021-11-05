@@ -62,7 +62,7 @@ public:
 
 private:
   NetDeviceContainer m_satellites;
-  Ptr<NetDevice> m_ground = 0;
+  Ptr<NetDevice> m_ground = nullptr;
   Ptr<GroundSatSuccessModel> m_txSuccessModel = nullptr;
 
   TracedCallback<Ptr<const Packet>> m_phyTxDropTrace;
