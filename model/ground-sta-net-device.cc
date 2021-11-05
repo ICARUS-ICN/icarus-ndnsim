@@ -259,7 +259,7 @@ GroundStaNetDevice::NeedsArp (void) const
 {
   NS_LOG_FUNCTION (this);
 
-  return false;
+  return true;
 }
 
 bool
