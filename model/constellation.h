@@ -44,6 +44,7 @@ public:
 
   std::size_t GetNPlanes () const;
   std::size_t GetPlaneSize () const;
+  std::size_t GetConstellationId () const;
   Ptr<Node> GetSatellite (std::size_t plane, std::size_t index) const;
 
   NodeContainer CreateNodeContainer () const;
@@ -51,6 +52,9 @@ public:
 private:
   typedef std::vector<Ptr<Node>> plane;
 
+  static std::size_t constellationCounter;
+
+  std::size_t m_constellationId;
   std::size_t m_nPlanes, m_planeSize;
   std::vector<plane> m_planes;
 };

@@ -36,6 +36,8 @@ namespace icarus {
 
 NS_LOG_COMPONENT_DEFINE ("icarus.Constellation");
 
+std::size_t Constellation::constellationCounter = 0;
+
 namespace {
 auto
 getSqDistance (const Vector &a, const Vector &b)
@@ -47,7 +49,10 @@ getSqDistance (const Vector &a, const Vector &b)
 } // namespace
 
 Constellation::Constellation (std::size_t n_planes, std::size_t plane_size)
-    : m_nPlanes (n_planes), m_planeSize (plane_size), m_planes (n_planes)
+    : m_constellationId (constellationCounter++),
+      m_nPlanes (n_planes),
+      m_planeSize (plane_size),
+      m_planes (n_planes)
 {
   NS_LOG_FUNCTION (this << n_planes << plane_size);
 
@@ -148,6 +153,12 @@ Constellation::CreateNodeContainer () const
     }
 
   return nodes;
+}
+
+std::size_t
+Constellation::GetConstellationId () const
+{
+  return m_constellationId;
 }
 
 } // namespace icarus
