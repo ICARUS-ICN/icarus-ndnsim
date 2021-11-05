@@ -17,12 +17,14 @@ def build(bld):
         'model/sat2ground-net-device.cc',
         'model/satpos/planet.cc',
         'model/icarus-net-device.cc',
-        'helper/icarus-helper.cc'
+        'helper/icarus-helper.cc',
+        'utils/sat-address.cc',
     ]
 
     module_test = bld.create_ns3_module_test_library('icarus')
     module_test.source = [
         'test/icarus-test-suite.cc',
+        'test/icarus-address-test-suite.cc',
     ]
 
     headers = bld(features='ns3header')
@@ -35,7 +37,8 @@ def build(bld):
         'model/ground-sat-success-model.h',
         'model/ground-sta-net-device.h',
         'model/icarus-net-device.h',
-        'helper/icarus-helper.h'
+        'helper/icarus-helper.h',
+        'utils/sat-address.h',
     ]
 
     if bld.env.ENABLE_EXAMPLES:
