@@ -152,6 +152,23 @@ IcarusHelper::Install (const NodeContainer &c) const
 }
 
 NetDeviceContainer
+IcarusHelper::Install (const NodeContainer &c, const std::vector<SatAddress> &addresses) const
+{
+  NS_LOG_FUNCTION (this << &c << &addresses);
+
+  NS_ASSERT_MSG (c.size () == addresses.size (), "We need as many addresses (" << addresses.size ()
+                                                                               << ") as nodes ("
+                                                                               << c.size () << ")");
+
+  Ptr<GroundSatChannel> channel = m_channelFactory.Create ()->GetObject<GroundSatChannel> ();
+  channel->SetAttribute (
+      "TxSuccess",
+      PointerValue (m_successModelFactory.Create ()->GetObject<GroundSatSuccessModel> ()));
+
+  return Install (c, addresses, channel);
+}
+
+NetDeviceContainer
 IcarusHelper::Install (const NodeContainer &c, Ptr<GroundSatChannel> channel) const
 {
   NS_LOG_FUNCTION (this << &c << channel);
@@ -167,6 +184,28 @@ IcarusHelper::Install (const NodeContainer &c, Ptr<GroundSatChannel> channel) co
 }
 
 NetDeviceContainer
+IcarusHelper::Install (const NodeContainer &c, const std::vector<SatAddress> &addresses,
+                       Ptr<GroundSatChannel> channel) const
+{
+  NS_LOG_FUNCTION (this << &c << &addresses << channel);
+
+  NS_ASSERT_MSG (c.size () == addresses.size (), "We need as many addresses (" << addresses.size ()
+                                                                               << ") as nodes ("
+                                                                               << c.size () << ")");
+
+  NetDeviceContainer devices;
+
+  auto address_it = addresses.begin ();
+  for (Ptr<Node> node : c)
+    {
+      devices.Add (InstallPriv (node, channel, &*address_it));
+      address_it++;
+    }
+
+  return devices;
+}
+
+NetDeviceContainer
 IcarusHelper::Install (const NodeContainer &c, const std::string &channelName) const
 {
   NS_LOG_FUNCTION (this << &c << channelName);
@@ -176,11 +215,12 @@ IcarusHelper::Install (const NodeContainer &c, const std::string &channelName) c
 }
 
 Ptr<NetDevice>
-IcarusHelper::InstallPriv (Ptr<Node> node, Ptr<GroundSatChannel> channel) const
+IcarusHelper::InstallPriv (Ptr<Node> node, Ptr<GroundSatChannel> channel,
+                           const SatAddress *address) const
 {
   NS_LOG_FUNCTION (this << node << channel);
 
-  Ptr<IcarusNetDevice> device = CreateDeviceForNode (node);
+  Ptr<IcarusNetDevice> device = CreateDeviceForNode (node, address);
   node->AddDevice (device);
   auto queue = m_queueFactory.Create<Queue<Packet>> ();
   device->SetQueue (queue);
@@ -194,7 +234,7 @@ IcarusHelper::InstallPriv (Ptr<Node> node, Ptr<GroundSatChannel> channel) const
 }
 
 Ptr<IcarusNetDevice>
-IcarusHelper::CreateDeviceForNode (Ptr<Node> node) const
+IcarusHelper::CreateDeviceForNode (Ptr<Node> node, const SatAddress *address) const
 {
   NS_LOG_FUNCTION (this << node);
 
@@ -205,7 +245,9 @@ IcarusHelper::CreateDeviceForNode (Ptr<Node> node) const
       // This is a satellite
       auto sat = m_sat2GroundFactory.Create<Sat2GroundNetDevice> ();
       NS_LOG_WARN ("FIXME: Add proper address from constellation");
-      sat->SetAddress (SatAddress ().ConvertTo ());
+      NS_ASSERT_MSG (address != nullptr, "All satellites need a unique address");
+
+      sat->SetAddress (address->ConvertTo ());
 
       return sat;
     }

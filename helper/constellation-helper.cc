@@ -31,6 +31,7 @@
 #include "ns3/log.h"
 #include "ns3/node-container.h"
 #include "ns3/ptr.h"
+#include "ns3/sat-address.h"
 
 #include <boost/units/systems/angle/degrees.hpp>
 
@@ -63,6 +64,9 @@ ConstellationHelper::CreateConstellation (quantity<length> altitude,
   NodeContainer nodes;
   nodes.Create (n_planes * n_satellites_per_plane);
 
+  std::vector<SatAddress> addresses;
+  addresses.reserve (nodes.size ());
+
   const auto offset_increment{n_phases * 360.0 * degree /
                               (1.0 * n_satellites_per_plane * n_planes)};
 
@@ -86,11 +90,13 @@ ConstellationHelper::CreateConstellation (quantity<length> altitude,
 
           (*satIterator)->AggregateObject (orbit);
           constellation->AddSatellite (plane_index, orbit_index, *satIterator);
+          addresses.push_back (
+              SatAddress (constellation->GetConstellationId (), plane_index, orbit_index));
         }
     }
 
   // Now that they have mobility, we can install Icarus net devices
-  m_icarusHelper->Install (nodes);
+  m_icarusHelper->Install (nodes, addresses);
 
   return constellation;
 }

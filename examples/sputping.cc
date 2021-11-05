@@ -27,6 +27,7 @@
 #include "ns3/mobility-module.h"
 #include "ns3/core-module.h"
 #include "ns3/icarus-module.h"
+#include "ns3/net-device-container.h"
 #include "ns3/net-device-queue-interface.h"
 #include "ns3/net-device.h"
 #include "ns3/internet-module.h"
@@ -40,6 +41,7 @@
 #include <boost/units/systems/si/length.hpp>
 #include <boost/units/systems/si/plane_angle.hpp>
 #include <boost/units/systems/angle/degrees.hpp>
+#include <boost/units/systems/si/prefixes.hpp>
 #include <limits>
 
 using namespace ns3;
@@ -52,6 +54,8 @@ main (int argc, char **argv) -> int
 {
   using boost::units::quantity;
   using boost::units::degree::degrees;
+  using boost::units::si::kilo;
+  using boost::units::si::length;
   using boost::units::si::meters;
   using boost::units::si::plane_angle;
   using boost::units::si::radians;
@@ -60,16 +64,18 @@ main (int argc, char **argv) -> int
   cmd.Parse (argc, argv);
 
   NodeContainer nodes;
-  nodes.Create (2);
-  auto bird = nodes.Get (0);
-  auto ground = nodes.Get (1);
+  nodes.Create (1);
+  auto ground = nodes.Get (0);
 
-  ObjectFactory circularOrbitFactory ("ns3::icarus::CircularOrbitMobilityModel");
-
-  auto mmodel = circularOrbitFactory.Create<CircularOrbitMobilityModel> ();
-  mmodel->LaunchSat (quantity<plane_angle> (60.0 * degrees), 0.0 * radians, 250e3 * meters,
-                     0.0 * radians);
-  bird->AggregateObject (mmodel);
+  Ptr<IcarusHelper> icarusHelper = Create<IcarusHelper> ();
+  ConstellationHelper chelper (icarusHelper);
+  auto constellation = chelper.CreateConstellation (
+      quantity<length> (250 * kilo * meters), quantity<plane_angle> (60.0 * degrees), 1, 1, 0);
+  nodes.Add (constellation->CreateNodeContainer ());
+  auto bird = nodes.Get (1);
+  auto bird_net_device = bird->GetDevice (0);
+  Ptr<GroundSatChannel> channel = DynamicCast<GroundSatChannel> (bird_net_device->GetChannel ());
+  NS_ASSERT (channel != nullptr);
 
   ObjectFactory staticPositionsFactory ("ns3::ListPositionAllocator");
   auto staticPositions = staticPositionsFactory.Create<ListPositionAllocator> ();
@@ -80,8 +86,8 @@ main (int argc, char **argv) -> int
   staticHelper.SetMobilityModel ("ns3::ConstantPositionMobilityModel");
   staticHelper.Install (ground);
 
-  IcarusHelper icarusHelper;
-  NetDeviceContainer netDevices = icarusHelper.Install (nodes);
+  NetDeviceContainer netDevices (bird_net_device);
+  netDevices.Add (icarusHelper->Install (ground, channel));
 
   InternetStackHelper ipStack;
   ipStack.Install (nodes);
@@ -100,9 +106,9 @@ main (int argc, char **argv) -> int
   // Add a new cache with a permanent entry to reach the satellite.
   auto ground_arp_cache = CreateObject<ArpCache> ();
   auto entry = ground_arp_cache->Add (ipInterfaces.GetAddress (0));
-  entry->SetMacAddress (SatAddress ().ConvertTo ());
+  entry->SetMacAddress (bird_net_device->GetAddress ());
   entry->MarkPermanent ();
-  Config::Set ("/NodeList/1/$ns3::Ipv4L3Protocol/InterfaceList/1/ArpCache",
+  Config::Set ("/NodeList/0/$ns3::Ipv4L3Protocol/InterfaceList/1/ArpCache",
                PointerValue (ground_arp_cache));
 
   UdpEchoServerHelper echoServer (7667);
@@ -115,8 +121,8 @@ main (int argc, char **argv) -> int
   AsciiTraceHelper ascii;
   auto stream = ascii.CreateFileStream ("/tmp/out.tr");
   stream->GetStream ()->precision (9);
-  icarusHelper.EnableAsciiAll (stream);
-  icarusHelper.EnablePcapAll ("/tmp/pcap-sputping.pcap");
+  icarusHelper->EnableAsciiAll (stream);
+  icarusHelper->EnablePcapAll ("/tmp/pcap-sputping.pcap");
 
   // Add channel drops to the ASCII trace
   Config::Connect ("/NodeList/0/DeviceList/0/$ns3::icarus::IcarusNetDevice/Channel/PhyTxDrop",
