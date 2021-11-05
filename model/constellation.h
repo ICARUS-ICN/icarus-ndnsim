@@ -41,7 +41,7 @@ public:
   Constellation (std::size_t n_planes, std::size_t plane_size);
   Constellation (const Constellation &) = delete;
 
-  void AddSatellite (std::size_t plane, std::size_t plane_order, Ptr<Node> satellite);
+  SatAddress AddSatellite (std::size_t plane, std::size_t plane_order, Ptr<Node> satellite);
   Ptr<Node> GetClosest (Vector3D cartesianCoordinates) const;
 
   std::size_t GetNPlanes () const;

@@ -63,7 +63,7 @@ Constellation::Constellation (std::size_t n_planes, std::size_t plane_size)
     }
 }
 
-void
+SatAddress
 Constellation::AddSatellite (std::size_t plane, std::size_t plane_order, Ptr<Node> satellite)
 {
   NS_LOG_FUNCTION (this << plane << plane_order << satellite);
@@ -74,6 +74,8 @@ Constellation::AddSatellite (std::size_t plane, std::size_t plane_order, Ptr<Nod
                        "A satellite must have a CircularOrbitMobilityModel");
 
   m_planes[plane][plane_order] = satellite;
+
+  return SatAddress (m_constellationId, plane, plane_order);
 }
 
 Ptr<Node>
