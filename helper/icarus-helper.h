@@ -30,6 +30,8 @@
 namespace ns3 {
 namespace icarus {
 
+class ConstellationHelper;
+
 class IcarusHelper : public PcapHelperForDevice,
                      public AsciiTraceHelperForDevice,
                      public SimpleRefCount<IcarusHelper>
@@ -112,7 +114,8 @@ public:
    * \param node The node to install the device in \param channel The channel to
    * attach to the device. \returns A container holding the added net device.
    */
-  NetDeviceContainer Install (Ptr<Node> node, Ptr<GroundSatChannel> channel) const;
+  NetDeviceContainer Install (Ptr<Node> node, Ptr<GroundSatChannel> channel,
+                              ConstellationHelper *chelper = nullptr) const;
 
   /**
    * This method creates an ns3::icarus::GroundStaNetDevice or
@@ -124,7 +127,8 @@ public:
    * of the channel to attach to the device. \returns A container holding the
    * added net device.
    */
-  NetDeviceContainer Install (Ptr<Node> node, const std::string &channelName) const;
+  NetDeviceContainer Install (Ptr<Node> node, const std::string &channelName,
+                              ConstellationHelper *chelper = nullptr) const;
 
   /**
    * This method creates an ns3::icarus::GroundStaNetDevice or
@@ -136,7 +140,8 @@ public:
    * channel The channel to attach to the device. \returns A container holding
    * the added net device.
    */
-  NetDeviceContainer Install (const std::string &nodeName, Ptr<GroundSatChannel> channel) const;
+  NetDeviceContainer Install (const std::string &nodeName, Ptr<GroundSatChannel> channel,
+                              ConstellationHelper *chelper = nullptr) const;
 
   /**
    * This method creates an ns3::icarus::GroundStaNetDevice or
@@ -148,7 +153,8 @@ public:
    * channelName The name of the channel to attach to the device. \returns A
    * container holding the added net device.
    */
-  NetDeviceContainer Install (const std::string &nodeName, const std::string &channelName) const;
+  NetDeviceContainer Install (const std::string &nodeName, const std::string &channelName,
+                              ConstellationHelper *chelper = nullptr) const;
 
   /**
    * This method creates an ns3::GroundSatChannel with the attributes configured
@@ -161,21 +167,7 @@ public:
    * \param c The NodeContainer holding the nodes to be changed. \returns A
    * container holding the added net devices.
    */
-  NetDeviceContainer Install (const NodeContainer &c) const;
-
-  /**
-   * This method creates an ns3::GroundSatChannel with the attributes configured
-   * by IcarusHelper::SetChannelAttribute. For each Ptr<node> in the provided
-   * container: it creates an ns3::icarus::GroundStaNetDevice or
-   * ns3::icarus::Sat2GroundNetDevice (with the attributes configured by
-   * IcarusHelper::SetDeviceAttribute); adds the device to the node; and
-   * attaches the channel to the device.
-   *
-   * \param c The NodeContainer holding the nodes to be changed. \returns A
-   * container holding the added net devices.
-   */
-  NetDeviceContainer Install (const NodeContainer &c,
-                              const std::vector<SatAddress> &addresses) const;
+  NetDeviceContainer Install (const NodeContainer &c, ConstellationHelper *chelper = nullptr) const;
 
   /**
    * For each Ptr<node> in the provided container, this method creates an
@@ -187,20 +179,8 @@ public:
    * The channel to attach to the devices. \returns A container holding the
    * added net devices.
    */
-  NetDeviceContainer Install (const NodeContainer &c, Ptr<GroundSatChannel> channel) const;
-
-  /**
-   * For each Ptr<node> in the provided container, this method creates an
-   * ns3::icarus::GroundStaNetDevice or ns3::icarus::Sat2GroundNetDevice (with
-   * the attributes configured by IcarusHelper::SetDeviceAttribute); adds the
-   * device to the node; and attaches the provided channel to the device.
-   *
-   * \param c The NodeContainer holding the nodes to be changed. \param channel
-   * The channel to attach to the devices. \returns A container holding the
-   * added net devices.
-   */
-  NetDeviceContainer Install (const NodeContainer &c, const std::vector<SatAddress> &addresses,
-                              Ptr<GroundSatChannel> channel) const;
+  NetDeviceContainer Install (const NodeContainer &c, Ptr<GroundSatChannel> channel,
+                              ConstellationHelper *chelper = nullptr) const;
 
   /**
    * For each Ptr<node> in the provided container, this method creates an
@@ -212,7 +192,8 @@ public:
    * channelName The name of the channel to attach to the devices. \returns A
    * container holding the added net devices.
    */
-  NetDeviceContainer Install (const NodeContainer &c, const std::string &channelName) const;
+  NetDeviceContainer Install (const NodeContainer &c, const std::string &channelName,
+                              ConstellationHelper *chelper = nullptr) const;
 
   /**
    * \brief Enable pcap output on the indicated net device.
@@ -253,10 +234,9 @@ private:
    * attach to the device. \returns A container holding the added net device.
    */
   Ptr<NetDevice> InstallPriv (Ptr<Node> node, Ptr<GroundSatChannel> channel,
-                              const SatAddress *address = nullptr) const;
+                              ConstellationHelper *chelper) const;
 
-  Ptr<IcarusNetDevice> CreateDeviceForNode (Ptr<Node> node,
-                                            const SatAddress *address = nullptr) const;
+  Ptr<IcarusNetDevice> CreateDeviceForNode (Ptr<Node> node, ConstellationHelper *chelper) const;
 
   ObjectFactory m_queueFactory; //!< factory for the queues
   ObjectFactory m_sat2GroundFactory; //!< factory for downstream NetDevices

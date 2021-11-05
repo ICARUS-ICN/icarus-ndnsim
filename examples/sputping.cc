@@ -64,18 +64,13 @@ main (int argc, char **argv) -> int
   cmd.Parse (argc, argv);
 
   NodeContainer nodes;
-  nodes.Create (1);
+  nodes.Create (2);
   auto ground = nodes.Get (0);
 
-  Ptr<IcarusHelper> icarusHelper = Create<IcarusHelper> ();
-  ConstellationHelper chelper (icarusHelper);
-  auto constellation = chelper.CreateConstellation (
-      quantity<length> (250 * kilo * meters), quantity<plane_angle> (60.0 * degrees), 1, 1, 0);
-  nodes.Add (constellation->CreateNodeContainer ());
+  IcarusHelper icarusHelper;
+  ConstellationHelper chelper (quantity<length> (250 * kilo * meters),
+                               quantity<plane_angle> (60.0 * degrees), 1, 1, 0);
   auto bird = nodes.Get (1);
-  auto bird_net_device = bird->GetDevice (0);
-  Ptr<GroundSatChannel> channel = DynamicCast<GroundSatChannel> (bird_net_device->GetChannel ());
-  NS_ASSERT (channel != nullptr);
 
   ObjectFactory staticPositionsFactory ("ns3::ListPositionAllocator");
   auto staticPositions = staticPositionsFactory.Create<ListPositionAllocator> ();
@@ -86,8 +81,7 @@ main (int argc, char **argv) -> int
   staticHelper.SetMobilityModel ("ns3::ConstantPositionMobilityModel");
   staticHelper.Install (ground);
 
-  NetDeviceContainer netDevices (bird_net_device);
-  netDevices.Add (icarusHelper->Install (ground, channel));
+  NetDeviceContainer netDevices (icarusHelper.Install (nodes, &chelper));
 
   InternetStackHelper ipStack;
   ipStack.Install (nodes);
@@ -96,7 +90,7 @@ main (int argc, char **argv) -> int
   Ipv4InterfaceContainer ipInterfaces;
   ipInterfaces = address.Assign (netDevices);
 
-  UdpEchoClientHelper echoClient (ipInterfaces.GetAddress (0), 7667);
+  UdpEchoClientHelper echoClient (ipInterfaces.GetAddress (1), 7667);
   echoClient.SetAttribute ("MaxPackets", UintegerValue (std::numeric_limits<uint32_t>::max ()));
   echoClient.SetAttribute ("Interval", TimeValue (Seconds (1.0)));
   echoClient.SetAttribute ("PacketSize", UintegerValue (1280));
@@ -105,8 +99,8 @@ main (int argc, char **argv) -> int
 
   // Add a new cache with a permanent entry to reach the satellite.
   auto ground_arp_cache = CreateObject<ArpCache> ();
-  auto entry = ground_arp_cache->Add (ipInterfaces.GetAddress (0));
-  entry->SetMacAddress (bird_net_device->GetAddress ());
+  auto entry = ground_arp_cache->Add (ipInterfaces.GetAddress (1));
+  entry->SetMacAddress (bird->GetDevice (0)->GetAddress ());
   entry->MarkPermanent ();
   Config::Set ("/NodeList/0/$ns3::Ipv4L3Protocol/InterfaceList/1/ArpCache",
                PointerValue (ground_arp_cache));
@@ -121,8 +115,8 @@ main (int argc, char **argv) -> int
   AsciiTraceHelper ascii;
   auto stream = ascii.CreateFileStream ("/tmp/out.tr");
   stream->GetStream ()->precision (9);
-  icarusHelper->EnableAsciiAll (stream);
-  icarusHelper->EnablePcapAll ("/tmp/pcap-sputping.pcap");
+  icarusHelper.EnableAsciiAll (stream);
+  icarusHelper.EnablePcapAll ("/tmp/pcap-sputping.pcap");
 
   // Add channel drops to the ASCII trace
   Config::Connect ("/NodeList/0/DeviceList/0/$ns3::icarus::IcarusNetDevice/Channel/PhyTxDrop",

@@ -103,124 +103,91 @@ IcarusHelper::SetChannelAttribute (const std::string &n1, const AttributeValue &
 }
 
 NetDeviceContainer
-IcarusHelper::Install (Ptr<Node> node, Ptr<GroundSatChannel> channel) const
+IcarusHelper::Install (Ptr<Node> node, Ptr<GroundSatChannel> channel,
+                       ConstellationHelper *chelper) const
 {
-  NS_LOG_FUNCTION (this << node << channel);
+  NS_LOG_FUNCTION (this << node << channel << chelper);
 
-  return NetDeviceContainer (InstallPriv (node, channel));
+  return NetDeviceContainer (InstallPriv (node, channel, chelper));
 }
 
 NetDeviceContainer
-IcarusHelper::Install (Ptr<Node> node, const std::string &channelName) const
+IcarusHelper::Install (Ptr<Node> node, const std::string &channelName,
+                       ConstellationHelper *chelper) const
 {
-  NS_LOG_FUNCTION (this << node << channelName);
+  NS_LOG_FUNCTION (this << node << channelName << chelper);
 
   Ptr<GroundSatChannel> channel = Names::Find<GroundSatChannel> (channelName);
-  return NetDeviceContainer (InstallPriv (node, channel));
+  return NetDeviceContainer (InstallPriv (node, channel, chelper));
 }
 
 NetDeviceContainer
-IcarusHelper::Install (const std::string &nodeName, Ptr<GroundSatChannel> channel) const
+IcarusHelper::Install (const std::string &nodeName, Ptr<GroundSatChannel> channel,
+                       ConstellationHelper *chelper) const
 {
-  NS_LOG_FUNCTION (this << nodeName << channel);
+  NS_LOG_FUNCTION (this << nodeName << channel << chelper);
 
   Ptr<Node> node = Names::Find<Node> (nodeName);
-  return NetDeviceContainer (InstallPriv (node, channel));
+  return NetDeviceContainer (InstallPriv (node, channel, chelper));
 }
 
 NetDeviceContainer
-IcarusHelper::Install (const std::string &nodeName, const std::string &channelName) const
+IcarusHelper::Install (const std::string &nodeName, const std::string &channelName,
+                       ConstellationHelper *chelper) const
 {
-  NS_LOG_FUNCTION (this << nodeName << channelName);
+  NS_LOG_FUNCTION (this << nodeName << channelName << chelper);
 
   Ptr<Node> node = Names::Find<Node> (nodeName);
   Ptr<GroundSatChannel> channel = Names::Find<GroundSatChannel> (channelName);
-  return NetDeviceContainer (InstallPriv (node, channel));
+  return NetDeviceContainer (InstallPriv (node, channel, chelper));
 }
 
 NetDeviceContainer
-IcarusHelper::Install (const NodeContainer &c) const
+IcarusHelper::Install (const NodeContainer &c, ConstellationHelper *chelper) const
 {
-  NS_LOG_FUNCTION (this << &c);
+  NS_LOG_FUNCTION (this << &c << chelper);
 
   Ptr<GroundSatChannel> channel = m_channelFactory.Create ()->GetObject<GroundSatChannel> ();
   channel->SetAttribute (
       "TxSuccess",
       PointerValue (m_successModelFactory.Create ()->GetObject<GroundSatSuccessModel> ()));
 
-  return Install (c, channel);
+  return Install (c, channel, chelper);
 }
 
 NetDeviceContainer
-IcarusHelper::Install (const NodeContainer &c, const std::vector<SatAddress> &addresses) const
+IcarusHelper::Install (const NodeContainer &c, Ptr<GroundSatChannel> channel,
+                       ConstellationHelper *chelper) const
 {
-  NS_LOG_FUNCTION (this << &c << &addresses);
-
-  NS_ASSERT_MSG (c.size () == addresses.size (), "We need as many addresses (" << addresses.size ()
-                                                                               << ") as nodes ("
-                                                                               << c.size () << ")");
-
-  Ptr<GroundSatChannel> channel = m_channelFactory.Create ()->GetObject<GroundSatChannel> ();
-  channel->SetAttribute (
-      "TxSuccess",
-      PointerValue (m_successModelFactory.Create ()->GetObject<GroundSatSuccessModel> ()));
-
-  return Install (c, addresses, channel);
-}
-
-NetDeviceContainer
-IcarusHelper::Install (const NodeContainer &c, Ptr<GroundSatChannel> channel) const
-{
-  NS_LOG_FUNCTION (this << &c << channel);
+  NS_LOG_FUNCTION (this << &c << channel << chelper);
 
   NetDeviceContainer devices;
 
   for (Ptr<Node> node : c)
     {
-      devices.Add (InstallPriv (node, channel));
+      devices.Add (InstallPriv (node, channel, chelper));
     }
 
   return devices;
 }
 
 NetDeviceContainer
-IcarusHelper::Install (const NodeContainer &c, const std::vector<SatAddress> &addresses,
-                       Ptr<GroundSatChannel> channel) const
+IcarusHelper::Install (const NodeContainer &c, const std::string &channelName,
+                       ConstellationHelper *chelper) const
 {
-  NS_LOG_FUNCTION (this << &c << &addresses << channel);
-
-  NS_ASSERT_MSG (c.size () == addresses.size (), "We need as many addresses (" << addresses.size ()
-                                                                               << ") as nodes ("
-                                                                               << c.size () << ")");
-
-  NetDeviceContainer devices;
-
-  auto address_it = addresses.begin ();
-  for (Ptr<Node> node : c)
-    {
-      devices.Add (InstallPriv (node, channel, &*address_it));
-      address_it++;
-    }
-
-  return devices;
-}
-
-NetDeviceContainer
-IcarusHelper::Install (const NodeContainer &c, const std::string &channelName) const
-{
-  NS_LOG_FUNCTION (this << &c << channelName);
+  NS_LOG_FUNCTION (this << &c << channelName << chelper);
 
   Ptr<GroundSatChannel> channel = Names::Find<GroundSatChannel> (channelName);
-  return Install (c, channel);
+  return Install (c, channel, chelper);
 }
 
 Ptr<NetDevice>
 IcarusHelper::InstallPriv (Ptr<Node> node, Ptr<GroundSatChannel> channel,
-                           const SatAddress *address) const
+                           ConstellationHelper *chelper) const
 {
-  NS_LOG_FUNCTION (this << node << channel);
+  NS_LOG_FUNCTION (this << node << channel << chelper);
 
-  Ptr<IcarusNetDevice> device = CreateDeviceForNode (node, address);
+  Ptr<IcarusNetDevice> device = CreateDeviceForNode (node, chelper);
   node->AddDevice (device);
   auto queue = m_queueFactory.Create<Queue<Packet>> ();
   device->SetQueue (queue);
@@ -234,22 +201,20 @@ IcarusHelper::InstallPriv (Ptr<Node> node, Ptr<GroundSatChannel> channel,
 }
 
 Ptr<IcarusNetDevice>
-IcarusHelper::CreateDeviceForNode (Ptr<Node> node, const SatAddress *address) const
+IcarusHelper::CreateDeviceForNode (Ptr<Node> node, ConstellationHelper *chelper) const
 {
-  NS_LOG_FUNCTION (this << node);
+  NS_LOG_FUNCTION (this << node << chelper);
 
-  NS_ABORT_MSG_UNLESS (node->GetObject<MobilityModel> () != nullptr,
-                       "Must assign a mobility model to the node BEFORE installing its netdevice.");
-  if (node->GetObject<CircularOrbitMobilityModel> () != nullptr)
+  // Install an Orbit it if does not have already a MobilityModel
+  if (node->GetObject<MobilityModel> () == nullptr)
     {
-      // This is a satellite
-      auto sat = m_sat2GroundFactory.Create<Sat2GroundNetDevice> ();
-      NS_LOG_WARN ("FIXME: Add proper address from constellation");
-      NS_ASSERT_MSG (address != nullptr, "All satellites need a unique address");
+      NS_ASSERT_MSG (chelper != nullptr,
+                     "We need a ConstellationHelper to create a Satellite device");
+      auto sat_device = m_sat2GroundFactory.Create<Sat2GroundNetDevice> ();
+      const auto address = chelper->LaunchSatellite (node);
+      sat_device->SetAddress (address.ConvertTo ());
 
-      sat->SetAddress (address->ConvertTo ());
-
-      return sat;
+      return sat_device;
     }
 
   // This is NOT a satellite

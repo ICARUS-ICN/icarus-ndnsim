@@ -23,6 +23,7 @@
 #include "ns3/icarus-module.h"
 #include "ns3/log-macros-enabled.h"
 #include "ns3/log.h"
+#include "ns3/node-container.h"
 #include "ns3/simulator.h"
 #include "ns3/geographic-positions.h"
 
@@ -147,15 +148,17 @@ main (int argc, char **argv) -> int
 
   cmd.Parse (argc, argv);
 
-  auto icarusHelper{Create<IcarusHelper> ()};
-  ConstellationHelper constellationHelper (icarusHelper);
+  IcarusHelper icarusHelper;
+  ConstellationHelper constellationHelper (quantity<length> (250 * kilo * meters),
+                                           quantity<plane_angle> (60 * degree::degree), 6, 4, 1);
 
-  auto constellation = constellationHelper.CreateConstellation (
-      quantity<length> (250 * kilo * meters), quantity<plane_angle> (60 * degree::degree), 6, 4, 1);
+  NodeContainer nodes;
+  nodes.Create (6 * 4);
+  icarusHelper.Install (nodes, &constellationHelper);
 
   ns3::Simulator::Stop (Days (7));
 
-  ns3::Simulator::Schedule (Seconds (0.0), logLocation, constellation);
+  ns3::Simulator::Schedule (Seconds (0.0), logLocation, constellationHelper.GetConstellation ());
 
   ns3::Simulator::Run ();
   ns3::Simulator::Destroy ();

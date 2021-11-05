@@ -20,6 +20,7 @@
 
 #include "constellation-helper.h"
 
+#include "ns3/abort.h"
 #include "ns3/constellation.h"
 #include "ns3/icarus-helper.h"
 
@@ -27,6 +28,7 @@
 #include "ns3/assert.h"
 #include "ns3/circular-orbit.h"
 #include "ns3/core-module.h"
+#include "ns3/log-macros-enabled.h"
 #include "ns3/node.h"
 #include "ns3/log.h"
 #include "ns3/node-container.h"
@@ -34,6 +36,8 @@
 #include "ns3/sat-address.h"
 
 #include <boost/units/systems/angle/degrees.hpp>
+#include <boost/units/systems/si/plane_angle.hpp>
+#include <boost/units/io.hpp>
 
 NS_LOG_COMPONENT_DEFINE ("icarus.ConstellationHelper");
 
@@ -45,60 +49,63 @@ using boost::units::degree::degree;
 using boost::units::si::length;
 using boost::units::si::plane_angle;
 
-ConstellationHelper::ConstellationHelper (Ptr<IcarusHelper> creator) : m_icarusHelper (creator)
+ConstellationHelper::ConstellationHelper (quantity<length> altitude,
+                                          quantity<plane_angle> inclination, std::size_t n_planes,
+                                          std::size_t n_satellites_per_plane, std::size_t n_phases)
+    : m_constellation (Create<Constellation> (n_planes, n_satellites_per_plane)),
+      m_offsetIncrement (n_phases * 360.0 * degree / (1.0 * n_satellites_per_plane * n_planes)),
+      m_altitude (altitude),
+      m_inclination (inclination),
+      m_ascendingNode (0 * degree),
+      m_phase (0 * degree),
+      m_offset (0 * degree),
+      m_planeIndex (0),
+      m_orbitIndex (0)
 {
-  NS_LOG_FUNCTION (this << creator);
+  NS_LOG_FUNCTION (this << altitude << inclination << n_planes << n_satellites_per_plane
+                        << n_phases);
 
   m_circularOrbitFactory.SetTypeId ("ns3::icarus::CircularOrbitMobilityModel");
 }
 
 Ptr<Constellation>
-ConstellationHelper::CreateConstellation (quantity<length> altitude,
-                                          quantity<plane_angle> inclination, unsigned n_planes,
-                                          unsigned n_satellites_per_plane, unsigned n_phases)
+ConstellationHelper::GetConstellation () const
 {
-  NS_LOG_FUNCTION (this << altitude.value () << inclination.value () << n_satellites_per_plane
-                        << n_planes << n_phases);
-  auto constellation{Create<Constellation> (n_planes, n_satellites_per_plane)};
+  NS_LOG_FUNCTION (this);
 
-  NodeContainer nodes;
-  nodes.Create (n_planes * n_satellites_per_plane);
+  return m_constellation;
+}
 
-  std::vector<SatAddress> addresses;
-  addresses.reserve (nodes.size ());
+SatAddress
+ConstellationHelper::LaunchSatellite (Ptr<Node> satellite)
+{
+  NS_LOG_FUNCTION (this << &satellite);
 
-  const auto offset_increment{n_phases * 360.0 * degree /
-                              (1.0 * n_satellites_per_plane * n_planes)};
+  NS_ABORT_MSG_IF (m_planeIndex >= m_constellation->GetNPlanes () && m_orbitIndex > 0,
+                   "All satellites have already been created in this constellation");
+  NS_ASSERT_MSG (m_phase < 360 * degree, "Phase angle should be < 360º: " << m_phase);
+  NS_ASSERT_MSG (m_ascendingNode < 360 * degree,
+                 "Ascending node should be < 360º: " << m_ascendingNode);
 
-  auto satIterator = nodes.begin ();
-  auto plane_index = 0;
-  for (auto ascending_node{0 * degree}, offset = 0 * degree; ascending_node < 360 * degree;
-       ascending_node += 360 / static_cast<double> (n_planes) * degree, offset += offset_increment,
-                                        plane_index++)
+  auto orbit = m_circularOrbitFactory.Create<CircularOrbitMobilityModel> ();
+  orbit->LaunchSat (quantity<plane_angle> (m_inclination), quantity<plane_angle> (m_ascendingNode),
+                    m_altitude, quantity<plane_angle> (m_phase + m_offset));
+
+  satellite->AggregateObject (orbit);
+  const auto address = m_constellation->AddSatellite (m_planeIndex, m_orbitIndex, satellite);
+
+  m_orbitIndex += 1;
+  m_phase += 360 / static_cast<double> (m_constellation->GetPlaneSize ()) * degree;
+  if (m_orbitIndex == m_constellation->GetPlaneSize ())
     {
-      auto orbit_index = 0;
-      for (auto phase{0 * degree}; phase < 360 * degree;
-           phase += 360 / static_cast<double> (n_satellites_per_plane) * degree, satIterator++,
-           orbit_index++)
-        {
-          NS_ASSERT (satIterator != nodes.end ());
-          NS_ASSERT (*satIterator != nullptr);
-
-          auto orbit = m_circularOrbitFactory.Create<CircularOrbitMobilityModel> ();
-          orbit->LaunchSat (inclination, quantity<plane_angle> (ascending_node), altitude,
-                            quantity<plane_angle> (phase + offset));
-
-          (*satIterator)->AggregateObject (orbit);
-          constellation->AddSatellite (plane_index, orbit_index, *satIterator);
-          addresses.push_back (
-              SatAddress (constellation->GetConstellationId (), plane_index, orbit_index));
-        }
+      m_orbitIndex = 0;
+      m_phase = 0 * degree;
+      m_planeIndex += 1;
+      m_ascendingNode += 360 / static_cast<double> (m_constellation->GetNPlanes ()) * degree;
+      m_offset += m_offsetIncrement;
     }
 
-  // Now that they have mobility, we can install Icarus net devices
-  m_icarusHelper->Install (nodes, addresses);
-
-  return constellation;
+  return address;
 }
 
 } // namespace icarus

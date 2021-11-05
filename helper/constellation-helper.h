@@ -24,9 +24,12 @@
 
 #include "ns3/object-factory.h"
 #include "ns3/ptr.h"
+#include "ns3/sat-address.h"
 
+#include <boost/units/quantity.hpp>
 #include <boost/units/systems/si/length.hpp>
 #include <boost/units/systems/si/plane_angle.hpp>
+#include <boost/units/systems/angle/degrees.hpp>
 
 namespace ns3 {
 namespace icarus {
@@ -36,17 +39,28 @@ class IcarusHelper;
 class ConstellationHelper
 {
 public:
-  ConstellationHelper (Ptr<IcarusHelper> creator);
+  ConstellationHelper (boost::units::quantity<boost::units::si::length> altitude,
+                       boost::units::quantity<boost::units::si::plane_angle> inclination,
+                       std::size_t n_planes, std::size_t n_satellites_per_plane,
+                       std::size_t n_phases);
   ConstellationHelper (const ConstellationHelper &) = delete;
 
-  Ptr<Constellation>
-  CreateConstellation (boost::units::quantity<boost::units::si::length> altitude,
-                       boost::units::quantity<boost::units::si::plane_angle> inclination,
-                       unsigned n_planes, unsigned n_satellites_per_plane, unsigned n_phases);
+  Ptr<Constellation> GetConstellation () const;
+
+  SatAddress LaunchSatellite (Ptr<Node> satellite);
 
 private:
-  Ptr<IcarusHelper> m_icarusHelper;
+  const Ptr<Constellation> m_constellation;
   ObjectFactory m_circularOrbitFactory;
+
+  const boost::units::quantity<boost::units::degree::plane_angle> m_offsetIncrement;
+  const boost::units::quantity<boost::units::si::length> m_altitude;
+  const boost::units::quantity<boost::units::degree::plane_angle> m_inclination;
+
+  boost::units::quantity<boost::units::degree::plane_angle> m_ascendingNode, m_phase, m_offset;
+
+  std::size_t m_planeIndex;
+  std::size_t m_orbitIndex;
 };
 
 } // namespace icarus
