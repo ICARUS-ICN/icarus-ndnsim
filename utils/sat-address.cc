@@ -126,6 +126,12 @@ operator== (const SatAddress &a, const SatAddress &b)
          a.getOrbitalPlane () == b.getOrbitalPlane () && a.getPlaneIndex () == b.getPlaneIndex ();
 }
 
+bool
+operator!= (const SatAddress &a, const SatAddress &b)
+{
+  return !(a == b);
+}
+
 std::ostream &
 operator<< (std::ostream &os, const SatAddress &address)
 {
