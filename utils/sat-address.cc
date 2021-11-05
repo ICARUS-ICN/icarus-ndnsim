@@ -49,7 +49,7 @@ SatAddress::GetType ()
   return m_type;
 }
 
-SatAddress::SatAddress ()
+SatAddress::SatAddress () : m_constellationId (0), m_orbitalPlane (0), m_planeIndex (0)
 {
 }
 
