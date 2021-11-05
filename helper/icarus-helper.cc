@@ -24,6 +24,7 @@
 #include "ns3/icarus-net-device.h"
 #include "ns3/log-macros-enabled.h"
 #include "ns3/ground-sat-channel.h"
+#include "ns3/log.h"
 #include "ns3/mobility-model.h"
 #include "ns3/names.h"
 #include "ns3/net-device-queue-interface.h"
@@ -33,6 +34,7 @@
 #include "ns3/config.h"
 #include "ns3/assert.h"
 #include "ns3/ground-sat-success-model.h"
+#include "src/icarus/utils/sat-address.h"
 
 namespace ns3 {
 namespace icarus {
@@ -179,7 +181,6 @@ IcarusHelper::InstallPriv (Ptr<Node> node, Ptr<GroundSatChannel> channel) const
   NS_LOG_FUNCTION (this << node << channel);
 
   Ptr<IcarusNetDevice> device = CreateDeviceForNode (node);
-  device->SetAddress (Mac48Address::Allocate ());
   node->AddDevice (device);
   auto queue = m_queueFactory.Create<Queue<Packet>> ();
   device->SetQueue (queue);
@@ -202,7 +203,11 @@ IcarusHelper::CreateDeviceForNode (Ptr<Node> node) const
   if (node->GetObject<CircularOrbitMobilityModel> () != nullptr)
     {
       // This is a satellite
-      return m_sat2GroundFactory.Create<Sat2GroundNetDevice> ();
+      auto sat = m_sat2GroundFactory.Create<Sat2GroundNetDevice> ();
+      NS_LOG_WARN ("FIXME: Add proper address from constellation");
+      sat->SetAddress (SatAddress ().ConvertTo ());
+
+      return sat;
     }
 
   // This is NOT a satellite

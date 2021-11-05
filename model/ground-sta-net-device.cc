@@ -22,6 +22,7 @@
 
 #include "ground-sta-net-device.h"
 #include "ns3/log.h"
+#include "ns3/address.h"
 #include "ns3/icarus-net-device.h"
 #include "ns3/log-macros-enabled.h"
 #include "ns3/pointer.h"
@@ -69,34 +70,36 @@ GroundStaNetDevice::Attach (Ptr<GroundSatChannel> channel)
 }
 
 void
-GroundStaNetDevice::ReceiveFromSat (Ptr<Packet> packet, DataRate bps, uint16_t protocolNumber)
+GroundStaNetDevice::ReceiveFromSat (Ptr<Packet> packet, DataRate bps, const SatAddress &src,
+                                    uint16_t protocolNumber)
 {
-  NS_LOG_FUNCTION (this << packet << bps << protocolNumber);
+  NS_LOG_FUNCTION (this << packet << bps << src << protocolNumber);
 
   m_phyRxBeginTrace (packet);
   Simulator::Schedule (bps.CalculateBytesTxTime (packet->GetSize ()),
-                       &GroundStaNetDevice::ReceiveFromSatFinish, this, packet, protocolNumber);
+                       &GroundStaNetDevice::ReceiveFromSatFinish, this, packet, src,
+                       protocolNumber);
 }
 
 void
-GroundStaNetDevice::ReceiveFromSatFinish (Ptr<Packet> packet, uint16_t protocolNumber)
+GroundStaNetDevice::ReceiveFromSatFinish (Ptr<Packet> packet, const SatAddress &src,
+                                          uint16_t protocolNumber)
 {
-  NS_LOG_FUNCTION (this << packet << protocolNumber);
+  NS_LOG_FUNCTION (this << packet << src << protocolNumber);
 
   m_phyRxEndTrace (packet);
   m_snifferTrace (packet);
   m_macRxTrace (packet);
 
-  NS_LOG_WARN ("FIXME: Missing source address.");
   NS_LOG_WARN ("FIXME: Have to specify packet type properly");
 
   static auto macUnspecified = Mac48Address ("00:00:00:00:00:00");
   if (m_promiscReceiveCallback.IsNull () != true)
     {
-      m_promiscReceiveCallback (this, packet, protocolNumber, macUnspecified, macUnspecified,
+      m_promiscReceiveCallback (this, packet, protocolNumber, src.ConvertTo (), macUnspecified,
                                 PACKET_HOST);
     }
-  m_receiveCallback (this, packet, protocolNumber, macUnspecified);
+  m_receiveCallback (this, packet, protocolNumber, src.ConvertTo ());
 }
 
 void
@@ -113,6 +116,23 @@ GroundStaNetDevice::IsBroadcast (void) const
   NS_LOG_FUNCTION (this);
 
   return false;
+}
+
+void
+GroundStaNetDevice::SetAddress (Address address)
+{
+  NS_LOG_FUNCTION (this << address);
+
+  NS_LOG_WARN ("FIXME: We still do not support addresses");
+}
+
+Address
+GroundStaNetDevice::GetAddress (void) const
+{
+  NS_LOG_FUNCTION (this);
+
+  NS_LOG_WARN ("FIXME: We still do not support addresses");
+  return Address ();
 }
 
 Address
@@ -185,7 +205,7 @@ GroundStaNetDevice::Send (Ptr<Packet> packet, const Address &dest, uint16_t prot
         {
           auto packet = GetQueue ()->Dequeue ();
           m_snifferTrace (packet);
-          TransmitStart (packet, protocolNumber);
+          TransmitStart (packet, SatAddress::ConvertFrom (dest), protocolNumber);
         }
     }
 
@@ -193,22 +213,25 @@ GroundStaNetDevice::Send (Ptr<Packet> packet, const Address &dest, uint16_t prot
 }
 
 void
-GroundStaNetDevice::TransmitStart (Ptr<Packet> packet, uint16_t protocolNumber)
+GroundStaNetDevice::TransmitStart (Ptr<Packet> packet, const SatAddress &dst,
+                                   uint16_t protocolNumber)
 {
-  NS_LOG_FUNCTION (this << packet << protocolNumber);
+  NS_LOG_FUNCTION (this << packet << dst << protocolNumber);
   NS_ASSERT_MSG (m_txMachineState == IDLE,
                  "Must be IDLE to transmit. Tx state is: " << m_txMachineState);
   m_txMachineState = TRANSMITTING;
 
   m_phyTxBeginTrace (packet);
-  Time endTx = GetInternalChannel ()->Transmit2Sat (packet, GetDataRate (), protocolNumber);
-  Simulator::Schedule (endTx, &GroundStaNetDevice::TransmitComplete, this, packet, protocolNumber);
+  Time endTx = GetInternalChannel ()->Transmit2Sat (packet, GetDataRate (), dst, protocolNumber);
+  Simulator::Schedule (endTx, &GroundStaNetDevice::TransmitComplete, this, packet, dst,
+                       protocolNumber);
 }
 
 void
-GroundStaNetDevice::TransmitComplete (Ptr<Packet> packet, uint16_t protocolNumber)
+GroundStaNetDevice::TransmitComplete (Ptr<Packet> packet, const SatAddress &dst,
+                                      uint16_t protocolNumber)
 {
-  NS_LOG_FUNCTION (this << packet << protocolNumber);
+  NS_LOG_FUNCTION (this << packet << dst << protocolNumber);
 
   m_phyTxEndTrace (packet);
   m_txMachineState = IDLE;
@@ -217,7 +240,7 @@ GroundStaNetDevice::TransmitComplete (Ptr<Packet> packet, uint16_t protocolNumbe
     {
       auto packet = GetQueue ()->Dequeue ();
       m_snifferTrace (packet);
-      TransmitStart (packet, protocolNumber);
+      TransmitStart (packet, dst, protocolNumber);
     }
 }
 

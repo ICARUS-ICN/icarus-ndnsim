@@ -24,7 +24,7 @@
 #include "icarus-net-device.h"
 #include "ns3/log-macros-enabled.h"
 #include "ns3/log.h"
-#include "ns3/mac48-address.h"
+#include "ns3/sat-address.h"
 #include "ns3/pointer.h"
 #include "ns3/uinteger.h"
 #include "ns3/abort.h"
@@ -42,7 +42,11 @@ Sat2GroundNetDevice::GetTypeId (void)
   static TypeId tid = TypeId ("ns3::icarus::Sat2GroundNetDevice")
                           .SetParent<IcarusNetDevice> ()
                           .SetGroupName ("ICARUS")
-                          .AddConstructor<Sat2GroundNetDevice> ();
+                          .AddConstructor<Sat2GroundNetDevice> ()
+                          .AddAttribute ("Address", "The link-layer address of this device.",
+                                         SatAddressValue (SatAddress ()),
+                                         MakeSatAddressAccessor (&Sat2GroundNetDevice::m_address),
+                                         MakeSatAddressChecker ());
 
   return tid;
 }
@@ -104,6 +108,22 @@ Sat2GroundNetDevice::IsBroadcast (void) const
   NS_LOG_FUNCTION (this);
 
   return false;
+}
+
+void
+Sat2GroundNetDevice::SetAddress (Address address)
+{
+  NS_LOG_FUNCTION (this << address);
+
+  m_address = SatAddress::ConvertFrom (address);
+}
+
+Address
+Sat2GroundNetDevice::GetAddress (void) const
+{
+  NS_LOG_FUNCTION (this);
+
+  return m_address.ConvertTo ();
 }
 
 Address
@@ -194,7 +214,8 @@ Sat2GroundNetDevice::TransmitStart (Ptr<Packet> packet, uint16_t protocolNumber)
   m_txMachineState = TRANSMITTING;
 
   m_phyTxBeginTrace (packet);
-  Time endTx = GetInternalChannel ()->Transmit2Ground (packet, GetDataRate (), protocolNumber);
+  Time endTx =
+      GetInternalChannel ()->Transmit2Ground (packet, GetDataRate (), m_address, protocolNumber);
   Simulator::Schedule (endTx, &Sat2GroundNetDevice::TransmitComplete, this, packet, protocolNumber);
 }
 
