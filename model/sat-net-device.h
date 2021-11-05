@@ -95,7 +95,6 @@ public:
 
 private:
   DataRate m_bps;
-  Mac48Address m_address;
   uint32_t m_ifIndex;
   Ptr<Queue<Packet>> m_queue;
   Ptr<Sat2SatChannel> m_channel;
