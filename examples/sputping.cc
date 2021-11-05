@@ -18,8 +18,12 @@
  * Author: Miguel Rodríguez Pérez <miguel@det.uvigo.gal>
  */
 
+#include "ns3/arp-cache.h"
+#include "ns3/callback.h"
 #include "ns3/drop-tail-queue.h"
 #include "ns3/icarus-helper.h"
+#include "ns3/ipv4-address.h"
+#include "ns3/ipv4-l3-protocol.h"
 #include "ns3/mobility-module.h"
 #include "ns3/core-module.h"
 #include "ns3/icarus-module.h"
@@ -27,9 +31,11 @@
 #include "ns3/net-device.h"
 #include "ns3/internet-module.h"
 #include "ns3/applications-module.h"
+#include "ns3/pointer.h"
 #include "ns3/trace-helper.h"
 #include "ns3/udp-echo-helper.h"
 #include "src/core/model/log.h"
+#include "ns3/sat-address.h"
 
 #include <boost/units/systems/si/length.hpp>
 #include <boost/units/systems/si/plane_angle.hpp>
@@ -90,6 +96,14 @@ main (int argc, char **argv) -> int
   echoClient.SetAttribute ("PacketSize", UintegerValue (1280));
 
   ApplicationContainer clientApps = echoClient.Install (ground);
+
+  // Add a new cache with a permanent entry to reach the satellite.
+  auto ground_arp_cache = CreateObject<ArpCache> ();
+  auto entry = ground_arp_cache->Add (ipInterfaces.GetAddress (0));
+  entry->SetMacAddress (SatAddress ().ConvertTo ());
+  entry->MarkPermanent ();
+  Config::Set ("/NodeList/1/$ns3::Ipv4L3Protocol/InterfaceList/1/ArpCache",
+               PointerValue (ground_arp_cache));
 
   UdpEchoServerHelper echoServer (7667);
   ApplicationContainer serverApps = echoServer.Install (bird);
