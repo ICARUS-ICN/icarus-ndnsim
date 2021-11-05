@@ -111,7 +111,9 @@ GroundSatChannel::Transmit2Sat (Ptr<Packet> packet, DataRate bps, const SatAddre
 
   if (SatAddress::ConvertFrom (m_satellites.Get (0)->GetAddress ()) != dst)
     {
-      NS_LOG_DEBUG ("Dropping packet as destination address is not in orbit");
+      NS_LOG_DEBUG ("Dropping packet as destination address is not in orbit "
+                    << dst
+                    << " != " << SatAddress::ConvertFrom (m_satellites.Get (0)->GetAddress ()));
       m_phyTxDropTrace (packet);
     }
 
