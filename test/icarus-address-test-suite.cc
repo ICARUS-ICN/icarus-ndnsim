@@ -21,6 +21,7 @@
 
 #include "ns3/test.h"
 #include "ns3/core-module.h"
+#include "utils/sat-address.h"
 #include <cstring>
 
 using namespace ns3;
@@ -58,6 +59,11 @@ SatAddressTestCase::DoRun ()
   NS_TEST_ASSERT_MSG_EQ (newSatAddress.getConstellationId (), 0xf00f, "Wrong constellation id.");
   NS_TEST_ASSERT_MSG_EQ (newSatAddress.getOrbitalPlane (), 0xe11e, "Wrong orbital plane id.");
   NS_TEST_ASSERT_MSG_EQ (newSatAddress.getPlaneIndex (), 0xd22d, "Wrong plane index id.");
+
+  std::istringstream s ("f00f:e11e:d22d");
+  SatAddress test2;
+  s >> test2;
+  NS_TEST_ASSERT_MSG_EQ (test, test2, "Wrong conversion from istream");
 }
 
 // Add some help text to this case to describe what it is intended to test
