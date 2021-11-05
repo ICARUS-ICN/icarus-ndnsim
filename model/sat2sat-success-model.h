@@ -16,8 +16,7 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
- * Authors: Miguel Rodríguez Pérez <miguel@det.uvigo.gal>
- *          Pablo Iglesias Sanuy <pabliglesias@alumnos.uvigo.es>
+ * Author: Pablo Iglesias Sanuy <pabliglesias@alumnos.uvigo.es>
  *
  */
 
@@ -48,6 +47,7 @@ public:
 
 private:
   static const double DEFAULT_MAX_DISTANCE;
+  static const double MIN_ALTITUDE_FOR_VISIBILITY;
 
   double m_maxDistance; // In meters
 };

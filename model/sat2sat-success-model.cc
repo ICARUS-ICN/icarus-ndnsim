@@ -16,8 +16,7 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
- * Authors: Miguel Rodríguez Pérez <miguel@det.uvigo.gal>
- *          Pablo Iglesias Sanuy <pabliglesias@alumnos.uvigo.es>
+ * Author: Pablo Iglesias Sanuy <pabliglesias@alumnos.uvigo.es>
  *
  */
 
@@ -44,6 +43,7 @@ using constants::Earth;
 NS_OBJECT_ENSURE_REGISTERED (Sat2SatSuccessModel);
 
 const double Sat2SatSuccessModel::DEFAULT_MAX_DISTANCE = 2981438.0; // 2981.438km
+const double Sat2SatSuccessModel::MIN_ALTITUDE_FOR_VISIBILITY = 80000.0; //80 km
 
 TypeId
 Sat2SatSuccessModel::GetTypeId (void)
@@ -84,8 +84,8 @@ void
 Sat2SatSuccessModel::CalcMaxDistance(double altitude)
 {
   auto h = altitude; //Radius of the satellite
-  auto r = double (80000) + Earth.getRadius().value(); // 80 km + Earth Radius
-  m_maxDistance = 2 * root<2> (pow<2> (h) - pow<2> (r)); //max distance = 2*sqrt(h^2 - r^2)
+  auto r = MIN_ALTITUDE_FOR_VISIBILITY + Earth.getRadius().value(); // 80 km + Earth Radius
+  m_maxDistance = 2 * sqrt((h*h) - (r*r)); //max distance = 2*sqrt(h^2 - r^2)
 }
 
 } // namespace icarus
