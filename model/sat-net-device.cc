@@ -46,10 +46,6 @@ SatNetDevice::GetTypeId (void)
           .AddAttribute ("Channel", "The channel attached to this device", PointerValue (),
                          MakePointerAccessor (&SatNetDevice::m_channel),
                          MakePointerChecker<Sat2SatChannel> ())
-          .AddAttribute ("Address", "The MAC address of this device.",
-                         Mac48AddressValue (Mac48Address ("00:00:00:00:00:00")),
-                         MakeMac48AddressAccessor (&SatNetDevice::m_address),
-                         MakeMac48AddressChecker ())
           .AddAttribute (
               "DataRate", "The default data rate for ground<->satellite channels",
               DataRateValue (DataRate ("1Gb/s")),
@@ -268,15 +264,16 @@ SatNetDevice::SetAddress (Address address)
 {
   NS_LOG_FUNCTION (this << address);
 
-  m_address = Mac48Address::ConvertFrom (address);
+  NS_LOG (LOG_WARN, "This is not supported");
 }
 
 Address
 SatNetDevice::GetAddress (void) const
 {
   NS_LOG_FUNCTION (this);
+  NS_LOG (LOG_WARN, "This is not supported");
 
-  return m_address;
+  return Mac48Address::GetBroadcast ();
 }
 
 bool
