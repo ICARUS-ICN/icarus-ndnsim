@@ -113,6 +113,16 @@ main (int argc, char **argv) -> int
   Config::Set ("/NodeList/0/$ns3::Ipv4L3Protocol/InterfaceList/1/ArpCache",
                PointerValue (ground_arp_cache));
 
+  // Add a new cache with a permanent entry to reach the ground node.
+  auto orbit_arp_cache = CreateObject<ArpCache> ();
+  entry = orbit_arp_cache->Add (ipInterfaces.GetAddress (0));
+  entry->SetMacAddress (ground->GetDevice (0)->GetAddress ());
+  entry->MarkPermanent ();
+  Config::Set ("/NodeList/1/$ns3::Ipv4L3Protocol/InterfaceList/1/ArpCache",
+               PointerValue (orbit_arp_cache));
+  Config::Set ("/NodeList/2/$ns3::Ipv4L3Protocol/InterfaceList/1/ArpCache",
+               PointerValue (orbit_arp_cache));
+
   UdpEchoServerHelper echoServer (7667);
   ApplicationContainer serverApps = echoServer.Install (bird1);
   serverApps.Add (echoServer.Install (bird2));
