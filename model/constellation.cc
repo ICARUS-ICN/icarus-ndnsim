@@ -97,11 +97,11 @@ Constellation::GetClosest (Vector3D cartesianCoordinates) const
               continue;
             }
 
-          auto sq_distance =
+          const auto sq_distance =
               getSqDistance (sat->GetObject<MobilityModel> ()->GetPosition (), bestPos);
           if (sq_distance <= sq_closest_distance)
             {
-              sq_distance = sq_closest_distance;
+              sq_closest_distance = sq_distance;
               bestPos = sat->GetObject<MobilityModel> ()->GetPosition ();
               closest = sat;
             }
