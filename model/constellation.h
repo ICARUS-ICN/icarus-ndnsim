@@ -50,6 +50,8 @@ public:
   Ptr<Sat2GroundNetDevice> GetSatellite (std::size_t plane, std::size_t index) const;
 
   NetDeviceContainer CreateNetDeviceContainer () const;
+  std::size_t GetSize () const;
+  Ptr<Sat2GroundNetDevice> Get (std::size_t index) const;
 
 private:
   typedef std::vector<Ptr<Sat2GroundNetDevice>> plane;
@@ -59,6 +61,8 @@ private:
   std::size_t m_constellationId;
   std::size_t m_nPlanes, m_planeSize;
   std::vector<plane> m_planes;
+
+  std::size_t m_size;
 };
 } // namespace icarus
 } // namespace ns3
