@@ -65,23 +65,27 @@ main (int argc, char **argv) -> int
   cmd.Parse (argc, argv);
 
   NodeContainer nodes;
-  nodes.Create (3);
-  auto ground = nodes.Get (0);
+  nodes.Create (4);
+  auto ground1 = nodes.Get (0);
+  auto ground2 = nodes.Get (1);
 
   IcarusHelper icarusHelper;
   ConstellationHelper chelper (quantity<length> (250 * kilo * meters),
                                quantity<plane_angle> (60.0 * degrees), 2, 1, 0);
-  auto bird1 = nodes.Get (1);
-  auto bird2 = nodes.Get (2);
+  auto bird1 = nodes.Get (2);
+  auto bird2 = nodes.Get (3);
 
   ObjectFactory staticPositionsFactory ("ns3::ListPositionAllocator");
   auto staticPositions = staticPositionsFactory.Create<ListPositionAllocator> ();
   staticPositions->Add (GeographicPositions::GeographicToCartesianCoordinates (
       42.1704632, -8.6877909, 450, GeographicPositions::WGS84)); // Our School
+  staticPositions->Add (GeographicPositions::GeographicToCartesianCoordinates (
+      -27.39979, -33.66416, 0, GeographicPositions::WGS84)); // Somewhere else
   MobilityHelper staticHelper;
   staticHelper.SetPositionAllocator (staticPositions);
   staticHelper.SetMobilityModel ("ns3::ConstantPositionMobilityModel");
-  staticHelper.Install (ground);
+  staticHelper.Install (ground1);
+  staticHelper.Install (ground2);
 
   NetDeviceContainer netDevices (icarusHelper.Install (nodes, &chelper));
 
@@ -92,35 +96,40 @@ main (int argc, char **argv) -> int
   Ipv4InterfaceContainer ipInterfaces;
   ipInterfaces = address.Assign (netDevices);
 
-  UdpEchoClientHelper echoClient (ipInterfaces.GetAddress (1), 7667);
+  UdpEchoClientHelper echoClient (ipInterfaces.GetAddress (2), 7667);
   echoClient.SetAttribute ("MaxPackets", UintegerValue (std::numeric_limits<uint32_t>::max ()));
   echoClient.SetAttribute ("Interval", TimeValue (Seconds (1.0)));
   echoClient.SetAttribute ("PacketSize", UintegerValue (1280));
+  ApplicationContainer clientApps = echoClient.Install (ground1);
 
-  ApplicationContainer clientApps = echoClient.Install (ground);
-  echoClient.SetAttribute ("RemoteAddress", AddressValue (ipInterfaces.GetAddress (2)));
+  echoClient.SetAttribute ("RemoteAddress", AddressValue (ipInterfaces.GetAddress (3)));
   echoClient.SetAttribute ("PacketSize", UintegerValue (1400));
-  clientApps.Add (echoClient.Install (ground));
+  clientApps.Add (echoClient.Install (ground2));
 
   // Add a new cache with a permanent entry to reach the satellite.
   auto ground_arp_cache = CreateObject<ArpCache> ();
-  auto entry = ground_arp_cache->Add (ipInterfaces.GetAddress (1));
+  auto entry = ground_arp_cache->Add (ipInterfaces.GetAddress (2));
   entry->SetMacAddress (bird1->GetDevice (0)->GetAddress ());
   entry->MarkPermanent ();
-  entry = ground_arp_cache->Add (ipInterfaces.GetAddress (2));
+  entry = ground_arp_cache->Add (ipInterfaces.GetAddress (3));
   entry->SetMacAddress (bird2->GetDevice (0)->GetAddress ());
   entry->MarkPermanent ();
   Config::Set ("/NodeList/0/$ns3::Ipv4L3Protocol/InterfaceList/1/ArpCache",
+               PointerValue (ground_arp_cache));
+  Config::Set ("/NodeList/1/$ns3::Ipv4L3Protocol/InterfaceList/1/ArpCache",
                PointerValue (ground_arp_cache));
 
   // Add a new cache with a permanent entry to reach the ground node.
   auto orbit_arp_cache = CreateObject<ArpCache> ();
   entry = orbit_arp_cache->Add (ipInterfaces.GetAddress (0));
-  entry->SetMacAddress (ground->GetDevice (0)->GetAddress ());
+  entry->SetMacAddress (ground1->GetDevice (0)->GetAddress ());
   entry->MarkPermanent ();
-  Config::Set ("/NodeList/1/$ns3::Ipv4L3Protocol/InterfaceList/1/ArpCache",
-               PointerValue (orbit_arp_cache));
+  entry = orbit_arp_cache->Add (ipInterfaces.GetAddress (1));
+  entry->SetMacAddress (ground2->GetDevice (0)->GetAddress ());
+  entry->MarkPermanent ();
   Config::Set ("/NodeList/2/$ns3::Ipv4L3Protocol/InterfaceList/1/ArpCache",
+               PointerValue (orbit_arp_cache));
+  Config::Set ("/NodeList/3/$ns3::Ipv4L3Protocol/InterfaceList/1/ArpCache",
                PointerValue (orbit_arp_cache));
 
   UdpEchoServerHelper echoServer (7667);
