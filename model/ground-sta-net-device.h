@@ -80,8 +80,8 @@ private:
       m_phyTxEndTrace, m_phyRxBeginTrace, m_phyRxEndTrace, m_snifferTrace;
 
   void ReceiveFromSatFinish (Ptr<Packet> packet, const SatAddress &src, uint16_t protocolNumber);
-  void TransmitStart (Ptr<Packet> packet, const SatAddress &dst, uint16_t protocolNumber);
-  void TransmitComplete (Ptr<Packet> packet, const SatAddress &dst, uint16_t protocolNumber);
+  void TransmitStart (Ptr<Packet> packet);
+  void TransmitComplete (Ptr<Packet> packet);
 };
 
 } // namespace icarus
