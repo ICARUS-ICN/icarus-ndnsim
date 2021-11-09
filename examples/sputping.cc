@@ -18,6 +18,7 @@
  * Author: Miguel Rodríguez Pérez <miguel@det.uvigo.gal>
  */
 
+#include "ns3/address.h"
 #include "ns3/arp-cache.h"
 #include "ns3/callback.h"
 #include "ns3/drop-tail-queue.h"
@@ -64,13 +65,14 @@ main (int argc, char **argv) -> int
   cmd.Parse (argc, argv);
 
   NodeContainer nodes;
-  nodes.Create (2);
+  nodes.Create (3);
   auto ground = nodes.Get (0);
 
   IcarusHelper icarusHelper;
   ConstellationHelper chelper (quantity<length> (250 * kilo * meters),
-                               quantity<plane_angle> (60.0 * degrees), 1, 1, 0);
-  auto bird = nodes.Get (1);
+                               quantity<plane_angle> (60.0 * degrees), 2, 1, 0);
+  auto bird1 = nodes.Get (1);
+  auto bird2 = nodes.Get (2);
 
   ObjectFactory staticPositionsFactory ("ns3::ListPositionAllocator");
   auto staticPositions = staticPositionsFactory.Create<ListPositionAllocator> ();
@@ -96,17 +98,24 @@ main (int argc, char **argv) -> int
   echoClient.SetAttribute ("PacketSize", UintegerValue (1280));
 
   ApplicationContainer clientApps = echoClient.Install (ground);
+  echoClient.SetAttribute ("RemoteAddress", AddressValue (ipInterfaces.GetAddress (2)));
+  echoClient.SetAttribute ("PacketSize", UintegerValue (1400));
+  clientApps.Add (echoClient.Install (ground));
 
   // Add a new cache with a permanent entry to reach the satellite.
   auto ground_arp_cache = CreateObject<ArpCache> ();
   auto entry = ground_arp_cache->Add (ipInterfaces.GetAddress (1));
-  entry->SetMacAddress (bird->GetDevice (0)->GetAddress ());
+  entry->SetMacAddress (bird1->GetDevice (0)->GetAddress ());
+  entry->MarkPermanent ();
+  entry = ground_arp_cache->Add (ipInterfaces.GetAddress (2));
+  entry->SetMacAddress (bird2->GetDevice (0)->GetAddress ());
   entry->MarkPermanent ();
   Config::Set ("/NodeList/0/$ns3::Ipv4L3Protocol/InterfaceList/1/ArpCache",
                PointerValue (ground_arp_cache));
 
   UdpEchoServerHelper echoServer (7667);
-  ApplicationContainer serverApps = echoServer.Install (bird);
+  ApplicationContainer serverApps = echoServer.Install (bird1);
+  serverApps.Add (echoServer.Install (bird2));
 
   clientApps.Start (Seconds (0.0));
 
