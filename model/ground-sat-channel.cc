@@ -35,6 +35,7 @@
 #include "sat2ground-net-device.h"
 #include "ground-sta-net-device.h"
 #include "ns3/assert.h"
+#include "ns3/constellation.h"
 
 namespace ns3 {
 namespace icarus {
@@ -65,17 +66,6 @@ GroundSatChannel::GetTypeId (void)
 }
 
 bool
-GroundSatChannel::AttachNewSat (Ptr<Sat2GroundNetDevice> device)
-{
-  NS_LOG_FUNCTION (this << device);
-  NS_ABORT_MSG_UNLESS (device->GetNode ()->GetObject<MobilityModel> () != 0,
-                       "Satellites need a mobility model");
-  m_satellites.Add (device);
-
-  return true;
-}
-
-bool
 GroundSatChannel::AttachGround (Ptr<GroundStaNetDevice> device)
 {
   NS_LOG_FUNCTION (this << device);
@@ -90,7 +80,7 @@ GroundSatChannel::AttachGround (Ptr<GroundStaNetDevice> device)
   return false;
 }
 
-GroundSatChannel::GroundSatChannel () : Channel ()
+GroundSatChannel::GroundSatChannel () : Channel (), m_constellation (nullptr)
 {
   NS_LOG_FUNCTION (this);
 }
@@ -106,62 +96,62 @@ GroundSatChannel::Transmit2Sat (Ptr<Packet> packet, DataRate bps, const SatAddre
 {
   NS_LOG_FUNCTION (this << packet << bps << dst << protocolNumber);
   NS_ASSERT_MSG (m_ground, "We need a ground station");
-  NS_ASSERT_MSG (m_satellites.GetN () == 1,
-                 "WIP: Only 1 satellite en the constellation is supported");
 
-  if (SatAddress::ConvertFrom (m_satellites.Get (0)->GetAddress ()) != dst)
+  Time endTx = bps.CalculateBytesTxTime (packet->GetSize ());
+
+  if (m_constellation == nullptr)
     {
-      NS_LOG_DEBUG ("Dropping packet as destination address is not in orbit "
-                    << dst
-                    << " != " << SatAddress::ConvertFrom (m_satellites.Get (0)->GetAddress ()));
+      NS_LOG_WARN ("We need a constellation manager for transmissions to orbit.");
+      m_phyTxDropTrace (packet);
+
+      return endTx;
+    }
+
+  auto sat_device = m_constellation->GetSatellite (dst);
+  if (sat_device == nullptr)
+    {
+      NS_LOG_DEBUG ("Dropping packet as destination address is not in orbit " << dst);
       m_phyTxDropTrace (packet);
     }
 
-  Time endTx = bps.CalculateBytesTxTime (packet->GetSize ());
   auto posGround = m_ground->GetNode ()->GetObject<MobilityModel> ();
-  auto posSat = m_satellites.Get (0)->GetNode ()->GetObject<MobilityModel> ();
+  auto posSat = sat_device->GetNode ()->GetObject<MobilityModel> ();
   auto distanceMeters = posGround->GetDistanceFrom (posSat);
 
   Time delay (Seconds (distanceMeters / 3e8));
 
   if (m_txSuccessModel != nullptr &&
-      m_txSuccessModel->TramsmitSuccess (m_ground->GetNode (), m_satellites.Get (0)->GetNode (),
-                                         packet) != true)
+      m_txSuccessModel->TramsmitSuccess (m_ground->GetNode (), sat_device->GetNode (), packet) !=
+          true)
     {
       m_phyTxDropTrace (packet);
     }
   else
     {
-      NS_ASSERT (DynamicCast<Sat2GroundNetDevice> (m_satellites.Get (0)) != 0);
-      auto sat = StaticCast<Sat2GroundNetDevice> (m_satellites.Get (0));
-
-      Simulator::ScheduleWithContext (sat->GetNode ()->GetId (), delay,
-                                      &Sat2GroundNetDevice::ReceiveFromGround, sat, packet, bps,
-                                      protocolNumber);
+      Simulator::ScheduleWithContext (sat_device->GetNode ()->GetId (), delay,
+                                      &Sat2GroundNetDevice::ReceiveFromGround, sat_device, packet,
+                                      bps, protocolNumber);
     }
 
   return endTx;
 }
 
 Time
-GroundSatChannel::Transmit2Ground (Ptr<Packet> packet, DataRate bps, const SatAddress &src,
+GroundSatChannel::Transmit2Ground (Ptr<Packet> packet, DataRate bps, Ptr<Sat2GroundNetDevice> src,
                                    uint16_t protocolNumber) const
 {
-  NS_LOG_FUNCTION (this << packet << bps << src << protocolNumber);
+  NS_LOG_FUNCTION (this << packet << bps << &src << protocolNumber);
   NS_ASSERT_MSG (m_ground, "We need a ground station");
-  NS_ASSERT_MSG (m_satellites.GetN () == 1,
-                 "WIP: Only 1 satellite en the constellation is supported");
 
   Time endTx = bps.CalculateBytesTxTime (packet->GetSize ());
   auto posGround = m_ground->GetNode ()->GetObject<MobilityModel> ();
-  auto posSat = m_satellites.Get (0)->GetNode ()->GetObject<MobilityModel> ();
+  auto posSat = src->GetNode ()->GetObject<MobilityModel> ();
   auto distanceMeters = posGround->GetDistanceFrom (posSat);
 
   Time delay (Seconds (distanceMeters / 3e8));
 
   if (m_txSuccessModel != nullptr &&
-      m_txSuccessModel->TramsmitSuccess (m_ground->GetNode (), m_satellites.Get (0)->GetNode (),
-                                         packet) != true)
+      m_txSuccessModel->TramsmitSuccess (m_ground->GetNode (), src->GetNode (), packet) != true)
     {
       NS_LOG_DEBUG ("Dropped packet " << packet);
       m_phyTxDropTrace (packet);
@@ -170,9 +160,10 @@ GroundSatChannel::Transmit2Ground (Ptr<Packet> packet, DataRate bps, const SatAd
     {
       NS_ASSERT (DynamicCast<GroundStaNetDevice> (m_ground) != 0);
 
-      Simulator::ScheduleWithContext (
-          m_ground->GetNode ()->GetId (), delay, &GroundStaNetDevice::ReceiveFromSat,
-          DynamicCast<GroundStaNetDevice> (m_ground), packet, bps, src, protocolNumber);
+      Simulator::ScheduleWithContext (m_ground->GetNode ()->GetId (), delay,
+                                      &GroundStaNetDevice::ReceiveFromSat,
+                                      DynamicCast<GroundStaNetDevice> (m_ground), packet, bps,
+                                      SatAddress::ConvertFrom (src->GetAddress ()), protocolNumber);
     }
 
   return endTx;
@@ -182,7 +173,7 @@ std::size_t
 GroundSatChannel::GetNDevices (void) const
 {
   NS_LOG_FUNCTION (this);
-  return m_satellites.GetN () + (m_ground ? 1 : 0);
+  return m_constellation->GetSize () + (m_ground ? 1 : 0);
 }
 
 Ptr<NetDevice>
@@ -193,14 +184,23 @@ GroundSatChannel::GetDevice (std::size_t i) const
   NS_ABORT_MSG_UNLESS (i < GetNDevices (),
                        "Asking for " << i << "-th device of a total of " << GetNDevices ());
 
-  if (i < m_satellites.GetN ())
+  if (i < m_constellation->GetSize ())
     {
-      return m_satellites.Get (i);
+      return m_constellation->Get (i);
     }
   NS_ASSERT (i + 1 == GetNDevices ());
   NS_ASSERT (m_ground);
 
   return m_ground;
 }
+
+void
+GroundSatChannel::SetConstellation (Ptr<Constellation> constellation)
+{
+  NS_LOG_FUNCTION (this << constellation);
+
+  m_constellation = constellation;
+}
+
 } // namespace icarus
 } // namespace ns3
