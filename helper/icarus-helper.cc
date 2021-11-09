@@ -163,6 +163,11 @@ IcarusHelper::Install (const NodeContainer &c, Ptr<GroundSatChannel> channel,
 
   NetDeviceContainer devices;
 
+  if (chelper != nullptr)
+    {
+      channel->SetConstellation (chelper->GetConstellation ());
+    }
+
   for (Ptr<Node> node : c)
     {
       devices.Add (InstallPriv (node, channel, chelper));
