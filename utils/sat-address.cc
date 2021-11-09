@@ -74,6 +74,26 @@ SatAddress::ConvertTo () const
   return Address (GetType (), buffer, WIRE_SIZE);
 }
 
+void
+SatAddress::CopyFrom (const uint8_t buffer[WIRE_SIZE])
+{
+  NS_LOG_FUNCTION (this << buffer);
+
+  std::memcpy (&m_constellationId, buffer, 2);
+  std::memcpy (&m_orbitalPlane, buffer + 2, 2);
+  std::memcpy (&m_planeIndex, buffer + 4, 2);
+}
+
+void
+SatAddress::CopyTo (uint8_t buffer[6]) const
+{
+  NS_LOG_FUNCTION (this << buffer);
+
+  std::memcpy (buffer, &m_constellationId, 2);
+  std::memcpy (buffer + 2, &m_orbitalPlane, 2);
+  std::memcpy (buffer + 4, &m_planeIndex, 2);
+}
+
 SatAddress
 SatAddress::ConvertFrom (const Address &address)
 {
@@ -135,7 +155,7 @@ operator!= (const SatAddress &a, const SatAddress &b)
 std::ostream &
 operator<< (std::ostream &os, const SatAddress &address)
 {
-  NS_LOG_FUNCTION (&os << address);
+  NS_LOG_FUNCTION (&os << &address);
 
   os.setf (std::ios::hex, std::ios::basefield);
   os.fill ('0');
@@ -153,6 +173,8 @@ operator<< (std::ostream &os, const SatAddress &address)
 std::istream &
 operator>> (std::istream &is, SatAddress &address)
 {
+  NS_LOG_FUNCTION (&is);
+
   uint16_t constellation, plane, index;
 
   std::string tmp;

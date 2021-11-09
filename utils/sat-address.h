@@ -30,6 +30,9 @@ namespace icarus {
 
 class SatAddress
 {
+private:
+  constexpr static std::size_t WIRE_SIZE = 6;
+
 public:
   SatAddress ();
   SatAddress (uint16_t constellationId, uint16_t orbitalPlane, uint16_t planeIndex);
@@ -37,13 +40,25 @@ public:
   Address ConvertTo () const;
   static SatAddress ConvertFrom (const Address &address);
 
+  /**
+   * \param buffer address in network order
+   *
+   * Copy the input address to our internal buffer.
+   */
+  void CopyFrom (const uint8_t buffer[WIRE_SIZE]);
+  /**
+   * \param buffer address in network order
+   *
+   * Copy the internal address to the input buffer.
+   */
+  void CopyTo (uint8_t buffer[WIRE_SIZE]) const;
+
   uint16_t getConstellationId () const;
   uint16_t getOrbitalPlane () const;
   uint16_t getPlaneIndex () const;
 
 private:
   const static uint8_t m_type;
-  constexpr static std::size_t WIRE_SIZE = 6;
 
   uint16_t m_constellationId; // Stored in network byte order
   uint16_t m_orbitalPlane; // Stored in network byte order
