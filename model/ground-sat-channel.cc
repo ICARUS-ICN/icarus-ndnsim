@@ -21,23 +21,17 @@
  */
 
 #include "ground-sat-channel.h"
-#include "ns3/assert.h"
-#include "ns3/channel.h"
-#include "ground-sat-success-model.h"
-#include "ns3/log-macros-enabled.h"
-#include "ns3/log.h"
-#include "ns3/abort.h"
-#include "ns3/mobility-model.h"
-#include "ns3/net-device.h"
-#include "ns3/pointer.h"
-#include "ns3/ptr.h"
-#include "ns3/simulator.h"
-#include "sat2ground-net-device.h"
-#include "ground-sta-net-device.h"
-#include "ns3/assert.h"
+
 #include "ns3/constellation.h"
+#include "ns3/ground-sat-success-model.h"
+#include "ns3/ground-sta-net-device.h"
+#include "ns3/mobility-model.h"
+#include "ns3/pointer.h"
+#include "ns3/simulator.h"
+#include "ns3/sat2ground-net-device.h"
 
 namespace ns3 {
+
 namespace icarus {
 NS_LOG_COMPONENT_DEFINE ("icarus.GroundSatChannel");
 
@@ -80,7 +74,8 @@ GroundSatChannel::AttachGround (Ptr<GroundStaNetDevice> device)
   return false;
 }
 
-GroundSatChannel::GroundSatChannel () : Channel (), m_constellation (nullptr)
+GroundSatChannel::GroundSatChannel ()
+    : Channel (), m_txSuccessModel (nullptr), m_constellation (nullptr)
 {
   NS_LOG_FUNCTION (this);
 }
