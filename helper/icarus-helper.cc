@@ -224,6 +224,7 @@ IcarusHelper::CreateDeviceForNode (Ptr<Node> node, ConstellationHelper *chelper)
 
   // This is NOT a satellite
   const auto ground_device = m_groundStaFactory.Create<GroundStaNetDevice> ();
+  ground_device->SetAddress (Mac48Address::Allocate ());
   node->AddDevice (ground_device);
   return ground_device;
 }
