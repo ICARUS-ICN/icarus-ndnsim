@@ -31,12 +31,15 @@
 #include "ns3/data-rate.h"
 #include "ns3/sat-address.h"
 #include "ns3/traced-callback.h"
+#include "constellation.h"
 
 namespace ns3 {
 namespace icarus {
+
 class GroundStaNetDevice;
 class Sat2GroundNetDevice;
 class GroundSatSuccessModel;
+
 class GroundSatChannel : public Channel
 {
 public:
@@ -49,10 +52,9 @@ public:
   GroundSatChannel ();
   virtual ~GroundSatChannel ();
 
-  bool AttachNewSat (Ptr<Sat2GroundNetDevice> device);
   bool AttachGround (Ptr<GroundStaNetDevice> device);
 
-  Time Transmit2Ground (Ptr<Packet> packet, DataRate bps, const SatAddress &src,
+  Time Transmit2Ground (Ptr<Packet> packet, DataRate bps, Ptr<Sat2GroundNetDevice> src,
                         uint16_t protocolNumber) const;
   Time Transmit2Sat (Ptr<Packet> packet, DataRate bps, const SatAddress &dst,
                      uint16_t protocolNumber) const;
@@ -60,10 +62,12 @@ public:
   virtual std::size_t GetNDevices (void) const override;
   virtual Ptr<NetDevice> GetDevice (std::size_t i) const override;
 
+  void SetConstellation (Ptr<Constellation> constellation);
+
 private:
-  NetDeviceContainer m_satellites;
   Ptr<NetDevice> m_ground = nullptr;
   Ptr<GroundSatSuccessModel> m_txSuccessModel = nullptr;
+  Ptr<Constellation> m_constellation;
 
   TracedCallback<Ptr<const Packet>> m_phyTxDropTrace;
 };

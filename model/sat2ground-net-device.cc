@@ -61,14 +61,10 @@ Sat2GroundNetDevice::Attach (Ptr<GroundSatChannel> channel)
 {
   NS_LOG_FUNCTION (this << channel);
 
-  if (channel->AttachNewSat (this))
-    {
-      SetChannel (channel);
-      m_linkChangeCallbacks ();
-      return true;
-    }
+  SetChannel (channel);
+  m_linkChangeCallbacks ();
 
-  return false;
+  return true;
 }
 
 void
@@ -214,8 +210,8 @@ Sat2GroundNetDevice::TransmitStart (Ptr<Packet> packet, uint16_t protocolNumber)
   m_txMachineState = TRANSMITTING;
 
   m_phyTxBeginTrace (packet);
-  Time endTx =
-      GetInternalChannel ()->Transmit2Ground (packet, GetDataRate (), m_address, protocolNumber);
+  Time endTx = GetInternalChannel ()->Transmit2Ground (
+      packet, GetDataRate (), GetObject<Sat2GroundNetDevice> (), protocolNumber);
   Simulator::Schedule (endTx, &Sat2GroundNetDevice::TransmitComplete, this, packet, protocolNumber);
 }
 
