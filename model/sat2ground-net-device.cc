@@ -22,8 +22,10 @@
 
 #include "sat2ground-net-device.h"
 #include "icarus-net-device.h"
+#include "ns3/ground-sta-net-device.h"
 #include "ns3/log-macros-enabled.h"
 #include "ns3/log.h"
+#include "ns3/mac48-address.h"
 #include "ns3/sat-address.h"
 #include "ns3/pointer.h"
 #include "ns3/uinteger.h"
@@ -35,6 +37,116 @@ namespace icarus {
 NS_LOG_COMPONENT_DEFINE ("icarus.Sat2GroundNetDevice");
 
 NS_OBJECT_ENSURE_REGISTERED (Sat2GroundNetDevice);
+
+namespace {
+/**
+ * \brief Tag to store source, destination and protocol of each packet.
+ */
+class SatGroundTag : public Tag
+{
+public:
+  /**
+   * \brief Get the type ID.
+   * \return the object TypeId
+   */
+  static TypeId GetTypeId (void);
+  virtual TypeId GetInstanceTypeId (void) const override;
+
+  virtual uint32_t GetSerializedSize (void) const override;
+  virtual void Serialize (TagBuffer i) const override;
+  virtual void Deserialize (TagBuffer i) override;
+
+  /**
+   * Set the destination address
+   * \param dst destination address
+   */
+  void
+  SetDst (const Mac48Address &dst)
+  {
+    m_dst = dst;
+  }
+  /**
+   * Get the destination address
+   * \return the destination address
+   */
+  const Mac48Address &
+  GetDst (void) const
+  {
+    return m_dst;
+  }
+
+  /**
+   * Set the protocol number
+   * \param proto protocol number
+   */
+  void
+  SetProto (uint16_t proto)
+  {
+    m_protocolNumber = proto;
+  }
+  /**
+   * Get the protocol number
+   * \return the protocol number
+   */
+  uint16_t
+  GetProto (void) const
+  {
+    return m_protocolNumber;
+  }
+
+  void Print (std::ostream &os) const override;
+
+private:
+  Mac48Address m_dst; //!< destination address
+  uint16_t m_protocolNumber; //!< protocol number
+};
+
+NS_OBJECT_ENSURE_REGISTERED (SatGroundTag);
+
+TypeId
+SatGroundTag::GetTypeId (void)
+{
+  static TypeId tid = TypeId ("ns3::SatGroundTag")
+                          .SetParent<Tag> ()
+                          .SetGroupName ("Icarus")
+                          .AddConstructor<SatGroundTag> ();
+  return tid;
+}
+TypeId
+SatGroundTag::GetInstanceTypeId (void) const
+{
+  return GetTypeId ();
+}
+
+uint32_t
+SatGroundTag::GetSerializedSize (void) const
+{
+  return 8 + 8 + 2;
+}
+void
+SatGroundTag::Serialize (TagBuffer i) const
+{
+  uint8_t mac[6];
+  m_dst.CopyTo (mac);
+  i.Write (mac, 6);
+  i.WriteU16 (m_protocolNumber);
+}
+void
+SatGroundTag::Deserialize (TagBuffer i)
+{
+  uint8_t mac[6];
+
+  i.Read (mac, 6);
+  m_dst.CopyFrom (mac);
+  m_protocolNumber = i.ReadU16 ();
+}
+
+void
+SatGroundTag::Print (std::ostream &os) const
+{
+  os << " dst=" << m_dst << " proto=" << m_protocolNumber;
+}
+} // namespace
 
 TypeId
 Sat2GroundNetDevice::GetTypeId (void)
@@ -68,17 +180,20 @@ Sat2GroundNetDevice::Attach (Ptr<GroundSatChannel> channel)
 }
 
 void
-Sat2GroundNetDevice::ReceiveFromGround (Ptr<Packet> packet, DataRate bps, uint16_t protocolNumber)
+Sat2GroundNetDevice::ReceiveFromGround (Ptr<Packet> packet, DataRate bps, const Address &src,
+                                        uint16_t protocolNumber)
 {
-  NS_LOG_FUNCTION (this << packet << bps << protocolNumber);
+  NS_LOG_FUNCTION (this << packet << bps << src << protocolNumber);
 
   m_phyRxBeginTrace (packet);
   Simulator::Schedule (bps.CalculateBytesTxTime (packet->GetSize ()),
-                       &Sat2GroundNetDevice::ReceiveFromGroundFinish, this, packet, protocolNumber);
+                       &Sat2GroundNetDevice::ReceiveFromGroundFinish, this, packet, src,
+                       protocolNumber);
 }
 
 void
-Sat2GroundNetDevice::ReceiveFromGroundFinish (Ptr<Packet> packet, uint16_t protocolNumber)
+Sat2GroundNetDevice::ReceiveFromGroundFinish (Ptr<Packet> packet, const Address &src,
+                                              uint16_t protocolNumber)
 {
   NS_LOG_FUNCTION (this << packet << protocolNumber);
 
@@ -86,16 +201,11 @@ Sat2GroundNetDevice::ReceiveFromGroundFinish (Ptr<Packet> packet, uint16_t proto
   m_snifferTrace (packet);
   m_macRxTrace (packet);
 
-  NS_LOG_WARN ("FIXME: Missing source address.");
-  NS_LOG_WARN ("FIXME: Have to specify packet type properly");
-  static auto macUnspecified = Mac48Address ("00:00:00:00:00:00");
-
   if (m_promiscReceiveCallback.IsNull () != true)
     {
-      m_promiscReceiveCallback (this, packet, protocolNumber, macUnspecified, macUnspecified,
-                                PACKET_HOST);
+      m_promiscReceiveCallback (this, packet, protocolNumber, src, GetAddress (), PACKET_HOST);
     }
-  m_receiveCallback (this, packet, protocolNumber, macUnspecified);
+  m_receiveCallback (this, packet, protocolNumber, src);
 }
 
 bool
@@ -179,7 +289,11 @@ bool
 Sat2GroundNetDevice::Send (Ptr<Packet> packet, const Address &dest, uint16_t protocolNumber)
 {
   NS_LOG_FUNCTION (this << packet << dest << protocolNumber);
-  NS_LOG_WARN ("The protocol number should really be transmitted in a header somehow");
+
+  SatGroundTag tag;
+  tag.SetDst (Mac48Address::ConvertFrom (dest));
+  tag.SetProto (protocolNumber);
+  packet->AddPacketTag (tag);
 
   m_macTxTrace (packet);
   if (GetQueue ()->Enqueue (packet) == false)
@@ -196,7 +310,7 @@ Sat2GroundNetDevice::Send (Ptr<Packet> packet, const Address &dest, uint16_t pro
         {
           auto packet = GetQueue ()->Dequeue ();
           m_snifferTrace (packet);
-          TransmitStart (packet, protocolNumber);
+          TransmitStart (packet);
         }
     }
 
@@ -204,23 +318,28 @@ Sat2GroundNetDevice::Send (Ptr<Packet> packet, const Address &dest, uint16_t pro
 }
 
 void
-Sat2GroundNetDevice::TransmitStart (Ptr<Packet> packet, uint16_t protocolNumber)
+Sat2GroundNetDevice::TransmitStart (Ptr<Packet> packet)
 {
-  NS_LOG_FUNCTION (this << packet << protocolNumber);
+  NS_LOG_FUNCTION (this << packet);
   NS_ASSERT_MSG (m_txMachineState == IDLE,
                  "Must be IDLE to transmit. Tx state is: " << m_txMachineState);
   m_txMachineState = TRANSMITTING;
 
+  SatGroundTag tag;
+  packet->PeekPacketTag (tag);
+  const auto dst = tag.GetDst ();
+  const auto proto = tag.GetProto ();
+
   m_phyTxBeginTrace (packet);
   Time endTx = GetInternalChannel ()->Transmit2Ground (
-      packet, GetDataRate (), GetObject<Sat2GroundNetDevice> (), protocolNumber);
-  Simulator::Schedule (endTx, &Sat2GroundNetDevice::TransmitComplete, this, packet, protocolNumber);
+      packet, GetDataRate (), GetObject<Sat2GroundNetDevice> (), dst, proto);
+  Simulator::Schedule (endTx, &Sat2GroundNetDevice::TransmitComplete, this, packet);
 }
 
 void
-Sat2GroundNetDevice::TransmitComplete (Ptr<Packet> packet, uint16_t protocolNumber)
+Sat2GroundNetDevice::TransmitComplete (Ptr<Packet> packet)
 {
-  NS_LOG_FUNCTION (this << packet << protocolNumber);
+  NS_LOG_FUNCTION (this << packet);
 
   m_phyTxEndTrace (packet);
   m_txMachineState = IDLE;
@@ -229,7 +348,7 @@ Sat2GroundNetDevice::TransmitComplete (Ptr<Packet> packet, uint16_t protocolNumb
     {
       auto packet = GetQueue ()->Dequeue ();
       m_snifferTrace (packet);
-      TransmitStart (packet, protocolNumber);
+      TransmitStart (packet);
     }
 }
 

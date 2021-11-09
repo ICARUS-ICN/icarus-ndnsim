@@ -45,7 +45,8 @@ public:
 
   bool Attach (Ptr<GroundSatChannel> channel) override;
 
-  void ReceiveFromGround (Ptr<Packet> packet, DataRate bps, uint16_t protocolNumber);
+  void ReceiveFromGround (Ptr<Packet> packet, DataRate bps, const Address &src,
+                          uint16_t protocolNumber);
 
   Address GetAddress () const override;
   void SetAddress (Address address) override;
@@ -74,9 +75,9 @@ private:
   SatAddress m_address;
   enum { IDLE, TRANSMITTING } m_txMachineState = IDLE;
 
-  void ReceiveFromGroundFinish (Ptr<Packet> packet, uint16_t protocolNumber);
-  void TransmitStart (Ptr<Packet> packet, uint16_t protocolNumber);
-  void TransmitComplete (Ptr<Packet> packet, uint16_t protocolNumber);
+  void ReceiveFromGroundFinish (Ptr<Packet> packet, const Address &src, uint16_t protocolNumber);
+  void TransmitStart (Ptr<Packet> packet);
+  void TransmitComplete (Ptr<Packet> packet);
 };
 
 } // namespace icarus
