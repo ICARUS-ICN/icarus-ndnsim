@@ -32,6 +32,7 @@
 #include <boost/units/systems/si/plane_angle.hpp>
 #include <boost/units/systems/si/prefixes.hpp>
 #include <boost/units/systems/si/length.hpp>
+#include <cstddef>
 
 NS_LOG_COMPONENT_DEFINE ("icarus.ConstellationPositionsExample");
 
@@ -118,9 +119,9 @@ logLocation (const Ptr<Constellation> &constellation)
 {
   NS_LOG_FUNCTION (constellation);
 
-  for (auto plane = 0; plane < constellation->GetNPlanes (); plane++)
+  for (std::size_t plane = 0; plane < constellation->GetNPlanes (); plane++)
     {
-      for (auto index = 0; index < constellation->GetPlaneSize (); index++)
+      for (std::size_t index = 0; index < constellation->GetPlaneSize (); index++)
         {
           const auto &sat = constellation->GetSatellite (plane, index);
           const auto &mobility = sat->GetObject<CircularOrbitMobilityModel> ();
