@@ -53,7 +53,8 @@ Constellation::Constellation (std::size_t n_planes, std::size_t plane_size)
     : m_constellationId (constellationCounter++),
       m_nPlanes (n_planes),
       m_planeSize (plane_size),
-      m_planes (n_planes)
+      m_planes (n_planes),
+      m_size (0)
 {
   NS_LOG_FUNCTION (this << n_planes << plane_size);
 
@@ -73,6 +74,11 @@ Constellation::AddSatellite (std::size_t plane, std::size_t plane_order,
                    "There can be only on satellite in each orbital location");
   NS_ABORT_MSG_UNLESS (satellite->GetNode ()->GetObject<CircularOrbitMobilityModel> () != nullptr,
                        "A satellite must have a CircularOrbitMobilityModel");
+
+  if (m_planes[plane][plane_order] == nullptr)
+    {
+      m_size += 1;
+    }
 
   m_planes[plane][plane_order] = satellite;
 
@@ -176,6 +182,25 @@ std::size_t
 Constellation::GetConstellationId () const
 {
   return m_constellationId;
+}
+
+std::size_t
+Constellation::GetSize () const
+{
+  NS_ASSERT (m_size <= m_nPlanes * m_planeSize);
+
+  return m_size;
+}
+
+Ptr<Sat2GroundNetDevice>
+Constellation::Get (std::size_t index) const
+{
+  NS_ABORT_UNLESS (index <= GetSize ());
+
+  const std::size_t plane = index / GetPlaneSize ();
+  const std::size_t plane_order = index % GetPlaneSize ();
+
+  return m_planes[plane][plane_order];
 }
 
 } // namespace icarus
