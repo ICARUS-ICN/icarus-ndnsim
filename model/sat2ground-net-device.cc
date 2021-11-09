@@ -103,7 +103,9 @@ Sat2GroundNetDevice::IsBroadcast (void) const
 {
   NS_LOG_FUNCTION (this);
 
-  return false;
+  NS_LOG_WARN ("Only to make the ARP implementation of ns3 happy.");
+  // There should be a way to put a L2 address on a destination on a non-broadcast medium
+  return true;
 }
 
 void
@@ -246,7 +248,7 @@ Sat2GroundNetDevice::NeedsArp (void) const
 {
   NS_LOG_FUNCTION (this);
 
-  return false;
+  return true;
 }
 
 bool
