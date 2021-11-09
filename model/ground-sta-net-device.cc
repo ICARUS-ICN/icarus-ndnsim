@@ -25,6 +25,7 @@
 #include "ns3/address.h"
 #include "ns3/icarus-net-device.h"
 #include "ns3/log-macros-enabled.h"
+#include "ns3/mac48-address.h"
 #include "ns3/pointer.h"
 #include "ns3/sat-address.h"
 #include "ns3/uinteger.h"
@@ -173,19 +174,15 @@ GroundStaNetDevice::Attach (Ptr<GroundSatChannel> channel)
 {
   NS_LOG_FUNCTION (this << channel);
 
-  if (channel->AttachGround (this))
-    {
-      SetChannel (channel);
-      m_linkChangeCallbacks ();
+  channel->AddGroundDevice (this);
+  SetChannel (channel);
+  m_linkChangeCallbacks ();
 
-      return true;
-    }
-
-  return false;
+  return true;
 }
 
 void
-GroundStaNetDevice::ReceiveFromSat (Ptr<Packet> packet, DataRate bps, const SatAddress &src,
+GroundStaNetDevice::ReceiveFromSat (Ptr<Packet> packet, DataRate bps, const Address &src,
                                     uint16_t protocolNumber)
 {
   NS_LOG_FUNCTION (this << packet << bps << src << protocolNumber);
@@ -197,7 +194,7 @@ GroundStaNetDevice::ReceiveFromSat (Ptr<Packet> packet, DataRate bps, const SatA
 }
 
 void
-GroundStaNetDevice::ReceiveFromSatFinish (Ptr<Packet> packet, const SatAddress &src,
+GroundStaNetDevice::ReceiveFromSatFinish (Ptr<Packet> packet, const Address &src,
                                           uint16_t protocolNumber)
 {
   NS_LOG_FUNCTION (this << packet << src << protocolNumber);
@@ -206,15 +203,11 @@ GroundStaNetDevice::ReceiveFromSatFinish (Ptr<Packet> packet, const SatAddress &
   m_snifferTrace (packet);
   m_macRxTrace (packet);
 
-  NS_LOG_WARN ("FIXME: Have to specify packet type properly");
-
-  static auto macUnspecified = Mac48Address ("00:00:00:00:00:00");
   if (m_promiscReceiveCallback.IsNull () != true)
     {
-      m_promiscReceiveCallback (this, packet, protocolNumber, src.ConvertTo (), macUnspecified,
-                                PACKET_HOST);
+      m_promiscReceiveCallback (this, packet, protocolNumber, src, GetAddress (), PACKET_HOST);
     }
-  m_receiveCallback (this, packet, protocolNumber, src.ConvertTo ());
+  m_receiveCallback (this, packet, protocolNumber, src);
 }
 
 void
@@ -347,7 +340,8 @@ GroundStaNetDevice::TransmitStart (Ptr<Packet> packet)
   const auto proto = tag.GetProto ();
 
   m_phyTxBeginTrace (packet);
-  Time endTx = GetInternalChannel ()->Transmit2Sat (packet, GetDataRate (), dst, proto);
+  Time endTx = GetInternalChannel ()->Transmit2Sat (packet, GetDataRate (),
+                                                    GetObject<GroundStaNetDevice> (), dst, proto);
   Simulator::Schedule (endTx, &GroundStaNetDevice::TransmitComplete, this, packet);
 }
 

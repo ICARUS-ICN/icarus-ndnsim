@@ -30,7 +30,6 @@
 #include "ns3/queue.h"
 #include "ns3/ground-sat-channel.h"
 #include "icarus-net-device.h"
-#include <cstdint>
 
 namespace ns3 {
 namespace icarus {
@@ -47,7 +46,7 @@ public:
 
   bool Attach (Ptr<GroundSatChannel> channel) override;
 
-  void ReceiveFromSat (Ptr<Packet> packet, DataRate bps, const SatAddress &src,
+  void ReceiveFromSat (Ptr<Packet> packet, DataRate bps, const Address &src,
                        uint16_t protocolNumber);
 
   Address GetAddress () const override;
@@ -81,7 +80,7 @@ private:
       m_phyTxEndTrace, m_phyRxBeginTrace, m_phyRxEndTrace, m_snifferTrace;
   Mac48Address m_address;
 
-  void ReceiveFromSatFinish (Ptr<Packet> packet, const SatAddress &src, uint16_t protocolNumber);
+  void ReceiveFromSatFinish (Ptr<Packet> packet, const Address &src, uint16_t protocolNumber);
   void TransmitStart (Ptr<Packet> packet);
   void TransmitComplete (Ptr<Packet> packet);
 };
