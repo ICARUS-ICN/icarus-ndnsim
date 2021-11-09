@@ -26,6 +26,7 @@
 #include "ns3/node.h"
 #include "ns3/net-device.h"
 #include "ns3/sat-address.h"
+#include "ns3/mac48-address.h"
 #include "ns3/queue.h"
 #include "ns3/ground-sat-channel.h"
 #include "icarus-net-device.h"
@@ -78,6 +79,7 @@ private:
 
   TracedCallback<Ptr<const Packet>> m_macTxTrace, m_macTxDropTrace, m_macRxTrace, m_phyTxBeginTrace,
       m_phyTxEndTrace, m_phyRxBeginTrace, m_phyRxEndTrace, m_snifferTrace;
+  Mac48Address m_address;
 
   void ReceiveFromSatFinish (Ptr<Packet> packet, const SatAddress &src, uint16_t protocolNumber);
   void TransmitStart (Ptr<Packet> packet);

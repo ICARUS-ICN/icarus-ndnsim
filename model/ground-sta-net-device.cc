@@ -154,7 +154,11 @@ GroundStaNetDevice::GetTypeId (void)
   static TypeId tid = TypeId ("ns3::icarus::GroundStaNetDevice")
                           .SetParent<IcarusNetDevice> ()
                           .SetGroupName ("ICARUS")
-                          .AddConstructor<GroundStaNetDevice> ();
+                          .AddConstructor<GroundStaNetDevice> ()
+                          .AddAttribute ("Address", "The link-layer address of this device.",
+                                         Mac48AddressValue (Mac48Address ("00:00:00:00:00:00")),
+                                         MakeMac48AddressAccessor (&GroundStaNetDevice::m_address),
+                                         MakeMac48AddressChecker ());
 
   return tid;
 }
@@ -236,7 +240,7 @@ GroundStaNetDevice::SetAddress (Address address)
 {
   NS_LOG_FUNCTION (this << address);
 
-  NS_LOG_WARN ("FIXME: We still do not support addresses");
+  m_address = Mac48Address::ConvertFrom (address);
 }
 
 Address
@@ -244,8 +248,7 @@ GroundStaNetDevice::GetAddress (void) const
 {
   NS_LOG_FUNCTION (this);
 
-  NS_LOG_WARN ("FIXME: We still do not support addresses");
-  return Address ();
+  return m_address;
 }
 
 Address
