@@ -77,7 +77,7 @@ ConstellationHelper::GetConstellation () const
 }
 
 SatAddress
-ConstellationHelper::LaunchSatellite (Ptr<Node> satellite)
+ConstellationHelper::LaunchSatellite (Ptr<Sat2GroundNetDevice> satellite)
 {
   NS_LOG_FUNCTION (this << &satellite);
 
@@ -91,7 +91,7 @@ ConstellationHelper::LaunchSatellite (Ptr<Node> satellite)
   orbit->LaunchSat (quantity<plane_angle> (m_inclination), quantity<plane_angle> (m_ascendingNode),
                     m_altitude, quantity<plane_angle> (m_phase + m_offset));
 
-  satellite->AggregateObject (orbit);
+  satellite->GetNode ()->AggregateObject (orbit);
   const auto address = m_constellation->AddSatellite (m_planeIndex, m_orbitIndex, satellite);
 
   m_orbitIndex += 1;

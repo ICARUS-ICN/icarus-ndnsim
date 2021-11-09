@@ -26,9 +26,9 @@
 #include "ns3/log-macros-enabled.h"
 #include "ns3/log.h"
 #include "ns3/mobility-model.h"
-#include "ns3/node-container.h"
-#include "ns3/node.h"
+#include "ns3/net-device-container.h"
 #include "ns3/sat-address.h"
+#include "ns3/sat2ground-net-device.h"
 
 #include <limits>
 
@@ -64,13 +64,14 @@ Constellation::Constellation (std::size_t n_planes, std::size_t plane_size)
 }
 
 SatAddress
-Constellation::AddSatellite (std::size_t plane, std::size_t plane_order, Ptr<Node> satellite)
+Constellation::AddSatellite (std::size_t plane, std::size_t plane_order,
+                             Ptr<Sat2GroundNetDevice> satellite)
 {
   NS_LOG_FUNCTION (this << plane << plane_order << satellite);
 
   NS_ABORT_MSG_IF (m_planes[plane][plane_order] != nullptr,
                    "There can be only on satellite in each orbital location");
-  NS_ABORT_MSG_UNLESS (satellite->GetObject<CircularOrbitMobilityModel> () != nullptr,
+  NS_ABORT_MSG_UNLESS (satellite->GetNode ()->GetObject<CircularOrbitMobilityModel> () != nullptr,
                        "A satellite must have a CircularOrbitMobilityModel");
 
   m_planes[plane][plane_order] = satellite;
@@ -78,12 +79,12 @@ Constellation::AddSatellite (std::size_t plane, std::size_t plane_order, Ptr<Nod
   return SatAddress (m_constellationId, plane, plane_order);
 }
 
-Ptr<Node>
+Ptr<Sat2GroundNetDevice>
 Constellation::GetClosest (Vector3D cartesianCoordinates) const
 {
   NS_LOG_FUNCTION (this << cartesianCoordinates);
 
-  Ptr<Node> closest = nullptr;
+  Ptr<Sat2GroundNetDevice> closest = nullptr;
   Vector bestPos;
   double sq_closest_distance = std::numeric_limits<double>::infinity ();
 
@@ -98,7 +99,7 @@ Constellation::GetClosest (Vector3D cartesianCoordinates) const
             }
 
           const auto sq_distance =
-              getSqDistance (sat->GetObject<MobilityModel> ()->GetPosition (), bestPos);
+              getSqDistance (sat->GetNode ()->GetObject<MobilityModel> ()->GetPosition (), bestPos);
           if (sq_distance <= sq_closest_distance)
             {
               sq_closest_distance = sq_distance;
@@ -127,7 +128,7 @@ Constellation::GetPlaneSize () const
   return m_planeSize;
 }
 
-Ptr<Node>
+Ptr<Sat2GroundNetDevice>
 Constellation::GetSatellite (const SatAddress &address) const
 {
   NS_LOG_FUNCTION (this << address);
@@ -140,7 +141,7 @@ Constellation::GetSatellite (const SatAddress &address) const
   return GetSatellite (address.getOrbitalPlane (), address.getPlaneIndex ());
 }
 
-Ptr<Node>
+Ptr<Sat2GroundNetDevice>
 Constellation::GetSatellite (std::size_t plane, std::size_t index) const
 {
   NS_LOG_FUNCTION (this << plane << index);
@@ -151,11 +152,11 @@ Constellation::GetSatellite (std::size_t plane, std::size_t index) const
   return m_planes[plane][index];
 }
 
-NodeContainer
-Constellation::CreateNodeContainer () const
+NetDeviceContainer
+Constellation::CreateNetDeviceContainer () const
 {
   NS_LOG_FUNCTION (this);
-  NodeContainer nodes;
+  NetDeviceContainer devices;
 
   for (const auto &plane : m_planes)
     {
@@ -163,12 +164,12 @@ Constellation::CreateNodeContainer () const
         {
           if (sat != nullptr)
             {
-              nodes.Add (sat);
+              devices.Add (sat);
             }
         }
     }
 
-  return nodes;
+  return devices;
 }
 
 std::size_t

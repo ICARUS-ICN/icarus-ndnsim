@@ -20,7 +20,7 @@
 #ifndef CONSTELLATION_H
 #define CONSTELLATION_H
 
-#include "ns3/node-container.h"
+#include "ns3/net-device-container.h"
 #include "ns3/ptr.h"
 #include "ns3/simple-ref-count.h"
 #include "ns3/vector.h"
@@ -28,12 +28,10 @@
 #include <vector>
 
 namespace ns3 {
-
-class Node;
-
 namespace icarus {
 
 class SatAddress;
+class Sat2GroundNetDevice;
 
 class Constellation : public SimpleRefCount<Constellation>
 {
@@ -41,19 +39,20 @@ public:
   Constellation (std::size_t n_planes, std::size_t plane_size);
   Constellation (const Constellation &) = delete;
 
-  SatAddress AddSatellite (std::size_t plane, std::size_t plane_order, Ptr<Node> satellite);
-  Ptr<Node> GetClosest (Vector3D cartesianCoordinates) const;
+  SatAddress AddSatellite (std::size_t plane, std::size_t plane_order,
+                           Ptr<Sat2GroundNetDevice> satellite);
+  Ptr<Sat2GroundNetDevice> GetClosest (Vector3D cartesianCoordinates) const;
 
   std::size_t GetNPlanes () const;
   std::size_t GetPlaneSize () const;
   std::size_t GetConstellationId () const;
-  Ptr<Node> GetSatellite (const SatAddress &address) const;
-  Ptr<Node> GetSatellite (std::size_t plane, std::size_t index) const;
+  Ptr<Sat2GroundNetDevice> GetSatellite (const SatAddress &address) const;
+  Ptr<Sat2GroundNetDevice> GetSatellite (std::size_t plane, std::size_t index) const;
 
-  NodeContainer CreateNodeContainer () const;
+  NetDeviceContainer CreateNetDeviceContainer () const;
 
 private:
-  typedef std::vector<Ptr<Node>> plane;
+  typedef std::vector<Ptr<Sat2GroundNetDevice>> plane;
 
   static std::size_t constellationCounter;
 

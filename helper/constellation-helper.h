@@ -35,6 +35,7 @@ namespace ns3 {
 namespace icarus {
 
 class IcarusHelper;
+class Sat2GroundNetDevice;
 
 class ConstellationHelper
 {
@@ -47,7 +48,7 @@ public:
 
   Ptr<Constellation> GetConstellation () const;
 
-  SatAddress LaunchSatellite (Ptr<Node> satellite);
+  SatAddress LaunchSatellite (Ptr<Sat2GroundNetDevice> satellite);
 
 private:
   const Ptr<Constellation> m_constellation;

@@ -188,7 +188,6 @@ IcarusHelper::InstallPriv (Ptr<Node> node, Ptr<GroundSatChannel> channel,
   NS_LOG_FUNCTION (this << node << channel << chelper);
 
   Ptr<IcarusNetDevice> device = CreateDeviceForNode (node, chelper);
-  node->AddDevice (device);
   auto queue = m_queueFactory.Create<Queue<Packet>> ();
   device->SetQueue (queue);
   device->Attach (channel);
@@ -211,14 +210,17 @@ IcarusHelper::CreateDeviceForNode (Ptr<Node> node, ConstellationHelper *chelper)
       NS_ASSERT_MSG (chelper != nullptr,
                      "We need a ConstellationHelper to create a Satellite device");
       auto sat_device = m_sat2GroundFactory.Create<Sat2GroundNetDevice> ();
-      const auto address = chelper->LaunchSatellite (node);
+      node->AddDevice (sat_device);
+      const auto address = chelper->LaunchSatellite (sat_device);
       sat_device->SetAddress (address.ConvertTo ());
 
       return sat_device;
     }
 
   // This is NOT a satellite
-  return m_groundStaFactory.Create<GroundStaNetDevice> ();
+  const auto ground_device = m_groundStaFactory.Create<GroundStaNetDevice> ();
+  node->AddDevice (ground_device);
+  return ground_device;
 }
 
 void
