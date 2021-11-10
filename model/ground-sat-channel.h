@@ -65,6 +65,7 @@ public:
   virtual Ptr<NetDevice> GetDevice (std::size_t i) const override;
 
   void SetConstellation (Ptr<Constellation> constellation);
+  Ptr<Constellation> GetConstellation () const;
 
 private:
   NetDeviceContainer m_ground;
