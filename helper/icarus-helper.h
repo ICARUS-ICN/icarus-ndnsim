@@ -26,6 +26,7 @@
 #include "ns3/trace-helper.h"
 #include "ns3/ground-sat-channel.h"
 #include "ns3/icarus-net-device.h"
+#include "src/ndnSIM/helper/ndn-stack-helper.hpp"
 
 namespace ns3 {
 namespace icarus {
@@ -105,6 +106,7 @@ public:
    */
   void SetChannelAttribute (const std::string &n1, const AttributeValue &v1);
 
+  static void FixNdnStackHelper (ndn::StackHelper &sh);
   /**
    * This method creates an ns3::icarus::GroundStaNetDevice or
    * ns3::icarus::Sat2GroundNetDevice with the attributes configured by
