@@ -22,13 +22,12 @@
 #include "ns3/mobility-module.h"
 #include "ns3/icarus-module.h"
 #include "ns3/trace-helper.h"
-#include "ns3/log.h"
 #include "ns3/ndnSIM-module.h"
 
 #include <boost/units/systems/si/length.hpp>
 #include <boost/units/systems/si/plane_angle.hpp>
 #include <boost/units/systems/angle/degrees.hpp>
-#include <limits>
+#include <boost/units/systems/si/prefixes.hpp>
 
 namespace ns3 {
 using namespace icarus;
@@ -40,9 +39,11 @@ main (int argc, char **argv) -> int
 {
   using boost::units::quantity;
   using boost::units::degree::degrees;
+  using boost::units::si::kilo;
+  using boost::units::si::length;
   using boost::units::si::meters;
   using boost::units::si::plane_angle;
-  using boost::units::si::radians;
+
   CommandLine cmd;
 
   cmd.Parse (argc, argv);
@@ -52,12 +53,11 @@ main (int argc, char **argv) -> int
   auto bird = nodes.Get (0);
   auto ground = nodes.Get (1);
 
-  ObjectFactory circularOrbitFactory ("ns3::icarus::CircularOrbitMobilityModel");
+  IcarusHelper icarusHelper;
+  ConstellationHelper constellationHelper (quantity<length> (250 * kilo * meters),
+                                           quantity<plane_angle> (60.0 * degrees), 2, 1, 0);
 
-  auto mmodel = circularOrbitFactory.Create<CircularOrbitMobilityModel> ();
-  mmodel->LaunchSat (quantity<plane_angle> (60.0 * degrees), 0.0 * radians, 250e3 * meters,
-                     0.0 * radians);
-  bird->AggregateObject (mmodel);
+  ObjectFactory circularOrbitFactory ("ns3::icarus::CircularOrbitMobilityModel");
 
   ObjectFactory staticPositionsFactory ("ns3::ListPositionAllocator");
   auto staticPositions = staticPositionsFactory.Create<ListPositionAllocator> ();
@@ -68,8 +68,7 @@ main (int argc, char **argv) -> int
   staticHelper.SetMobilityModel ("ns3::ConstantPositionMobilityModel");
   staticHelper.Install (ground);
 
-  IcarusHelper icarusHelper;
-  NetDeviceContainer netDevices = icarusHelper.Install (nodes);
+  NetDeviceContainer netDevices (icarusHelper.Install (nodes, &constellationHelper));
 
   // Install NDN stack on all nodes
   ns3::ndn::StackHelper ndnHelper;
