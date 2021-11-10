@@ -19,6 +19,7 @@
  */
 
 #include "ns3/core-module.h"
+#include "ns3/icarus-helper.h"
 #include "ns3/mobility-module.h"
 #include "ns3/icarus-module.h"
 #include "ns3/trace-helper.h"
@@ -72,6 +73,7 @@ main (int argc, char **argv) -> int
 
   // Install NDN stack on all nodes
   ns3::ndn::StackHelper ndnHelper;
+  IcarusHelper::FixNdnStackHelper (ndnHelper);
   ndnHelper.SetDefaultRoutes (true);
   ndnHelper.InstallAll ();
 
