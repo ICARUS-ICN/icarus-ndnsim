@@ -20,6 +20,7 @@
 
 #include "icarus-helper.h"
 #include "ns3/abort.h"
+#include "ns3/callback.h"
 #include "ns3/circular-orbit.h"
 #include "ns3/icarus-net-device.h"
 #include "ns3/log-macros-enabled.h"
@@ -34,7 +35,10 @@
 #include "ns3/config.h"
 #include "ns3/assert.h"
 #include "ns3/ground-sat-success-model.h"
-#include "src/icarus/utils/sat-address.h"
+#include "ns3/sat-address.h"
+
+#include "ns3/ndnSIM/NFD/daemon/face/generic-link-service.hpp"
+#include "src/icarus/model/ground-sta-transport.h"
 
 namespace ns3 {
 namespace icarus {
@@ -393,6 +397,57 @@ IcarusHelper::EnableAsciiInternal (Ptr<OutputStreamWrapper> stream, std::string 
       << "/TxQueue/Drop";
   Config::Connect (oss.str (),
                    MakeBoundCallback (&AsciiTraceHelper::DefaultDropSinkWithContext, stream));
+}
+
+namespace {
+
+// Adapted from ndn-stack-helper.cpp
+std::string
+constructFaceUri (Ptr<NetDevice> netDevice)
+{
+  std::string uri = "netdev://";
+  Address address = netDevice->GetAddress ();
+  if (Mac48Address::IsMatchingType (address))
+    {
+      uri += "[" + boost::lexical_cast<std::string> (Mac48Address::ConvertFrom (address)) + "]";
+    }
+
+  return uri;
+}
+
+std::shared_ptr<nfd::face::Face>
+GroundStaNetDeviceCallback (Ptr<Node> node, Ptr<ndn::L3Protocol> ndn, Ptr<NetDevice> netDevice)
+{
+  NS_LOG_DEBUG ("Creating default Face on node " << node->GetId ());
+
+  // Create an ndnSIM-specific transport instance
+  ::nfd::face::GenericLinkService::Options opts;
+  opts.allowFragmentation = true;
+  opts.allowReassembly = true;
+  opts.allowCongestionMarking = true;
+
+  auto linkService = std::make_unique<::nfd::face::GenericLinkService> (opts);
+
+  auto transport = std::make_unique<ndn::icarus::GroundStaTransport> (
+      node, netDevice, constructFaceUri (netDevice), "netdev://[ff:ff:ff:ff:ff:ff]");
+
+  auto face = std::make_shared<nfd::face::Face> (std::move (linkService), std::move (transport));
+  face->setMetric (1);
+
+  ndn->addFace (face);
+  NS_LOG_LOGIC ("Node " << node->GetId () << ": added Face as face #" << face->getLocalUri ());
+
+  return face;
+}
+} // namespace
+
+void
+IcarusHelper::FixNdnStackHelper (ndn::StackHelper &sh)
+{
+  NS_LOG_FUNCTION (&sh);
+
+  sh.AddFaceCreateCallback (GroundStaNetDevice::GetTypeId (),
+                            MakeCallback (GroundStaNetDeviceCallback));
 }
 
 } // namespace icarus
