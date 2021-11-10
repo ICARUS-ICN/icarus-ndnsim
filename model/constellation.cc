@@ -92,25 +92,25 @@ Constellation::GetClosest (Vector3D cartesianCoordinates) const
 
   Ptr<Sat2GroundNetDevice> closest = nullptr;
   Vector bestPos;
-  double sq_closest_distance = std::numeric_limits<double>::infinity ();
+  auto sq_closest_distance = std::numeric_limits<double>::infinity ();
 
   NS_LOG_WARN ("FIXME: Replace this with a better algorithm.");
   for (const auto &plane : m_planes)
     {
-      for (const auto &sat : plane)
+      for (const auto &sat_device : plane)
         {
-          if (sat == nullptr)
+          if (sat_device == nullptr)
             {
               continue;
             }
 
-          const auto sq_distance =
-              getSqDistance (sat->GetNode ()->GetObject<MobilityModel> ()->GetPosition (), bestPos);
+          const auto sq_distance = getSqDistance (
+              sat_device->GetNode ()->GetObject<MobilityModel> ()->GetPosition (), bestPos);
           if (sq_distance <= sq_closest_distance)
             {
               sq_closest_distance = sq_distance;
-              bestPos = sat->GetObject<MobilityModel> ()->GetPosition ();
-              closest = sat;
+              bestPos = sat_device->GetNode ()->GetObject<MobilityModel> ()->GetPosition ();
+              closest = sat_device;
             }
         }
     }
