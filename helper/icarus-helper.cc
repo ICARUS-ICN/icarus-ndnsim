@@ -239,12 +239,12 @@ IcarusHelper::EnablePcapInternal (std::string prefix, Ptr<NetDevice> nd, bool pr
   // the system.  We can only deal with devices of type IcarusHelper.
   //
   Ptr<IcarusNetDevice> device = nd->GetObject<GroundStaNetDevice> ();
-  if (device == 0)
+  if (device == nullptr)
     {
       // Try the satellite device
       device = nd->GetObject<Sat2GroundNetDevice> ();
     }
-  if (device == 0)
+  if (device == nullptr)
     {
       NS_LOG_INFO ("IcarusHelper::EnablePcapInternal(): Device "
                    << device << " not of type ns3::icarus::IcarusNetDevice");
@@ -284,7 +284,7 @@ IcarusHelper::EnableAsciiInternal (Ptr<OutputStreamWrapper> stream, std::string 
   // the system.  We can only deal with devices of type IcarusNetDevice.
   //
   Ptr<IcarusNetDevice> device = nd->GetObject<IcarusNetDevice> ();
-  if (device == 0)
+  if (device == nullptr)
     {
       NS_LOG_INFO ("IcarusHelper::EnableAsciiInternal(): Device "
                    << device << " not of type ns3::icarus::IcarusNetDevice");
@@ -303,7 +303,7 @@ IcarusHelper::EnableAsciiInternal (Ptr<OutputStreamWrapper> stream, std::string 
   // since there will be one file per context and therefore the context would
   // be redundant.
   //
-  if (stream == 0)
+  if (stream == nullptr)
     {
       //
       // Set up an output stream object to deal with private ofstream copy
@@ -360,13 +360,13 @@ IcarusHelper::EnableAsciiInternal (Ptr<OutputStreamWrapper> stream, std::string 
   uint32_t deviceid = nd->GetIfIndex ();
 
   std::string name{"icarus::Sat2GroundNetDevice"};
-  if (DynamicCast<GroundStaNetDevice> (device) != 0)
+  if (DynamicCast<GroundStaNetDevice> (device) != nullptr)
     {
       name = "icarus::GroundStaNetDevice";
     }
   else
     {
-      NS_ASSERT (DynamicCast<Sat2GroundNetDevice> (device) != 0);
+      NS_ASSERT (DynamicCast<Sat2GroundNetDevice> (device) != nullptr);
     }
 
   std::ostringstream oss;
