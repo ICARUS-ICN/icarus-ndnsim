@@ -76,8 +76,6 @@ public:
 private:
   enum { IDLE, TRANSMITTING } m_txMachineState = IDLE;
 
-  TracedCallback<Ptr<const Packet>> m_macTxTrace, m_macTxDropTrace, m_macRxTrace, m_phyTxBeginTrace,
-      m_phyTxEndTrace, m_phyRxBeginTrace, m_phyRxEndTrace, m_snifferTrace;
   Mac48Address m_address;
 
   void ReceiveFromSatFinish (Ptr<Packet> packet, const Address &src, uint16_t protocolNumber);
