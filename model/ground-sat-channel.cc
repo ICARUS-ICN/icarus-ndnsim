@@ -27,7 +27,6 @@
 #include "ns3/ground-sat-success-model.h"
 #include "ns3/ground-sta-net-device.h"
 #include "ns3/ipv6-address.h"
-#include "ns3/log-macros-enabled.h"
 #include "ns3/mobility-model.h"
 #include "ns3/pointer.h"
 #include "ns3/simulator.h"
@@ -213,14 +212,6 @@ GroundSatChannel::SetConstellation (Ptr<Constellation> constellation)
   NS_LOG_FUNCTION (this << constellation);
 
   m_constellation = constellation;
-}
-
-Ptr<Constellation>
-GroundSatChannel::GetConstellation () const
-{
-  NS_LOG_FUNCTION (this);
-
-  return m_constellation;
 }
 
 } // namespace icarus
