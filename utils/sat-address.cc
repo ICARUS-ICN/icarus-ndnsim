@@ -160,9 +160,9 @@ operator<< (std::ostream &os, const SatAddress &address)
   os.setf (std::ios::hex, std::ios::basefield);
   os.fill ('0');
 
-  os << std::setw (4) << htons (address.getConstellationId ()) << ':';
-  os << std::setw (4) << htons (address.getOrbitalPlane ()) << ':';
-  os << std::setw (4) << htons (address.getPlaneIndex ());
+  os << std::setw (4) << address.getConstellationId () << ':';
+  os << std::setw (4) << address.getOrbitalPlane () << ':';
+  os << std::setw (4) << address.getPlaneIndex ();
 
   os.setf (std::ios::dec, std::ios::basefield);
   os.fill (' ');
