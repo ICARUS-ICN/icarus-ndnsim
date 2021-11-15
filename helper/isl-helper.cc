@@ -100,91 +100,35 @@ ISLHelper::SetChannelAttribute (const std::string &n1, const AttributeValue &v1)
 }
 
 NetDeviceContainer
-ISLHelper::Install (Ptr<Node> node, Ptr<Sat2SatChannel> channel,
-                       ConstellationHelper *chelper) const
+ISLHelper::Install (const NodeContainer &c) const
 {
-  NS_LOG_FUNCTION (this << node << channel << chelper);
+  NS_LOG_FUNCTION (this << &c);
 
-  return NetDeviceContainer (InstallPriv (node, channel, chelper));
-}
-
-NetDeviceContainer
-ISLHelper::Install (Ptr<Node> node, const std::string &channelName,
-                       ConstellationHelper *chelper) const
-{
-  NS_LOG_FUNCTION (this << node << channelName << chelper);
-
-  Ptr<Sat2SatChannel> channel = Names::Find<Sat2SatChannel> (channelName);
-  return NetDeviceContainer (InstallPriv (node, channel, chelper));
-}
-
-NetDeviceContainer
-ISLHelper::Install (const std::string &nodeName, Ptr<Sat2SatChannel> channel,
-                       ConstellationHelper *chelper) const
-{
-  NS_LOG_FUNCTION (this << nodeName << channel << chelper);
-
-  Ptr<Node> node = Names::Find<Node> (nodeName);
-  return NetDeviceContainer (InstallPriv (node, channel, chelper));
-}
-
-NetDeviceContainer
-ISLHelper::Install (const std::string &nodeName, const std::string &channelName,
-                       ConstellationHelper *chelper) const
-{
-  NS_LOG_FUNCTION (this << nodeName << channelName << chelper);
-
-  Ptr<Node> node = Names::Find<Node> (nodeName);
-  Ptr<Sat2SatChannel> channel = Names::Find<Sat2SatChannel> (channelName);
-  return NetDeviceContainer (InstallPriv (node, channel, chelper));
-}
-
-NetDeviceContainer
-ISLHelper::Install (const NodeContainer &c, ConstellationHelper *chelper) const
-{
-  NS_LOG_FUNCTION (this << &c << chelper);
-
-  Ptr<Sat2SatChannel> channel = m_channelFactory.Create ()->GetObject<Sat2SatChannel> ();
-  channel->SetAttribute (
-      "TxSuccess",
-      PointerValue (m_successModelFactory.Create ()->GetObject<Sat2SatSuccessModel> ()));
-
-  return Install (c, channel, chelper);
-}
-
-NetDeviceContainer
-ISLHelper::Install (const NodeContainer &c, Ptr<Sat2SatChannel> channel,
-                       ConstellationHelper *chelper) const
-{
-  NS_LOG_FUNCTION (this << &c << channel << chelper);
-
-  NetDeviceContainer devices;
-
-  for (Ptr<Node> node : c)
-    {
-      devices.Add (InstallPriv (node, channel, chelper));
+  NodeContainer::const_iterator node1,node2;
+  NetDeviceContainer netDevices;
+  for(node1=c.begin();node1!=c.end();++node1){
+    for(node2=c.begin();node2!=c.end();++node2){
+      if(node1 < node2){
+        Ptr<Sat2SatChannel> channel = m_channelFactory.Create () -> GetObject<Sat2SatChannel>();
+        channel -> SetAttribute (
+          "TxSuccess",
+          PointerValue (m_successModelFactory.Create ()->GetObject<Sat2SatSuccessModel>())
+        );
+        netDevices.Add(InstallPriv(*node1,channel));
+        netDevices.Add(InstallPriv(*node2,channel));
+      }
     }
-
-  return devices;
-}
-
-NetDeviceContainer
-ISLHelper::Install (const NodeContainer &c, const std::string &channelName,
-                       ConstellationHelper *chelper) const
-{
-  NS_LOG_FUNCTION (this << &c << channelName << chelper);
-
-  Ptr<Sat2SatChannel> channel = Names::Find<Sat2SatChannel> (channelName);
-  return Install (c, channel, chelper);
+  }
+  
+  return netDevices;
 }
 
 Ptr<NetDevice>
-ISLHelper::InstallPriv (Ptr<Node> node, Ptr<Sat2SatChannel> channel,
-                           ConstellationHelper *chelper) const
+ISLHelper::InstallPriv (Ptr<Node> node, Ptr<Sat2SatChannel> channel) const
 {
-  NS_LOG_FUNCTION (this << node << channel << chelper);
+  NS_LOG_FUNCTION (this << node << channel);
 
-  Ptr<SatNetDevice> device = CreateDeviceForNode (node, chelper);
+  Ptr<SatNetDevice> device = CreateDeviceForNode (node);
   node->AddDevice (device);
   auto queue = m_queueFactory.Create<Queue<Packet>> ();
   device->SetQueue (queue);
@@ -198,20 +142,13 @@ ISLHelper::InstallPriv (Ptr<Node> node, Ptr<Sat2SatChannel> channel,
 }
 
 Ptr<SatNetDevice>
-ISLHelper::CreateDeviceForNode (Ptr<Node> node, ConstellationHelper *chelper) const
+ISLHelper::CreateDeviceForNode (Ptr<Node> node) const
 {
-  NS_LOG_FUNCTION (this << node << chelper);
+  NS_LOG_FUNCTION (this << node);
 
-  // Install an Orbit it if does not have already a MobilityModel
-  if (node->GetObject<MobilityModel> () == nullptr)
-    {
-      NS_ASSERT_MSG (chelper != nullptr,
-                     "We need a ConstellationHelper to create a Satellite device");
-      auto sat_device = m_satNetDeviceFactory.Create<SatNetDevice> ();
-      const auto address = chelper->LaunchSatellite (node);
+  auto sat_device = m_satNetDeviceFactory.Create<SatNetDevice> ();
 
-      return sat_device;
-    }
+  return sat_device;
 }
 
 void
