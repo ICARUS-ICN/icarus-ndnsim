@@ -268,6 +268,10 @@ GroundStaNetDevice::SetRemoteAddress (const SatAddress &address)
 {
   NS_LOG_FUNCTION (this << address);
 
+  if (m_remoteAddress != address)
+    {
+      remoteAddressChange (m_remoteAddress, address);
+    }
   m_remoteAddress = address;
 }
 
