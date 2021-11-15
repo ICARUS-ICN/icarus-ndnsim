@@ -50,7 +50,7 @@ getSqDistance (const Vector &a, const Vector &b)
 } // namespace
 
 Constellation::Constellation (std::size_t n_planes, std::size_t plane_size)
-    : m_constellationId (constellationCounter++),
+    : m_constellationId (++constellationCounter),
       m_nPlanes (n_planes),
       m_planeSize (plane_size),
       m_planes (n_planes),
