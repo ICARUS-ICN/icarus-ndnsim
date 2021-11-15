@@ -52,6 +52,10 @@ public:
   Address GetAddress () const override;
   void SetAddress (Address address) override;
 
+  Address GetRemoteAddress () const;
+  void SetRemoteAddress (const Address &address);
+  void SetRemoteAddress (const SatAddress &address);
+
   virtual void AddLinkChangeCallback (Callback<void> callback) override;
   virtual bool IsBroadcast (void) const override;
   virtual Address GetBroadcast (void) const override;
@@ -76,7 +80,8 @@ public:
 private:
   enum { IDLE, TRANSMITTING } m_txMachineState = IDLE;
 
-  Mac48Address m_address;
+  Mac48Address m_localAddress;
+  SatAddress m_remoteAddress;
 
   void ReceiveFromSatFinish (Ptr<Packet> packet, const Address &src, uint16_t protocolNumber);
   void TransmitStart (Ptr<Packet> packet);
