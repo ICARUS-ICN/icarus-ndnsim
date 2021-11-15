@@ -22,6 +22,7 @@
 #include "ns3/arp-cache.h"
 #include "ns3/callback.h"
 #include "ns3/drop-tail-queue.h"
+#include "ns3/ground-sat-channel.h"
 #include "ns3/icarus-helper.h"
 #include "ns3/ipv4-address.h"
 #include "ns3/ipv4-l3-protocol.h"
@@ -106,22 +107,14 @@ main (int argc, char **argv) -> int
   echoClient.SetAttribute ("PacketSize", UintegerValue (1400));
   clientApps.Add (echoClient.Install (ground2));
 
-  // Add a new cache with a permanent entry to reach the satellite.
-  auto ground_arp_cache = CreateObject<ArpCache> ();
-  auto entry = ground_arp_cache->Add (ipInterfaces.GetAddress (2));
-  entry->SetMacAddress (bird1->GetDevice (0)->GetAddress ());
-  entry->MarkPermanent ();
-  entry = ground_arp_cache->Add (ipInterfaces.GetAddress (3));
-  entry->SetMacAddress (bird2->GetDevice (0)->GetAddress ());
-  entry->MarkPermanent ();
-  Config::Set ("/NodeList/0/$ns3::Ipv4L3Protocol/InterfaceList/1/ArpCache",
-               PointerValue (ground_arp_cache));
-  Config::Set ("/NodeList/1/$ns3::Ipv4L3Protocol/InterfaceList/1/ArpCache",
-               PointerValue (ground_arp_cache));
+  DynamicCast<GroundStaNetDevice> (ground1->GetDevice (0))
+      ->SetRemoteAddress (bird1->GetDevice (0)->GetAddress ());
+  DynamicCast<GroundStaNetDevice> (ground2->GetDevice (0))
+      ->SetRemoteAddress (bird2->GetDevice (0)->GetAddress ());
 
   // Add a new cache with a permanent entry to reach the ground node.
   auto orbit_arp_cache = CreateObject<ArpCache> ();
-  entry = orbit_arp_cache->Add (ipInterfaces.GetAddress (0));
+  auto entry = orbit_arp_cache->Add (ipInterfaces.GetAddress (0));
   entry->SetMacAddress (ground1->GetDevice (0)->GetAddress ());
   entry->MarkPermanent ();
   entry = orbit_arp_cache->Add (ipInterfaces.GetAddress (1));
