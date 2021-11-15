@@ -428,7 +428,7 @@ GroundStaNetDeviceCallback (Ptr<Node> node, Ptr<ndn::L3Protocol> ndn, Ptr<NetDev
   auto linkService = std::make_unique<::nfd::face::GenericLinkService> (opts);
 
   auto transport = std::make_unique<ndn::icarus::GroundStaTransport> (
-      node, netDevice, constructFaceUri (netDevice), "netdev://[ff:ff:ff:ff:ff:ff]");
+      node, netDevice, constructFaceUri (netDevice), "satdev://[0000:0000:0000]");
 
   auto face = std::make_shared<nfd::face::Face> (std::move (linkService), std::move (transport));
   face->setMetric (1);
