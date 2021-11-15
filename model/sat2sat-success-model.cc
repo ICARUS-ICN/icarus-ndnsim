@@ -49,7 +49,9 @@ TypeId
 Sat2SatSuccessModel::GetTypeId (void)
 {
   static TypeId tid =
-      TypeId ("ns3::icarus::Sat2SatSuccessModel").SetParent<Object> ().SetGroupName ("ICARUS");
+      TypeId ("ns3::icarus::Sat2SatSuccessModel").SetParent<Object> ()
+      .SetGroupName ("ICARUS")
+      .AddConstructor<Sat2SatSuccessModel> ();
 
   return tid;
 }
