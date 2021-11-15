@@ -19,6 +19,7 @@
  */
 
 #include "ns3/core-module.h"
+#include "ns3/ground-sat-channel.h"
 #include "ns3/icarus-helper.h"
 #include "ns3/mobility-module.h"
 #include "ns3/icarus-module.h"
@@ -79,6 +80,11 @@ main (int argc, char **argv) -> int
 
   // Choosing forwarding strategy
   ndn::StrategyChoiceHelper::InstallAll ("/icarus", "/localhost/nfd/strategy/best-route");
+
+  // Setting a destination address on the Ground Net Device.
+  // In a real setting *something* should track the **best** satellite.
+  DynamicCast<GroundStaNetDevice> (ground->GetDevice (0))
+      ->SetRemoteAddress (bird->GetDevice (0)->GetAddress ());
 
   // Installing applications
 
