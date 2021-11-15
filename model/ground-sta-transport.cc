@@ -125,16 +125,8 @@ GroundStaTransport::doSend (const Block &packet, const nfd::EndpointId &endpoint
   Ptr<ns3::Packet> ns3Packet = Create<ns3::Packet> ();
   ns3Packet->AddHeader (header);
 
-  const auto channel = DynamicCast<::ns3::icarus::GroundSatChannel> (m_netDevice->GetChannel ());
-  NS_ASSERT_MSG (channel != nullptr, "This net devices is not attached to a valid channel");
-
-  NS_LOG_WARN ("We may try different alternatives to find a valid satellite");
-  NS_LOG_WARN ("FIXME: Just a hack. We should be using the endpoint or some header for this.");
-  const auto mobility_model = m_node->GetObject<MobilityModel> ();
-  NS_ASSERT (mobility_model != nullptr);
-  const auto dst = channel->GetConstellation ()->GetClosest (mobility_model->GetPosition ());
-  // send the NS3 packet
-  m_netDevice->Send (ns3Packet, dst->GetAddress (), L3Protocol::ETHERNET_FRAME_TYPE);
+  // No need to specify destination
+  m_netDevice->Send (ns3Packet, Address (), L3Protocol::ETHERNET_FRAME_TYPE);
 }
 
 // callback
