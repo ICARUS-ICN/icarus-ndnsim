@@ -30,7 +30,6 @@
 namespace ns3 {
 namespace icarus {
 
-class ConstellationHelper;
 
 class ISLHelper : public PcapHelperForDevice,
                      public AsciiTraceHelperForDevice,
@@ -105,89 +104,17 @@ public:
   void SetChannelAttribute (const std::string &n1, const AttributeValue &v1);
 
   /**
-   * This method creates an ns3::icarus::SatNetDevice with the attributes
-   * configured by ISLHelper::SetDeviceAttribute and then adds the device
-   * to the node and attaches the provided channel to the device.
-   *
-   * \param node The node to install the device in \param channel The channel to
-   * attach to the device. \returns A container holding the added net device.
-   */
-  NetDeviceContainer Install (Ptr<Node> node, Ptr<Sat2SatChannel> channel,
-                              ConstellationHelper *chelper = nullptr) const;
-
-  /**
-   * This method creates an ns3::icarus::SatNetDevice with the attributes
-   * configured by ISLHelper::SetDeviceAttribute and then adds the device
-   * to the node and attaches the provided channel to the device.
-   *
-   * \param node The node to install the device in \param channelName The name
-   * of the channel to attach to the device. \returns A container holding the
-   * added net device.
-   */
-  NetDeviceContainer Install (Ptr<Node> node, const std::string &channelName,
-                              ConstellationHelper *chelper = nullptr) const;
-
-  /**
-   * This method creates an ns3::icarus::SatNetDevice with the attributes
-   * configured by ISLHelper::SetDeviceAttribute and then adds the device
-   * to the node and attaches the provided channel to the device.
-   *
-   * \param nodeName The name of the node to install the device in \param
-   * channel The channel to attach to the device. \returns A container holding
-   * the added net device.
-   */
-  NetDeviceContainer Install (const std::string &nodeName, Ptr<Sat2SatChannel> channel,
-                              ConstellationHelper *chelper = nullptr) const;
-
-  /**
-   * This method creates an ns3::icarus::SatNetDevice with the attributes
-   * configured by ISLHelper::SetDeviceAttribute and then adds the device
-   * to the node and attaches the provided channel to the device.
-   *
-   * \param nodeName The name of the node to install the device in \param
-   * channelName The name of the channel to attach to the device. \returns A
-   * container holding the added net device.
-   */
-  NetDeviceContainer Install (const std::string &nodeName, const std::string &channelName,
-                              ConstellationHelper *chelper = nullptr) const;
-
-  /**
-   * This method creates an ns3::Sat2SatChannel with the attributes configured
-   * by ISLHelper::SetChannelAttribute. For each Ptr<node> in the provided
-   * container: it creates an ns3::icarus::SatNetDevice (with the attributes
-   * configured by ISLHelper::SetDeviceAttribute); adds the device to the node;
-   * and attaches the channel to the device.
+   * This method creates an ns3::Sat2SatChannel for each pair of nodes in
+   * the provided container with the attributes configured by
+   * ISLHelper::SetChannelAttribute. For each Ptr<node> of each pair of
+   * nodes: it creates an ns3::icarus::SatNetDevice (with the attributes
+   * configured by ISLHelper::SetDeviceAttribute); adds the device to the
+   * node; and attaches each channel to each pair of devices.
    *
    * \param c The NodeContainer holding the nodes to be changed. \returns A
    * container holding the added net devices.
    */
-  NetDeviceContainer Install (const NodeContainer &c, ConstellationHelper *chelper = nullptr) const;
-
-  /**
-   * For each Ptr<node> in the provided container, this method creates an
-   * ns3::icarus::SatNetDevice (with the attributes configured by
-   * ISLHelper::SetDeviceAttribute); adds the device to the node;
-   * and attaches the provided channel to the device.
-   *
-   * \param c The NodeContainer holding the nodes to be changed. \param channel
-   * The channel to attach to the devices. \returns A container holding the
-   * added net devices.
-   */
-  NetDeviceContainer Install (const NodeContainer &c, Ptr<Sat2SatChannel> channel,
-                              ConstellationHelper *chelper = nullptr) const;
-
-  /**
-   * For each Ptr<node> in the provided container, this method creates an
-   * ns3::icarus::SatNetDevice (with the attributes configured by
-   * ISLHelper::SetDeviceAttribute); adds the device to the node; and
-   * attaches the provided channel to the device.
-   *
-   * \param c The NodeContainer holding the nodes to be changed. \param
-   * channelName The name of the channel to attach to the devices. \returns A
-   * container holding the added net devices.
-   */
-  NetDeviceContainer Install (const NodeContainer &c, const std::string &channelName,
-                              ConstellationHelper *chelper = nullptr) const;
+  NetDeviceContainer Install (const NodeContainer &c) const;
 
   /**
    * \brief Enable pcap output on the indicated net device.
@@ -220,16 +147,15 @@ public:
 private:
   /**
    * This method creates an ns3::icarus::SatNetDevice with the attributes
-   * configured by CsmaHelper::SetDeviceAttribute and then adds the device to
+   * configured by ISLHelper::SetDeviceAttribute and then adds the device to
    * the node and attaches the provided channel to the device.
    *
    * \param node The node to install the device in \param channel The channel to
    * attach to the device. \returns A container holding the added net device.
    */
-  Ptr<NetDevice> InstallPriv (Ptr<Node> node, Ptr<Sat2SatChannel> channel,
-                              ConstellationHelper *chelper) const;
+  Ptr<NetDevice> InstallPriv (Ptr<Node> node, Ptr<Sat2SatChannel> channel) const;
 
-  Ptr<SatNetDevice> CreateDeviceForNode (Ptr<Node> node, ConstellationHelper *chelper) const;
+  Ptr<SatNetDevice> CreateDeviceForNode (Ptr<Node> node) const;
 
   ObjectFactory m_queueFactory; //!< factory for the queues
   ObjectFactory m_satNetDeviceFactory; //!< factory for NetDevices
