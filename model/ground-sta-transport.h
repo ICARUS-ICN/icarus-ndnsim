@@ -32,6 +32,10 @@ namespace ns3 {
 
 class Node;
 
+namespace icarus {
+class SatAddress;
+}
+
 namespace ndn {
 namespace icarus {
 
@@ -58,6 +62,9 @@ private:
   void receiveFromNetDevice (Ptr<NetDevice> device, Ptr<const ns3::Packet> p, uint16_t protocol,
                              const Address &from, const Address &to,
                              NetDevice::PacketType packetType);
+
+  // Called internally to keep updated the remoteUri from the NetDevice
+  void updateRemoteUri (const ::ns3::icarus::SatAddress &remoteAddress);
 
   Ptr<::ns3::icarus::GroundStaNetDevice> m_netDevice; ///< \brief Smart pointer to NetDevice
   Ptr<Node> m_node;

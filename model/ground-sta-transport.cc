@@ -23,14 +23,9 @@
 #include "ground-sta-transport.h"
 #include "model/ndn-block-header.hpp"
 #include "model/ndn-l3-protocol.hpp"
-#include "ns3/assert.h"
-#include "ns3/constellation.h"
+#include "ndn-cxx/net/face-uri.hpp"
 #include "ns3/log-macros-enabled.h"
-#include "ns3/mobility-model.h"
-#include "ns3/node.h"
 #include "ns3/pointer.h"
-#include "ns3/queue.h"
-#include "ns3/sat2ground-net-device.h"
 
 NS_LOG_COMPONENT_DEFINE ("icarus.ndn.GroundStaTransport");
 
@@ -77,6 +72,9 @@ GroundStaTransport::GroundStaTransport (Ptr<Node> node, const Ptr<NetDevice> &ne
                         << this->getLocalUri ());
 
   NS_ASSERT_MSG (m_netDevice != 0, "NetDeviceFace needs to be assigned a valid NetDevice");
+
+  m_netDevice->remoteAddressChange.connect (
+      [&] (auto oldAddress, auto newAddress) { updateRemoteUri (newAddress); });
 
   m_node->RegisterProtocolHandler (MakeCallback (&GroundStaTransport::receiveFromNetDevice, this),
                                    L3Protocol::ETHERNET_FRAME_TYPE, m_netDevice,
@@ -150,6 +148,15 @@ Ptr<NetDevice>
 GroundStaTransport::GetNetDevice () const
 {
   return m_netDevice;
+}
+
+void
+GroundStaTransport::updateRemoteUri (const ::ns3::icarus::SatAddress &remoteAddress)
+{
+  NS_LOG_FUNCTION (this << remoteAddress);
+
+  setRemoteUri (
+      ndn::FaceUri ("satdev://[" + boost::lexical_cast<std::string> (remoteAddress) + "]"));
 }
 
 } // namespace icarus
