@@ -23,6 +23,7 @@
 #ifndef GROUND_STA_NET_DEVICE_H
 #define GROUND_STA_NET_DEVICE_H
 
+#include "ndn-cxx/util/signal/signal.hpp"
 #include "ns3/node.h"
 #include "ns3/net-device.h"
 #include "ns3/sat-address.h"
@@ -76,6 +77,12 @@ public:
   virtual bool NeedsArp (void) const override;
 
   virtual bool SupportsSendFrom (void) const override;
+
+  /** \brief signals when remote address changes
+   */
+  ndn::util::signal::Signal<GroundStaNetDevice, const SatAddress & /*old*/,
+                            const SatAddress & /*new*/>
+      remoteAddressChange;
 
 private:
   enum { IDLE, TRANSMITTING } m_txMachineState = IDLE;
