@@ -152,14 +152,19 @@ GroundSatTag::Print (std::ostream &os) const
 TypeId
 GroundStaNetDevice::GetTypeId (void)
 {
-  static TypeId tid = TypeId ("ns3::icarus::GroundStaNetDevice")
-                          .SetParent<IcarusNetDevice> ()
-                          .SetGroupName ("ICARUS")
-                          .AddConstructor<GroundStaNetDevice> ()
-                          .AddAttribute ("Address", "The link-layer address of this device.",
-                                         Mac48AddressValue (Mac48Address ("00:00:00:00:00:00")),
-                                         MakeMac48AddressAccessor (&GroundStaNetDevice::m_address),
-                                         MakeMac48AddressChecker ());
+  static TypeId tid =
+      TypeId ("ns3::icarus::GroundStaNetDevice")
+          .SetParent<IcarusNetDevice> ()
+          .SetGroupName ("ICARUS")
+          .AddConstructor<GroundStaNetDevice> ()
+          .AddAttribute ("Address", "The link-layer address of this device.",
+                         Mac48AddressValue (Mac48Address ("00:00:00:00:00:00")),
+                         MakeMac48AddressAccessor (&GroundStaNetDevice::m_localAddress),
+                         MakeMac48AddressChecker ())
+          .AddAttribute ("RemoteAddress", "The link-layer address of the remote satellite.",
+                         SatAddressValue (SatAddress (0, 0, 0)),
+                         MakeSatAddressAccessor (&GroundStaNetDevice::m_remoteAddress),
+                         MakeSatAddressChecker ());
 
   return tid;
 }
@@ -241,7 +246,31 @@ GroundStaNetDevice::GetAddress (void) const
 {
   NS_LOG_FUNCTION (this);
 
-  return m_address;
+  return m_localAddress;
+}
+
+Address
+GroundStaNetDevice::GetRemoteAddress () const
+{
+  NS_LOG_FUNCTION (this);
+
+  return m_remoteAddress.ConvertTo ();
+}
+
+void
+GroundStaNetDevice::SetRemoteAddress (const Address &address)
+{
+  NS_LOG_FUNCTION (this << address);
+
+  SetRemoteAddress (SatAddress::ConvertFrom (address));
+}
+
+void
+GroundStaNetDevice::SetRemoteAddress (const SatAddress &address)
+{
+  NS_LOG_FUNCTION (this << address);
+
+  m_remoteAddress = address;
 }
 
 Address
@@ -296,13 +325,13 @@ GroundStaNetDevice::IsPointToPoint (void) const
 }
 
 bool
-GroundStaNetDevice::Send (Ptr<Packet> packet, const Address &dest, uint16_t protocolNumber)
+GroundStaNetDevice::Send (Ptr<Packet> packet, const Address &, uint16_t protocolNumber)
 {
-  NS_LOG_FUNCTION (this << packet << dest << protocolNumber);
+  NS_LOG_FUNCTION (this << packet << protocolNumber);
   NS_LOG_WARN ("The protocol number should really be transmitted in a header somehow");
 
   GroundSatTag tag;
-  tag.SetDst (SatAddress::ConvertFrom (dest));
+  tag.SetDst (m_remoteAddress);
   tag.SetProto (protocolNumber);
   packet->AddPacketTag (tag);
 
