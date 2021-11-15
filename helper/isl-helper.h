@@ -104,17 +104,25 @@ public:
   void SetChannelAttribute (const std::string &n1, const AttributeValue &v1);
 
   /**
-   * This method creates an ns3::Sat2SatChannel for each pair of nodes in
-   * the provided container with the attributes configured by
-   * ISLHelper::SetChannelAttribute. For each Ptr<node> of each pair of
-   * nodes: it creates an ns3::icarus::SatNetDevice (with the attributes
+   * This method creates an ns3::Sat2SatChannel with the attributes configured by
+   * ISLHelper::SetChannelAttribute. For each Ptr<node> in the input container:
+   * it creates an ns3::icarus::SatNetDevice (with the attributes
    * configured by ISLHelper::SetDeviceAttribute); adds the device to the
-   * node; and attaches each channel to each pair of devices.
+   * node; and attaches the channel to both devices.
    *
    * \param c The NodeContainer holding the nodes to be changed. \returns A
    * container holding the added net devices.
    */
   NetDeviceContainer Install (const NodeContainer &c) const;
+  
+  /**
+   * This method creates a point-to-point ns3::Sat2SatChannel for two nodes.
+   * 
+   * \param a first node;
+   * \param b second node;
+   * \returns A container holding the added netDevices. 
+   */
+  NetDeviceContainer Install (Ptr<Node> a, Ptr<Node> b) const;
 
   /**
    * \brief Enable pcap output on the indicated net device.
@@ -154,8 +162,6 @@ private:
    * attach to the device. \returns A container holding the added net device.
    */
   Ptr<NetDevice> InstallPriv (Ptr<Node> node, Ptr<Sat2SatChannel> channel) const;
-
-  Ptr<SatNetDevice> CreateDeviceForNode (Ptr<Node> node) const;
 
   ObjectFactory m_queueFactory; //!< factory for the queues
   ObjectFactory m_satNetDeviceFactory; //!< factory for NetDevices

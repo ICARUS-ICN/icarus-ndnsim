@@ -104,23 +104,25 @@ ISLHelper::Install (const NodeContainer &c) const
 {
   NS_LOG_FUNCTION (this << &c);
 
-  NodeContainer::const_iterator node1,node2;
-  NetDeviceContainer netDevices;
-  for(node1=c.begin();node1!=c.end();++node1){
-    for(node2=c.begin();node2!=c.end();++node2){
-      if(node1 < node2){
-        Ptr<Sat2SatChannel> channel = m_channelFactory.Create () -> GetObject<Sat2SatChannel>();
-        channel -> SetAttribute (
-          "TxSuccess",
-          PointerValue (m_successModelFactory.Create ()->GetObject<Sat2SatSuccessModel>())
-        );
-        netDevices.Add(InstallPriv(*node1,channel));
-        netDevices.Add(InstallPriv(*node2,channel));
-      }
-    }
-  }
-  
-  return netDevices;
+  NS_ASSERT (c.GetN () == 2);
+  return Install (c.Get (0), c.Get (1));
+}
+
+NetDeviceContainer
+ISLHelper::Install(Ptr<Node> a, Ptr<Node> b) const
+{
+  NS_LOG_FUNCTION (this << a << b);
+
+  NetDeviceContainer devices;
+
+  Ptr <Sat2SatChannel> channel = m_channelFactory.Create() -> GetObject<Sat2SatChannel>();
+  channel -> SetAttribute (
+    "TxSuccess",
+    PointerValue (m_successModelFactory.Create () -> GetObject<Sat2SatSuccessModel>())
+  );
+  devices.Add(InstallPriv(a,channel));
+  devices.Add(InstallPriv(b,channel));
+  return devices;
 }
 
 Ptr<NetDevice>
@@ -128,7 +130,7 @@ ISLHelper::InstallPriv (Ptr<Node> node, Ptr<Sat2SatChannel> channel) const
 {
   NS_LOG_FUNCTION (this << node << channel);
 
-  Ptr<SatNetDevice> device = CreateDeviceForNode (node);
+  Ptr<SatNetDevice> device = m_satNetDeviceFactory.Create<SatNetDevice> ();
   node->AddDevice (device);
   auto queue = m_queueFactory.Create<Queue<Packet>> ();
   device->SetQueue (queue);
@@ -139,16 +141,6 @@ ISLHelper::InstallPriv (Ptr<Node> node, Ptr<Sat2SatChannel> channel) const
   device->AggregateObject (ndqi);
 
   return device;
-}
-
-Ptr<SatNetDevice>
-ISLHelper::CreateDeviceForNode (Ptr<Node> node) const
-{
-  NS_LOG_FUNCTION (this << node);
-
-  auto sat_device = m_satNetDeviceFactory.Create<SatNetDevice> ();
-
-  return sat_device;
 }
 
 void
