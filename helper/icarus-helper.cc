@@ -36,9 +36,8 @@
 #include "ns3/assert.h"
 #include "ns3/ground-sat-success-model.h"
 #include "ns3/sat-address.h"
-
+#include "ns3/ground-sta-transport.h"
 #include "ns3/ndnSIM/NFD/daemon/face/generic-link-service.hpp"
-#include "src/icarus/model/ground-sta-transport.h"
 
 namespace ns3 {
 namespace icarus {
