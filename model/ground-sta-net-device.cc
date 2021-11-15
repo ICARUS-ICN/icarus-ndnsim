@@ -228,9 +228,7 @@ GroundStaNetDevice::IsBroadcast (void) const
 {
   NS_LOG_FUNCTION (this);
 
-  NS_LOG_WARN ("Only to make the ARP implementation of ns3 happy.");
-  // There should be a way to put a L2 address on a destination on a non-broadcast medium
-  return true;
+  return false;
 }
 
 void
@@ -238,7 +236,7 @@ GroundStaNetDevice::SetAddress (Address address)
 {
   NS_LOG_FUNCTION (this << address);
 
-  m_address = Mac48Address::ConvertFrom (address);
+  m_localAddress = Mac48Address::ConvertFrom (address);
 }
 
 Address
@@ -277,9 +275,8 @@ Address
 GroundStaNetDevice::GetBroadcast (void) const
 {
   NS_LOG_FUNCTION (this);
-  NS_LOG (LOG_WARN, "This is not supported");
 
-  return Mac48Address::GetBroadcast ();
+  return Address ();
 }
 
 bool
@@ -294,18 +291,16 @@ Address
 GroundStaNetDevice::GetMulticast (Ipv4Address multicastGroup) const
 {
   NS_LOG_FUNCTION (this << multicastGroup);
-  NS_LOG (LOG_WARN, "This is not supported");
 
-  return Mac48Address::GetBroadcast ();
+  return Address ();
 }
 
 Address
 GroundStaNetDevice::GetMulticast (Ipv6Address addr) const
 {
   NS_LOG_FUNCTION (this << addr);
-  NS_LOG (LOG_WARN, "This is not supported");
 
-  return Mac48Address::GetBroadcast ();
+  return Address ();
 }
 
 bool
@@ -321,7 +316,7 @@ GroundStaNetDevice::IsPointToPoint (void) const
 {
   NS_LOG_FUNCTION (this);
 
-  return false;
+  return true;
 }
 
 bool
@@ -405,7 +400,7 @@ GroundStaNetDevice::NeedsArp (void) const
 {
   NS_LOG_FUNCTION (this);
 
-  return true;
+  return false;
 }
 
 bool
