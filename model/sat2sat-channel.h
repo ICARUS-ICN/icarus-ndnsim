@@ -56,7 +56,7 @@ public:
   virtual Ptr<NetDevice> GetDevice (std::size_t i) const override;
 
 private:
-  static const std::size_t N_SATELLITES = 2;
+  static const std::size_t MAX_N_SATELLITES = 2;
 
   std::size_t m_nSatellites;
   Ptr<Sat2SatSuccessModel> m_txSuccessModel = nullptr;

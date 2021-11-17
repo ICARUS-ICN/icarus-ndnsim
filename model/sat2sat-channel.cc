@@ -80,7 +80,7 @@ Sat2SatChannel::AttachNewSat (const Ptr<SatNetDevice> &device)
   NS_LOG_FUNCTION (this << device);
   NS_ABORT_MSG_UNLESS (device->GetNode ()->GetObject<MobilityModel> () != 0,
                        "Satellites need a mobility model");
-  NS_ASSERT_MSG (m_nSatellites < N_SATELLITES, "Only two satellites permitted");
+  NS_ASSERT_MSG (m_nSatellites < MAX_N_SATELLITES, "Only two satellites permitted");
   NS_ASSERT (device != 0);
 
   m_link[m_nSatellites++].m_src = device;

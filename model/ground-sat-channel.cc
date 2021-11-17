@@ -32,8 +32,6 @@
 #include "ns3/pointer.h"
 #include "ns3/simulator.h"
 #include "ns3/sat2ground-net-device.h"
-#include <cstdint>
-#include <memory>
 
 // Needed for the hash map
 template <>
@@ -80,7 +78,7 @@ GroundSatChannel::GetTypeId (void)
 }
 
 void
-GroundSatChannel::AddGroundDevice (Ptr<GroundStaNetDevice> device)
+GroundSatChannel::AddGroundDevice (const Ptr<GroundStaNetDevice> &device)
 {
   NS_LOG_FUNCTION (this << device);
   NS_ABORT_MSG_UNLESS (device->GetNode ()->GetObject<MobilityModel> () != 0,
@@ -106,8 +104,9 @@ GroundSatChannel::~GroundSatChannel ()
 }
 
 Time
-GroundSatChannel::Transmit2Sat (Ptr<Packet> packet, DataRate bps, Ptr<GroundStaNetDevice> src,
-                                const SatAddress &dst, uint16_t protocolNumber) const
+GroundSatChannel::Transmit2Sat (const Ptr<Packet> &packet, DataRate bps,
+                                const Ptr<GroundStaNetDevice> &src, const SatAddress &dst,
+                                uint16_t protocolNumber) const
 {
   NS_LOG_FUNCTION (this << packet << bps << dst << protocolNumber);
 
@@ -150,8 +149,9 @@ GroundSatChannel::Transmit2Sat (Ptr<Packet> packet, DataRate bps, Ptr<GroundStaN
 }
 
 Time
-GroundSatChannel::Transmit2Ground (Ptr<Packet> packet, DataRate bps, Ptr<Sat2GroundNetDevice> src,
-                                   const Address &dst, uint16_t protocolNumber) const
+GroundSatChannel::Transmit2Ground (const Ptr<Packet> &packet, DataRate bps,
+                                   const Ptr<Sat2GroundNetDevice> &src, const Address &dst,
+                                   uint16_t protocolNumber) const
 {
   NS_LOG_FUNCTION (this << packet << bps << &src << dst << protocolNumber);
 
@@ -208,7 +208,7 @@ GroundSatChannel::GetDevice (std::size_t i) const
 }
 
 void
-GroundSatChannel::SetConstellation (Ptr<Constellation> constellation)
+GroundSatChannel::SetConstellation (const Ptr<Constellation> &constellation)
 {
   NS_LOG_FUNCTION (this << constellation);
 
