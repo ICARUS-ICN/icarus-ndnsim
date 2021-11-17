@@ -33,21 +33,6 @@
 #include "ns3/simulator.h"
 #include "ns3/sat2ground-net-device.h"
 
-// Needed for the hash map
-template <>
-struct std::hash<ns3::Mac48Address>
-{
-  std::size_t
-  operator() (const ns3::Mac48Address &k) const
-  {
-    uint64_t value = 0x0000000000000000;
-
-    k.CopyTo (reinterpret_cast<uint8_t *> (&value));
-
-    return std::hash<uint64_t> () (value);
-  }
-};
-
 namespace ns3 {
 
 namespace icarus {
@@ -85,15 +70,10 @@ GroundSatChannel::AddGroundDevice (const Ptr<GroundStaNetDevice> &device)
                        "Ground stations need a mobility model");
 
   m_ground.push_back (device);
-  (*m_groundAddresses)[Mac48Address::ConvertFrom (device->GetAddress ())] = device;
 }
 
 GroundSatChannel::GroundSatChannel ()
-    : Channel (),
-      m_txSuccessModel (nullptr),
-      m_constellation (nullptr),
-      m_groundAddresses (
-          std::make_unique<std::unordered_map<Mac48Address, Ptr<GroundStaNetDevice>>> ())
+    : Channel (), m_txSuccessModel (nullptr), m_constellation (nullptr)
 {
   NS_LOG_FUNCTION (this);
 }
@@ -150,35 +130,32 @@ GroundSatChannel::Transmit2Sat (const Ptr<Packet> &packet, DataRate bps,
 
 void
 GroundSatChannel::Transmit2Ground (const Ptr<Packet> &packet, DataRate bps,
-                                   const Ptr<Sat2GroundNetDevice> &src, const Address &dst,
+                                   const Ptr<Sat2GroundNetDevice> &src,
                                    uint16_t protocolNumber) const
 {
-  NS_LOG_FUNCTION (this << packet << bps << &src << dst << protocolNumber);
+  NS_LOG_FUNCTION (this << packet << bps << &src << protocolNumber);
 
-  const auto ground_device_pair = m_groundAddresses->find (Mac48Address::ConvertFrom (dst));
-  NS_ABORT_MSG_IF (ground_device_pair == m_groundAddresses->end (),
-                   "We have not found a ground station with address " << dst);
-  const auto ground_device = ground_device_pair->second;
-
-  Time endTx = bps.CalculateBytesTxTime (packet->GetSize ());
-  auto posGround = ground_device->GetNode ()->GetObject<MobilityModel> ();
-  auto posSat = src->GetNode ()->GetObject<MobilityModel> ();
-  auto distanceMeters = posGround->GetDistanceFrom (posSat);
-
-  Time delay (Seconds (distanceMeters / 3e8));
-
-  if (m_txSuccessModel != nullptr &&
-      m_txSuccessModel->TramsmitSuccess (ground_device->GetNode (), src->GetNode (), packet) !=
-          true)
+  for (const auto &ground_device : m_ground)
     {
-      NS_LOG_DEBUG ("Dropped packet " << packet);
-      m_phyTxDropTrace (packet);
-    }
-  else
-    {
-      Simulator::ScheduleWithContext (ground_device->GetNode ()->GetId (), delay,
-                                      &GroundStaNetDevice::ReceiveFromSat, ground_device, packet,
-                                      bps, src->GetAddress (), protocolNumber);
+      auto posGround = ground_device->GetNode ()->GetObject<MobilityModel> ();
+      auto posSat = src->GetNode ()->GetObject<MobilityModel> ();
+      auto distanceMeters = posGround->GetDistanceFrom (posSat);
+
+      Time delay (Seconds (distanceMeters / 3e8));
+
+      if (m_txSuccessModel != nullptr &&
+          m_txSuccessModel->TramsmitSuccess (ground_device->GetNode (), src->GetNode (), packet) !=
+              true)
+        {
+          NS_LOG_DEBUG ("Dropped packet " << packet);
+          m_phyTxDropTrace (packet);
+        }
+      else
+        {
+          Simulator::ScheduleWithContext (ground_device->GetNode ()->GetId (), delay,
+                                          &GroundStaNetDevice::ReceiveFromSat, ground_device,
+                                          packet, bps, src->GetAddress (), protocolNumber);
+        }
     }
 }
 

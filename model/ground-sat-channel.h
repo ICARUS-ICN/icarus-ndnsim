@@ -29,8 +29,6 @@
 #include "ns3/net-device.h"
 #include "ns3/sat-address.h"
 #include "ns3/traced-callback.h"
-#include <memory>
-#include <unordered_map>
 
 namespace ns3 {
 
@@ -58,8 +56,7 @@ public:
   void AddGroundDevice (const Ptr<GroundStaNetDevice> &device);
 
   void Transmit2Ground (const Ptr<Packet> &packet, DataRate bps,
-                        const Ptr<Sat2GroundNetDevice> &src, const Address &dst,
-                        uint16_t protocolNumber) const;
+                        const Ptr<Sat2GroundNetDevice> &src, uint16_t protocolNumber) const;
   Time Transmit2Sat (const Ptr<Packet> &packet, DataRate bps, const Ptr<GroundStaNetDevice> &src,
                      const SatAddress &dst, uint16_t protocolNumber) const;
 
@@ -73,7 +70,6 @@ private:
   std::vector<Ptr<GroundStaNetDevice>> m_ground;
   Ptr<GroundSatSuccessModel> m_txSuccessModel;
   Ptr<Constellation> m_constellation;
-  std::unique_ptr<std::unordered_map<Mac48Address, Ptr<GroundStaNetDevice>>> m_groundAddresses;
 
   TracedCallback<Ptr<const Packet>> m_phyTxDropTrace;
 };

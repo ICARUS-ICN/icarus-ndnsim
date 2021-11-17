@@ -332,7 +332,7 @@ Sat2GroundNetDevice::TransmitStart (const Ptr<Packet> &packet)
 
   m_phyTxBeginTrace (packet);
   GetInternalChannel ()->Transmit2Ground (packet, GetDataRate (), GetObject<Sat2GroundNetDevice> (),
-                                          dst, proto);
+                                          proto);
   Simulator::Schedule (GetDataRate ().CalculateBytesTxTime (packet->GetSize ()),
                        &Sat2GroundNetDevice::TransmitComplete, this, packet);
 }
