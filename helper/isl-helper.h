@@ -30,10 +30,7 @@
 namespace ns3 {
 namespace icarus {
 
-
-class ISLHelper : public PcapHelperForDevice,
-                     public AsciiTraceHelperForDevice,
-                     public SimpleRefCount<ISLHelper>
+class ISLHelper : public PcapHelperForDevice, public AsciiTraceHelperForDevice
 {
 public:
   /**

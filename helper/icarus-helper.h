@@ -33,9 +33,7 @@ namespace icarus {
 
 class ConstellationHelper;
 
-class IcarusHelper : public PcapHelperForDevice,
-                     public AsciiTraceHelperForDevice,
-                     public SimpleRefCount<IcarusHelper>
+class IcarusHelper : public PcapHelperForDevice, public AsciiTraceHelperForDevice
 {
 public:
   /**
