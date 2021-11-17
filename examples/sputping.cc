@@ -112,19 +112,6 @@ main (int argc, char **argv) -> int
   DynamicCast<GroundStaNetDevice> (ground2->GetDevice (0))
       ->SetRemoteAddress (bird2->GetDevice (0)->GetAddress ());
 
-  // Add a new cache with a permanent entry to reach the ground node.
-  auto orbit_arp_cache = CreateObject<ArpCache> ();
-  auto entry = orbit_arp_cache->Add (ipInterfaces.GetAddress (0));
-  entry->SetMacAddress (ground1->GetDevice (0)->GetAddress ());
-  entry->MarkPermanent ();
-  entry = orbit_arp_cache->Add (ipInterfaces.GetAddress (1));
-  entry->SetMacAddress (ground2->GetDevice (0)->GetAddress ());
-  entry->MarkPermanent ();
-  Config::Set ("/NodeList/2/$ns3::Ipv4L3Protocol/InterfaceList/1/ArpCache",
-               PointerValue (orbit_arp_cache));
-  Config::Set ("/NodeList/3/$ns3::Ipv4L3Protocol/InterfaceList/1/ArpCache",
-               PointerValue (orbit_arp_cache));
-
   UdpEchoServerHelper echoServer (7667);
   ApplicationContainer serverApps = echoServer.Install (bird1);
   serverApps.Add (echoServer.Install (bird2));
