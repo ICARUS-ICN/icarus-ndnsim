@@ -169,7 +169,7 @@ Sat2GroundNetDevice::~Sat2GroundNetDevice ()
 }
 
 bool
-Sat2GroundNetDevice::Attach (Ptr<GroundSatChannel> channel)
+Sat2GroundNetDevice::Attach (const Ptr<GroundSatChannel> &channel)
 {
   NS_LOG_FUNCTION (this << channel);
 
@@ -180,7 +180,7 @@ Sat2GroundNetDevice::Attach (Ptr<GroundSatChannel> channel)
 }
 
 void
-Sat2GroundNetDevice::ReceiveFromGround (Ptr<Packet> packet, DataRate bps, const Address &src,
+Sat2GroundNetDevice::ReceiveFromGround (const Ptr<Packet> &packet, DataRate bps, const Address &src,
                                         uint16_t protocolNumber)
 {
   NS_LOG_FUNCTION (this << packet << bps << src << protocolNumber);
@@ -192,7 +192,7 @@ Sat2GroundNetDevice::ReceiveFromGround (Ptr<Packet> packet, DataRate bps, const 
 }
 
 void
-Sat2GroundNetDevice::ReceiveFromGroundFinish (Ptr<Packet> packet, const Address &src,
+Sat2GroundNetDevice::ReceiveFromGroundFinish (const Ptr<Packet> &packet, const Address &src,
                                               uint16_t protocolNumber)
 {
   NS_LOG_FUNCTION (this << packet << protocolNumber);
@@ -318,7 +318,7 @@ Sat2GroundNetDevice::Send (Ptr<Packet> packet, const Address &dest, uint16_t pro
 }
 
 void
-Sat2GroundNetDevice::TransmitStart (Ptr<Packet> packet)
+Sat2GroundNetDevice::TransmitStart (const Ptr<Packet> &packet)
 {
   NS_LOG_FUNCTION (this << packet);
   NS_ASSERT_MSG (m_txMachineState == IDLE,
@@ -337,7 +337,7 @@ Sat2GroundNetDevice::TransmitStart (Ptr<Packet> packet)
 }
 
 void
-Sat2GroundNetDevice::TransmitComplete (Ptr<Packet> packet)
+Sat2GroundNetDevice::TransmitComplete (const Ptr<Packet> &packet)
 {
   NS_LOG_FUNCTION (this << packet);
 

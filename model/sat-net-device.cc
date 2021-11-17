@@ -145,7 +145,7 @@ SatNetDevice::SetDataRate (DataRate rate)
 }
 
 void
-SatNetDevice::TransmitStart (Ptr<Packet> packet, uint16_t protocolNumber)
+SatNetDevice::TransmitStart (const Ptr<Packet> &packet, uint16_t protocolNumber)
 {
   NS_LOG_FUNCTION (this << packet << protocolNumber);
   NS_ASSERT_MSG (m_txMachineState == IDLE,
@@ -158,7 +158,7 @@ SatNetDevice::TransmitStart (Ptr<Packet> packet, uint16_t protocolNumber)
 }
 
 void
-SatNetDevice::TransmitComplete (Ptr<Packet> packet, uint16_t protocolNumber)
+SatNetDevice::TransmitComplete (const Ptr<Packet> &packet, uint16_t protocolNumber)
 {
   NS_LOG_FUNCTION (this << packet << protocolNumber);
 
@@ -174,7 +174,7 @@ SatNetDevice::TransmitComplete (Ptr<Packet> packet, uint16_t protocolNumber)
 }
 
 bool
-SatNetDevice::Attach (Ptr<Sat2SatChannel> channel)
+SatNetDevice::Attach (const Ptr<Sat2SatChannel> &channel)
 {
   NS_LOG_FUNCTION (this << channel);
 
@@ -215,7 +215,7 @@ SatNetDevice::Receive (Ptr<Packet> packet, DataRate bps, uint16_t protocolNumber
 }
 
 void
-SatNetDevice::ReceiveFinish (Ptr<Packet> packet, uint16_t protocolNumber)
+SatNetDevice::ReceiveFinish (const Ptr<Packet> &packet, uint16_t protocolNumber)
 {
   NS_LOG_FUNCTION (this << packet << protocolNumber);
 

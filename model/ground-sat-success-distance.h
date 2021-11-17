@@ -34,8 +34,8 @@ public:
   static TypeId GetTypeId (void);
   virtual ~GroundSatSuccessDistance ();
 
-  virtual bool TramsmitSuccess (Ptr<Node> srcNode, Ptr<Node> dstNode,
-                                Ptr<Packet> packet) const override;
+  virtual bool TramsmitSuccess (const Ptr<Node> &srcNode, const Ptr<Node> &dstNode,
+                                const Ptr<Packet> &packet) const override;
 
 private:
   static const double DEFAULT_MAX_DISTANCE;

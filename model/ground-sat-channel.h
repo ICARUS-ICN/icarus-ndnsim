@@ -54,17 +54,18 @@ public:
   GroundSatChannel ();
   virtual ~GroundSatChannel ();
 
-  void AddGroundDevice (Ptr<GroundStaNetDevice> device);
+  void AddGroundDevice (const Ptr<GroundStaNetDevice> &device);
 
-  Time Transmit2Ground (Ptr<Packet> packet, DataRate bps, Ptr<Sat2GroundNetDevice> src,
-                        const Address &dst, uint16_t protocolNumber) const;
-  Time Transmit2Sat (Ptr<Packet> packet, DataRate bps, Ptr<GroundStaNetDevice> src,
+  Time Transmit2Ground (const Ptr<Packet> &packet, DataRate bps,
+                        const Ptr<Sat2GroundNetDevice> &src, const Address &dst,
+                        uint16_t protocolNumber) const;
+  Time Transmit2Sat (const Ptr<Packet> &packet, DataRate bps, const Ptr<GroundStaNetDevice> &src,
                      const SatAddress &dst, uint16_t protocolNumber) const;
 
   virtual std::size_t GetNDevices (void) const override;
   virtual Ptr<NetDevice> GetDevice (std::size_t i) const override;
 
-  void SetConstellation (Ptr<Constellation> constellation);
+  void SetConstellation (const Ptr<Constellation> &constellation);
   Ptr<Constellation> GetConstellation () const;
 
 private:

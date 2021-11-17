@@ -75,7 +75,7 @@ Sat2SatChannel::~Sat2SatChannel ()
 }
 
 bool
-Sat2SatChannel::AttachNewSat (Ptr<SatNetDevice> device)
+Sat2SatChannel::AttachNewSat (const Ptr<SatNetDevice> &device)
 {
   NS_LOG_FUNCTION (this << device);
   NS_ABORT_MSG_UNLESS (device->GetNode ()->GetObject<MobilityModel> () != 0,
@@ -88,20 +88,22 @@ Sat2SatChannel::AttachNewSat (Ptr<SatNetDevice> device)
   // If we have both satellites connected to the channel, then finish introducing
   // the two halves and set the links to IDLE.
   //
-  if (m_nSatellites == N_SATELLITES)
+  if (m_nSatellites == MAX_N_SATELLITES)
     {
       m_link[0].m_dst = m_link[1].m_src;
       m_link[1].m_dst = m_link[0].m_src;
       m_link[0].m_state = IDLE;
       m_link[1].m_state = IDLE;
-      m_txSuccessModel->CalcMaxDistance(m_link[0].m_dst->GetNode()->GetObject<CircularOrbitMobilityModel> ()->getRadius());
+      m_txSuccessModel->CalcMaxDistance (
+          m_link[0].m_dst->GetNode ()->GetObject<CircularOrbitMobilityModel> ()->getRadius ());
     }
 
   return true;
 }
 
 Time
-Sat2SatChannel::TransmitStart (Ptr<Packet> packet, Ptr<SatNetDevice> src, DataRate bps, uint16_t protocolNumber) const
+Sat2SatChannel::TransmitStart (const Ptr<Packet> &packet, const Ptr<SatNetDevice> &src,
+                               DataRate bps, uint16_t protocolNumber) const
 {
   NS_LOG_FUNCTION (this << packet << bps << protocolNumber);
 
@@ -119,16 +121,14 @@ Sat2SatChannel::TransmitStart (Ptr<Packet> packet, Ptr<SatNetDevice> src, DataRa
   Time delay (Seconds (distanceMeters / 3e8));
 
   if (m_txSuccessModel != nullptr &&
-      m_txSuccessModel->TramsmitSuccess (src->GetNode (), dst->GetNode(),
-                                         packet) != true)
+      m_txSuccessModel->TramsmitSuccess (src->GetNode (), dst->GetNode (), packet) != true)
     {
       m_phyTxDropTrace (packet);
     }
   else
     {
-      Simulator::ScheduleWithContext (dst->GetNode ()->GetId (), delay,
-                                      &SatNetDevice::Receive, dst, packet, bps,
-                                      protocolNumber);
+      Simulator::ScheduleWithContext (dst->GetNode ()->GetId (), delay, &SatNetDevice::Receive, dst,
+                                      packet, bps, protocolNumber);
     }
 
   return endTx;
@@ -146,7 +146,7 @@ Sat2SatChannel::GetDevice (std::size_t i) const
 {
   NS_LOG_FUNCTION (this << i);
   // Last device is ground station
-  NS_ABORT_MSG_UNLESS (i < GetNDevices () -1 && i >= 0,
+  NS_ABORT_MSG_UNLESS (i < GetNDevices () - 1 && i >= 0,
                        "Asking for " << i << "-th device of a total of " << GetNDevices ());
   return m_link[i].m_src;
 }

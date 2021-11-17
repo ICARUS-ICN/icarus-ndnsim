@@ -41,9 +41,10 @@ public:
   Sat2SatSuccessModel ();
   virtual ~Sat2SatSuccessModel ();
 
-  virtual bool TramsmitSuccess (Ptr<Node> srcNode, Ptr<Node> dstNode, Ptr<Packet> packet) const;
+  virtual bool TramsmitSuccess (const Ptr<Node> &srcNode, const Ptr<Node> &dstNode,
+                                const Ptr<Packet> &packet) const;
 
-  virtual void CalcMaxDistance(double height);
+  virtual void CalcMaxDistance (double height);
 
 private:
   static const double DEFAULT_MAX_DISTANCE;

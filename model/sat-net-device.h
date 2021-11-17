@@ -41,13 +41,13 @@ public:
    */
   static TypeId GetTypeId (void);
 
-  SatNetDevice();
+  SatNetDevice ();
   virtual ~SatNetDevice ();
 
   virtual DataRate GetDataRate () const;
   virtual void SetDataRate (DataRate rate);
 
-  bool Attach (Ptr<Sat2SatChannel> channel);
+  bool Attach (const Ptr<Sat2SatChannel> &channel);
 
   virtual Ptr<Queue<Packet>> GetQueue () const;
   virtual void SetQueue (Ptr<Queue<Packet>> rate);
@@ -64,7 +64,7 @@ public:
 
   virtual bool SetMtu (const uint16_t mtu) override;
   virtual uint16_t GetMtu (void) const override;
-  
+
   virtual bool IsLinkUp (void) const override;
 
   virtual void AddLinkChangeCallback (Callback<void> callback) override;
@@ -86,7 +86,7 @@ public:
   virtual bool SendFrom (Ptr<Packet> packet, const Address &source, const Address &dest,
                          uint16_t protocolNumber) override;
   virtual Ptr<Node> GetNode (void) const override;
-  virtual void SetNode (Ptr<Node> node) override;                     
+  virtual void SetNode (Ptr<Node> node) override;
   virtual bool NeedsArp (void) const override;
 
   virtual void SetReceiveCallback (ReceiveCallback cb) override;
@@ -103,9 +103,9 @@ private:
   static constexpr uint16_t DEFAULT_MTU = 1500;
   enum { IDLE, TRANSMITTING } m_txMachineState = IDLE;
 
-  void ReceiveFinish (Ptr<Packet> packet, uint16_t protocolNumber);
-  void TransmitStart (Ptr<Packet> packet, uint16_t protocolNumber);
-  void TransmitComplete (Ptr<Packet> packet, uint16_t protocolNumber);
+  void ReceiveFinish (const Ptr<Packet> &packet, uint16_t protocolNumber);
+  void TransmitStart (const Ptr<Packet> &packet, uint16_t protocolNumber);
+  void TransmitComplete (const Ptr<Packet> &packet, uint16_t protocolNumber);
   Ptr<Sat2SatChannel> GetInternalChannel (void) const;
 
   TracedCallback<> m_linkChangeCallbacks;

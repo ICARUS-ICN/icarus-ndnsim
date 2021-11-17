@@ -40,7 +40,8 @@ public:
   static TypeId GetTypeId (void);
   virtual ~GroundSatSuccessModel ();
 
-  virtual bool TramsmitSuccess (Ptr<Node> srcNode, Ptr<Node> dstNode, Ptr<Packet> packet) const = 0;
+  virtual bool TramsmitSuccess (const Ptr<Node> &srcNode, const Ptr<Node> &dstNode,
+                                const Ptr<Packet> &packet) const = 0;
 };
 
 } // namespace icarus

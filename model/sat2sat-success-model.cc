@@ -48,17 +48,17 @@ const double Sat2SatSuccessModel::MIN_ALTITUDE_FOR_VISIBILITY = 80000.0; //80 km
 TypeId
 Sat2SatSuccessModel::GetTypeId (void)
 {
-  static TypeId tid =
-      TypeId ("ns3::icarus::Sat2SatSuccessModel").SetParent<Object> ()
-      .SetGroupName ("ICARUS")
-      .AddConstructor<Sat2SatSuccessModel> ();
+  static TypeId tid = TypeId ("ns3::icarus::Sat2SatSuccessModel")
+                          .SetParent<Object> ()
+                          .SetGroupName ("ICARUS")
+                          .AddConstructor<Sat2SatSuccessModel> ();
 
   return tid;
 }
 
 Sat2SatSuccessModel::Sat2SatSuccessModel ()
 {
-  NS_LOG_FUNCTION(this);
+  NS_LOG_FUNCTION (this);
 }
 Sat2SatSuccessModel::~Sat2SatSuccessModel ()
 {
@@ -66,7 +66,8 @@ Sat2SatSuccessModel::~Sat2SatSuccessModel ()
 }
 
 bool
-Sat2SatSuccessModel::TramsmitSuccess (Ptr<Node> src, Ptr<Node> dst, Ptr<Packet>) const
+Sat2SatSuccessModel::TramsmitSuccess (const Ptr<Node> &src, const Ptr<Node> &dst,
+                                      const Ptr<Packet> &) const
 {
   NS_LOG_FUNCTION (this << src << dst);
 
@@ -83,11 +84,11 @@ Sat2SatSuccessModel::TramsmitSuccess (Ptr<Node> src, Ptr<Node> dst, Ptr<Packet>)
 }
 
 void
-Sat2SatSuccessModel::CalcMaxDistance(double altitude)
+Sat2SatSuccessModel::CalcMaxDistance (double altitude)
 {
   auto h = altitude; //Radius of the satellite
-  auto r = MIN_ALTITUDE_FOR_VISIBILITY + Earth.getRadius().value(); // 80 km + Earth Radius
-  m_maxDistance = 2 * sqrt((h*h) - (r*r)); //max distance = 2*sqrt(h^2 - r^2)
+  auto r = MIN_ALTITUDE_FOR_VISIBILITY + Earth.getRadius ().value (); // 80 km + Earth Radius
+  m_maxDistance = 2 * sqrt ((h * h) - (r * r)); //max distance = 2*sqrt(h^2 - r^2)
 }
 
 } // namespace icarus

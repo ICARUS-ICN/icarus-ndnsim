@@ -47,9 +47,10 @@ public:
   Sat2SatChannel ();
   virtual ~Sat2SatChannel ();
 
-  bool AttachNewSat (Ptr<SatNetDevice> device);
+  bool AttachNewSat (const Ptr<SatNetDevice> &device);
 
-  Time TransmitStart (Ptr<Packet> packet, Ptr<SatNetDevice> src, DataRate bps, uint16_t protocolNumber) const;
+  Time TransmitStart (const Ptr<Packet> &packet, const Ptr<SatNetDevice> &src, DataRate bps,
+                      uint16_t protocolNumber) const;
 
   virtual std::size_t GetNDevices (void) const override;
   virtual Ptr<NetDevice> GetDevice (std::size_t i) const override;
@@ -62,11 +63,10 @@ private:
 
   TracedCallback<Ptr<const Packet>> m_phyTxDropTrace;
 
-    /** \brief Wire states
+  /** \brief Wire states
    *
    */
-  enum WireState
-  {
+  enum WireState {
     /** Initializing state */
     INITIALIZING,
     /** Idle state (no transmission from NetDevice) */
@@ -82,18 +82,20 @@ private:
    */
   class Link
   {
-public:
+  public:
     /** \brief Create the link, it will be in INITIALIZING state
      *
      */
-    Link() : m_state (INITIALIZING), m_src (0), m_dst (0) {}
+    Link () : m_state (INITIALIZING), m_src (0), m_dst (0)
+    {
+    }
 
-    WireState                  m_state; //!< State of the link
-    Ptr<SatNetDevice> m_src;   //!< First NetDevice
-    Ptr<SatNetDevice> m_dst;   //!< Second NetDevice
+    WireState m_state; //!< State of the link
+    Ptr<SatNetDevice> m_src; //!< First NetDevice
+    Ptr<SatNetDevice> m_dst; //!< Second NetDevice
   };
 
-  Link m_link[N_SATELLITES];
+  Link m_link[MAX_N_SATELLITES];
 };
 
 } // namespace icarus

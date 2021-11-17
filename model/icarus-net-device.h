@@ -41,7 +41,7 @@ public:
   static TypeId GetTypeId (void);
   virtual ~IcarusNetDevice ();
 
-  virtual bool Attach (Ptr<GroundSatChannel> channel) = 0;
+  virtual bool Attach (const Ptr<GroundSatChannel> &channel) = 0;
 
   virtual DataRate GetDataRate () const;
   virtual void SetDataRate (DataRate rate);

@@ -58,7 +58,8 @@ GroundSatSuccessDistance::~GroundSatSuccessDistance ()
 }
 
 bool
-GroundSatSuccessDistance::TramsmitSuccess (Ptr<Node> src, Ptr<Node> dst, Ptr<Packet>) const
+GroundSatSuccessDistance::TramsmitSuccess (const Ptr<Node> &src, const Ptr<Node> &dst,
+                                           const Ptr<Packet> &) const
 {
   NS_LOG_FUNCTION (this << src << dst);
 

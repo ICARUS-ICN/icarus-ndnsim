@@ -43,9 +43,9 @@ public:
   static TypeId GetTypeId (void);
   virtual ~Sat2GroundNetDevice ();
 
-  bool Attach (Ptr<GroundSatChannel> channel) override;
+  bool Attach (const Ptr<GroundSatChannel> &channel) override;
 
-  void ReceiveFromGround (Ptr<Packet> packet, DataRate bps, const Address &src,
+  void ReceiveFromGround (const Ptr<Packet> &packet, DataRate bps, const Address &src,
                           uint16_t protocolNumber);
 
   Address GetAddress () const override;
@@ -75,9 +75,10 @@ private:
   SatAddress m_address;
   enum { IDLE, TRANSMITTING } m_txMachineState = IDLE;
 
-  void ReceiveFromGroundFinish (Ptr<Packet> packet, const Address &src, uint16_t protocolNumber);
-  void TransmitStart (Ptr<Packet> packet);
-  void TransmitComplete (Ptr<Packet> packet);
+  void ReceiveFromGroundFinish (const Ptr<Packet> &packet, const Address &src,
+                                uint16_t protocolNumber);
+  void TransmitStart (const Ptr<Packet> &packet);
+  void TransmitComplete (const Ptr<Packet> &packet);
 };
 
 } // namespace icarus

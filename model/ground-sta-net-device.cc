@@ -175,7 +175,7 @@ GroundStaNetDevice::~GroundStaNetDevice ()
 }
 
 bool
-GroundStaNetDevice::Attach (Ptr<GroundSatChannel> channel)
+GroundStaNetDevice::Attach (const Ptr<GroundSatChannel> &channel)
 {
   NS_LOG_FUNCTION (this << channel);
 
@@ -187,7 +187,7 @@ GroundStaNetDevice::Attach (Ptr<GroundSatChannel> channel)
 }
 
 void
-GroundStaNetDevice::ReceiveFromSat (Ptr<Packet> packet, DataRate bps, const Address &src,
+GroundStaNetDevice::ReceiveFromSat (const Ptr<Packet> &packet, DataRate bps, const Address &src,
                                     uint16_t protocolNumber)
 {
   NS_LOG_FUNCTION (this << packet << bps << src << protocolNumber);
@@ -199,7 +199,7 @@ GroundStaNetDevice::ReceiveFromSat (Ptr<Packet> packet, DataRate bps, const Addr
 }
 
 void
-GroundStaNetDevice::ReceiveFromSatFinish (Ptr<Packet> packet, const Address &src,
+GroundStaNetDevice::ReceiveFromSatFinish (const Ptr<Packet> &packet, const Address &src,
                                           uint16_t protocolNumber)
 {
   NS_LOG_FUNCTION (this << packet << src << protocolNumber);
@@ -355,7 +355,7 @@ GroundStaNetDevice::Send (Ptr<Packet> packet, const Address &, uint16_t protocol
 }
 
 void
-GroundStaNetDevice::TransmitStart (Ptr<Packet> packet)
+GroundStaNetDevice::TransmitStart (const Ptr<Packet> &packet)
 {
   NS_LOG_FUNCTION (this << packet);
   NS_ASSERT_MSG (m_txMachineState == IDLE,
@@ -374,7 +374,7 @@ GroundStaNetDevice::TransmitStart (Ptr<Packet> packet)
 }
 
 void
-GroundStaNetDevice::TransmitComplete (Ptr<Packet> packet)
+GroundStaNetDevice::TransmitComplete (const Ptr<Packet> &packet)
 {
   NS_LOG_FUNCTION (this << packet);
 
