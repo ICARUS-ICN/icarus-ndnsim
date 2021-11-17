@@ -84,7 +84,7 @@ GroundSatChannel::AddGroundDevice (const Ptr<GroundStaNetDevice> &device)
   NS_ABORT_MSG_UNLESS (device->GetNode ()->GetObject<MobilityModel> () != 0,
                        "Ground stations need a mobility model");
 
-  m_ground.Add (device);
+  m_ground.push_back (device);
   (*m_groundAddresses)[Mac48Address::ConvertFrom (device->GetAddress ())] = device;
 }
 
@@ -188,7 +188,7 @@ std::size_t
 GroundSatChannel::GetNDevices (void) const
 {
   NS_LOG_FUNCTION (this);
-  return m_constellation->GetSize () + m_ground.GetN ();
+  return m_constellation->GetSize () + m_ground.size ();
 }
 
 Ptr<NetDevice>
@@ -204,7 +204,7 @@ GroundSatChannel::GetDevice (std::size_t i) const
       return m_constellation->Get (i);
     }
 
-  return m_ground.Get (i - m_constellation->GetSize ());
+  return m_ground.at (i - m_constellation->GetSize ());
 }
 
 void
