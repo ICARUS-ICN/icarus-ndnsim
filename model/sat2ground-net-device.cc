@@ -57,25 +57,6 @@ public:
   virtual void Deserialize (TagBuffer i) override;
 
   /**
-   * Set the destination address
-   * \param dst destination address
-   */
-  void
-  SetDst (const Mac48Address &dst)
-  {
-    m_dst = dst;
-  }
-  /**
-   * Get the destination address
-   * \return the destination address
-   */
-  const Mac48Address &
-  GetDst (void) const
-  {
-    return m_dst;
-  }
-
-  /**
    * Set the protocol number
    * \param proto protocol number
    */
@@ -291,7 +272,6 @@ Sat2GroundNetDevice::Send (Ptr<Packet> packet, const Address &dest, uint16_t pro
   NS_LOG_FUNCTION (this << packet << dest << protocolNumber);
 
   SatGroundTag tag;
-  tag.SetDst (Mac48Address::ConvertFrom (dest));
   tag.SetProto (protocolNumber);
   packet->AddPacketTag (tag);
 
@@ -327,7 +307,6 @@ Sat2GroundNetDevice::TransmitStart (const Ptr<Packet> &packet)
 
   SatGroundTag tag;
   packet->PeekPacketTag (tag);
-  const auto dst = tag.GetDst ();
   const auto proto = tag.GetProto ();
 
   m_phyTxBeginTrace (packet);
