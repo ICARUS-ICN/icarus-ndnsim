@@ -148,7 +148,7 @@ GroundSatChannel::Transmit2Sat (const Ptr<Packet> &packet, DataRate bps,
   return endTx;
 }
 
-Time
+void
 GroundSatChannel::Transmit2Ground (const Ptr<Packet> &packet, DataRate bps,
                                    const Ptr<Sat2GroundNetDevice> &src, const Address &dst,
                                    uint16_t protocolNumber) const
@@ -180,8 +180,6 @@ GroundSatChannel::Transmit2Ground (const Ptr<Packet> &packet, DataRate bps,
                                       &GroundStaNetDevice::ReceiveFromSat, ground_device, packet,
                                       bps, src->GetAddress (), protocolNumber);
     }
-
-  return endTx;
 }
 
 std::size_t
