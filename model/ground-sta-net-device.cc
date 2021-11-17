@@ -192,6 +192,12 @@ GroundStaNetDevice::ReceiveFromSat (const Ptr<Packet> &packet, DataRate bps, con
 {
   NS_LOG_FUNCTION (this << packet << bps << src << protocolNumber);
 
+  if (SatAddress::ConvertFrom (src) != m_remoteAddress)
+    {
+      NS_LOG_LOGIC ("Ignoring packet from non-tracked satellite:" << src);
+      return;
+    }
+
   m_phyRxBeginTrace (packet);
   Simulator::Schedule (bps.CalculateBytesTxTime (packet->GetSize ()),
                        &GroundStaNetDevice::ReceiveFromSatFinish, this, packet, src,
