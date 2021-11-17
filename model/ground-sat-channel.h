@@ -57,7 +57,7 @@ public:
 
   void AddGroundDevice (const Ptr<GroundStaNetDevice> &device);
 
-  Time Transmit2Ground (const Ptr<Packet> &packet, DataRate bps,
+  void Transmit2Ground (const Ptr<Packet> &packet, DataRate bps,
                         const Ptr<Sat2GroundNetDevice> &src, const Address &dst,
                         uint16_t protocolNumber) const;
   Time Transmit2Sat (const Ptr<Packet> &packet, DataRate bps, const Ptr<GroundStaNetDevice> &src,

@@ -331,9 +331,10 @@ Sat2GroundNetDevice::TransmitStart (const Ptr<Packet> &packet)
   const auto proto = tag.GetProto ();
 
   m_phyTxBeginTrace (packet);
-  Time endTx = GetInternalChannel ()->Transmit2Ground (
-      packet, GetDataRate (), GetObject<Sat2GroundNetDevice> (), dst, proto);
-  Simulator::Schedule (endTx, &Sat2GroundNetDevice::TransmitComplete, this, packet);
+  GetInternalChannel ()->Transmit2Ground (packet, GetDataRate (), GetObject<Sat2GroundNetDevice> (),
+                                          dst, proto);
+  Simulator::Schedule (GetDataRate ().CalculateBytesTxTime (packet->GetSize ()),
+                       &Sat2GroundNetDevice::TransmitComplete, this, packet);
 }
 
 void
