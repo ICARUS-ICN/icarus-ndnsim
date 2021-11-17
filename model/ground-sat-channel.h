@@ -26,6 +26,7 @@
 #include "ns3/channel.h"
 #include "ns3/data-rate.h"
 #include "ns3/net-device-container.h"
+#include "ns3/net-device.h"
 #include "ns3/sat-address.h"
 #include "ns3/traced-callback.h"
 #include <memory>
@@ -69,7 +70,7 @@ public:
   Ptr<Constellation> GetConstellation () const;
 
 private:
-  NetDeviceContainer m_ground;
+  std::vector<Ptr<GroundStaNetDevice>> m_ground;
   Ptr<GroundSatSuccessModel> m_txSuccessModel;
   Ptr<Constellation> m_constellation;
   std::unique_ptr<std::unordered_map<Mac48Address, Ptr<GroundStaNetDevice>>> m_groundAddresses;
