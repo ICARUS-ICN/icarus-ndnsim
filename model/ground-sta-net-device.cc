@@ -389,9 +389,9 @@ GroundStaNetDevice::TransmitComplete (const Ptr<Packet> &packet)
 
   if (GetQueue ()->IsEmpty () == false)
     {
-      auto packet = GetQueue ()->Dequeue ();
-      m_snifferTrace (packet);
-      TransmitStart (packet);
+      auto next_packet = GetQueue ()->Dequeue ();
+      m_snifferTrace (next_packet);
+      TransmitStart (next_packet);
     }
 }
 
