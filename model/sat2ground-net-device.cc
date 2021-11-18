@@ -89,7 +89,7 @@ SatGroundTag::GetTypeId (void)
 {
   static TypeId tid = TypeId ("ns3::SatGroundTag")
                           .SetParent<Tag> ()
-                          .SetGroupName ("Icarus")
+                          .SetGroupName ("ICARUS")
                           .AddConstructor<SatGroundTag> ();
   return tid;
 }
