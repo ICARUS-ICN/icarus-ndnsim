@@ -145,8 +145,7 @@ Ptr<NetDevice>
 Sat2SatChannel::GetDevice (std::size_t i) const
 {
   NS_LOG_FUNCTION (this << i);
-  // Last device is ground station
-  NS_ABORT_MSG_UNLESS (i < GetNDevices () - 1 && i >= 0,
+  NS_ABORT_MSG_UNLESS (i < GetNDevices () && i >= 0,
                        "Asking for " << i << "-th device of a total of " << GetNDevices ());
   return m_link[i].m_src;
 }
