@@ -86,6 +86,7 @@ Sat2SatSuccessModel::TramsmitSuccess (const Ptr<Node> &src, const Ptr<Node> &dst
 void
 Sat2SatSuccessModel::CalcMaxDistance (double altitude)
 {
+  NS_LOG_FUNCTION (this << altitude);
   auto h = altitude; //Radius of the satellite
   auto r = MIN_ALTITUDE_FOR_VISIBILITY + Earth.getRadius ().value (); // 80 km + Earth Radius
   m_maxDistance = 2 * sqrt ((h * h) - (r * r)); //max distance = 2*sqrt(h^2 - r^2)

@@ -152,12 +152,8 @@ ISLHelper::EnablePcapInternal (std::string prefix, Ptr<NetDevice> nd, bool promi
   // that are wandering through all of devices on perhaps all of the nodes in
   // the system.  We can only deal with devices of type ISLHelper.
   //
+  NS_LOG_FUNCTION(this << prefix << nd);
   Ptr<SatNetDevice> device = nd->GetObject<SatNetDevice> ();
-  if (device == 0)
-    {
-      // Try the satellite device
-      device = nd->GetObject<SatNetDevice> ();
-    }
   if (device == 0)
     {
       NS_LOG_INFO ("ISLHelper::EnablePcapInternal(): Device "
@@ -192,13 +188,14 @@ void
 ISLHelper::EnableAsciiInternal (Ptr<OutputStreamWrapper> stream, std::string prefix,
                                    Ptr<NetDevice> nd, bool explicitFilename)
 {
+  NS_LOG_FUNCTION(this << stream << prefix << nd);
   //
   // All of the ascii enable functions vector through here including the ones
   // that are wandering through all of devices on perhaps all of the nodes in
   // the system.  We can only deal with devices of type SatNetDevice.
   //
   Ptr<SatNetDevice> device = nd->GetObject<SatNetDevice> ();
-  if (device == 0)
+  if (device == nullptr)
     {
       NS_LOG_INFO ("ISLHelper::EnableAsciiInternal(): Device "
                    << device << " not of type ns3::icarus::SatNetDevice");
