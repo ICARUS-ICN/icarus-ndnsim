@@ -109,7 +109,7 @@ GroundSatTag::GetTypeId (void)
 {
   static TypeId tid = TypeId ("ns3::GroundSatTag")
                           .SetParent<Tag> ()
-                          .SetGroupName ("Icarus")
+                          .SetGroupName ("ICARUS")
                           .AddConstructor<GroundSatTag> ();
   return tid;
 }
