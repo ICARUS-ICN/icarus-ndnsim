@@ -324,6 +324,9 @@ Sat2GroundNetDevice::TransmitComplete (const Ptr<Packet> &packet)
   m_phyTxEndTrace (packet);
   m_txMachineState = IDLE;
 
+  SatGroundTag tag;
+  packet->RemovePacketTag (tag);
+
   if (GetQueue ()->IsEmpty () == false)
     {
       auto next_packet = GetQueue ()->Dequeue ();

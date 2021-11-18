@@ -387,6 +387,9 @@ GroundStaNetDevice::TransmitComplete (const Ptr<Packet> &packet)
   m_phyTxEndTrace (packet);
   m_txMachineState = IDLE;
 
+  GroundSatTag tag;
+  packet->RemovePacketTag (tag);
+
   if (GetQueue ()->IsEmpty () == false)
     {
       auto next_packet = GetQueue ()->Dequeue ();
