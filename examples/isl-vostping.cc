@@ -57,7 +57,7 @@ main (int argc, char **argv) -> int
   IcarusHelper icarusHelper;
   ISLHelper islHelper;
   ConstellationHelper constellationHelper (quantity<length> (250 * kilo * meters),
-                                           quantity<plane_angle> (60.0 * degrees), 2, 1, 0);
+                                           quantity<plane_angle> (60.0 * degrees), 1, 50, 1);
 
   ObjectFactory circularOrbitFactory ("ns3::icarus::CircularOrbitMobilityModel");
 
