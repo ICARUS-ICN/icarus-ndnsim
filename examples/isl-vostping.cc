@@ -73,8 +73,14 @@ main (int argc, char **argv) -> int
   // Choosing forwarding strategy
   ndn::StrategyChoiceHelper::InstallAll ("/icarus", "/localhost/nfd/strategy/best-route");
 
-  // Installing applications
+  // Insert routes
+  auto proto = bird1 -> GetObject<ndn::L3Protocol>();
+  auto face = proto ->getFaceByNetDevice(bird1->GetDevice(1));
 
+  ndn::FibHelper::AddRoute (bird1,"/icarus",face, int32_t(1));
+  
+  // Installing applications
+  
   // Consumer
   ndn::AppHelper consumerHelper ("ns3::ndn::ConsumerCbr");
   // Consumer will request /prefix/0, /prefix/1, ...
@@ -87,16 +93,18 @@ main (int argc, char **argv) -> int
   // Producer will reply to all requests starting with /prefix
   producerHelper.SetPrefix ("/icarus/bird1/isl-vostping");
   producerHelper.SetAttribute ("PayloadSize", StringValue ("1024"));
-  producerHelper.Install (bird2); // Satellite node
+  producerHelper.Install (bird2);
 
   AsciiTraceHelper ascii;
   auto stream = ascii.CreateFileStream ("/tmp/out.tr");
   stream->GetStream ()->precision (9);
-  icarusHelper.EnableAsciiAll (stream);
-  icarusHelper.EnablePcapAll ("/tmp/pcap-sputping");
+  islHelper.EnableAscii (stream,0,1);
+  islHelper.EnableAscii (stream, 1,1);
+  islHelper.EnablePcap ("/tmp/pcap-isl-vostping-1",0,1);
+  islHelper.EnablePcap("/tmp/pcap-isl-vostping-2",1,1);
 
   // Add channel drops to the ASCII trace
-  Config::Connect ("/NodeList/0/DeviceList/0/$ns3::icarus::SatNetDevice/Channel/PhyTxDrop",
+  Config::Connect ("/NodeList/0/DeviceList/1/$ns3::icarus::SatNetDevice/Channel/PhyTxDrop",
                    MakeBoundCallback (&AsciiTraceHelper::DefaultDropSinkWithContext, stream));
 
   ns3::Simulator::Stop (Days (7));
