@@ -25,7 +25,10 @@ def build(bld):
         'utils/sat-address.cc',
         'model/sat2sat-channel.cc',
         'model/sat2sat-success-model.cc',
-        'model/sat-net-device.cc'
+        'model/sat-net-device.cc',
+        'model/mac-model.cc',
+        'model/none-mac-model.cc',
+        'model/aloha-mac-model.cc'
     ]
 
     module_test = bld.create_ns3_module_test_library('icarus')
@@ -52,7 +55,10 @@ def build(bld):
         'utils/sat-address.h',
         'model/sat2sat-channel.h',
         'model/sat2sat-success-model.h',
-        'model/sat-net-device.h'
+        'model/sat-net-device.h',
+        'model/mac-model.h',
+        'model/none-mac-model.h',
+        'model/aloha-mac-model.h'
     ]
 
     if bld.env.ENABLE_EXAMPLES:

@@ -29,6 +29,7 @@
 #include "ns3/ground-sat-channel.h"
 #include "icarus-net-device.h"
 #include "ns3/sat-address.h"
+#include "aloha-mac-model.h"
 
 namespace ns3 {
 namespace icarus {
@@ -79,6 +80,8 @@ private:
                                 uint16_t protocolNumber);
   void TransmitStart (const Ptr<Packet> &packet);
   void TransmitComplete (const Ptr<Packet> &packet);
+
+  AlohaMacModel mac_model;
 };
 
 } // namespace icarus

@@ -167,9 +167,11 @@ Sat2GroundNetDevice::ReceiveFromGround (const Ptr<Packet> &packet, DataRate bps,
   NS_LOG_FUNCTION (this << packet << bps << src << protocolNumber);
 
   m_phyRxBeginTrace (packet);
-  Simulator::Schedule (bps.CalculateBytesTxTime (packet->GetSize ()),
+  Time packet_tx_time = bps.CalculateBytesTxTime (packet->GetSize ());
+  Simulator::Schedule (packet_tx_time,
                        &Sat2GroundNetDevice::ReceiveFromGroundFinish, this, packet, src,
                        protocolNumber);
+  mac_model.NewPacketRx (packet->GetUid (), packet_tx_time);
 }
 
 void
@@ -179,14 +181,18 @@ Sat2GroundNetDevice::ReceiveFromGroundFinish (const Ptr<Packet> &packet, const A
   NS_LOG_FUNCTION (this << packet << protocolNumber);
 
   m_phyRxEndTrace (packet);
-  m_snifferTrace (packet);
-  m_macRxTrace (packet);
 
-  if (m_promiscReceiveCallback.IsNull () != true)
+  if (!mac_model.HasCollided (packet->GetUid ()))
     {
-      m_promiscReceiveCallback (this, packet, protocolNumber, src, GetAddress (), PACKET_HOST);
+      m_snifferTrace (packet);
+      m_macRxTrace (packet);
+
+      if (m_promiscReceiveCallback.IsNull () != true)
+        {
+          m_promiscReceiveCallback (this, packet, protocolNumber, src, GetAddress (), PACKET_HOST);
+        }
+      m_receiveCallback (this, packet, protocolNumber, src);
     }
-  m_receiveCallback (this, packet, protocolNumber, src);
 }
 
 bool
