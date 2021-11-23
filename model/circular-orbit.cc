@@ -167,9 +167,10 @@ CircularOrbitMobilityModel::DoGetPosition () const
       radius - Earth.getRadius ().value (), GeographicPositions::SPHERE);
 }
 
-double CircularOrbitMobilityModel::getRadius () const
+double
+CircularOrbitMobilityModel::getRadius () const
 {
-  return radius.value();
+  return radius.value ();
 }
 
 } // namespace icarus
