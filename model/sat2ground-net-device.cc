@@ -132,14 +132,17 @@ SatGroundTag::Print (std::ostream &os) const
 TypeId
 Sat2GroundNetDevice::GetTypeId (void)
 {
-  static TypeId tid = TypeId ("ns3::icarus::Sat2GroundNetDevice")
-                          .SetParent<IcarusNetDevice> ()
-                          .SetGroupName ("ICARUS")
-                          .AddConstructor<Sat2GroundNetDevice> ()
-                          .AddAttribute ("Address", "The link-layer address of this device.",
-                                         SatAddressValue (SatAddress ()),
-                                         MakeSatAddressAccessor (&Sat2GroundNetDevice::m_address),
-                                         MakeSatAddressChecker ());
+  static TypeId tid =
+      TypeId ("ns3::icarus::Sat2GroundNetDevice")
+          .SetParent<IcarusNetDevice> ()
+          .SetGroupName ("ICARUS")
+          .AddConstructor<Sat2GroundNetDevice> ()
+          .AddAttribute (
+              "Address", "The link-layer address of this device.", SatAddressValue (SatAddress ()),
+              MakeSatAddressAccessor (&Sat2GroundNetDevice::m_address), MakeSatAddressChecker ())
+          .AddAttribute ("MacModel", "The MAC protocol for received frames", PointerValue (nullptr),
+                         MakePointerAccessor (&Sat2GroundNetDevice::m_macModel),
+                         MakePointerChecker<MacModel> ());
 
   return tid;
 }
@@ -168,10 +171,13 @@ Sat2GroundNetDevice::ReceiveFromGround (const Ptr<Packet> &packet, DataRate bps,
 
   m_phyRxBeginTrace (packet);
   Time packet_tx_time = bps.CalculateBytesTxTime (packet->GetSize ());
-  Simulator::Schedule (packet_tx_time,
-                       &Sat2GroundNetDevice::ReceiveFromGroundFinish, this, packet, src,
-                       protocolNumber);
-  m_macModel->NewPacketRx (packet, packet_tx_time);
+  Simulator::Schedule (packet_tx_time, &Sat2GroundNetDevice::ReceiveFromGroundFinish, this, packet,
+                       src, protocolNumber);
+
+  if (m_macModel != nullptr)
+    {
+      m_macModel->NewPacketRx (packet, packet_tx_time);
+    }
 }
 
 void
@@ -182,7 +188,7 @@ Sat2GroundNetDevice::ReceiveFromGroundFinish (const Ptr<Packet> &packet, const A
 
   m_phyRxEndTrace (packet);
 
-  if (!m_macModel->HasCollided (packet))
+  if (m_macModel == nullptr || !m_macModel->HasCollided (packet))
     {
       m_snifferTrace (packet);
       m_macRxTrace (packet);

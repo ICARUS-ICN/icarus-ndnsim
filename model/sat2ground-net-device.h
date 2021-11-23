@@ -29,7 +29,7 @@
 #include "ns3/ground-sat-channel.h"
 #include "icarus-net-device.h"
 #include "ns3/sat-address.h"
-#include "aloha-mac-model.h"
+#include "mac-model.h"
 
 namespace ns3 {
 namespace icarus {
@@ -74,9 +74,8 @@ public:
 
 private:
   SatAddress m_address;
+  Ptr<MacModel> m_macModel;
   enum { IDLE, TRANSMITTING } m_txMachineState = IDLE;
-
-  Ptr<AlohaMacModel> m_macModel = CreateObject<AlohaMacModel> ();
 
   void ReceiveFromGroundFinish (const Ptr<Packet> &packet, const Address &src,
                                 uint16_t protocolNumber);
