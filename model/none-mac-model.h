@@ -34,8 +34,8 @@ namespace icarus {
     static TypeId GetTypeId (void);
     
     virtual MacProtocol GetMacProtocol (void) const override;
-    virtual void NewPacketRx (uint64_t packet_uid, Time packet_tx_time) override;
-    virtual bool HasCollided (uint64_t packet_uid) override;
+    virtual void NewPacketRx (const Ptr<Packet> &packet, Time packet_tx_time) override;
+    virtual bool HasCollided (const Ptr<Packet> &packet) override;
   };
     
 }
