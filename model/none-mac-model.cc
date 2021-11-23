@@ -35,7 +35,8 @@ namespace icarus {
     static TypeId tid =
       TypeId ("ns3::icarus::NoneMacModel")
       .SetParent<MacModel> ()
-      .SetGroupName ("ICARUS");
+      .SetGroupName ("ICARUS")
+      .AddConstructor<NoneMacModel> ();
     
     return tid;
   }
