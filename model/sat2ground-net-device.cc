@@ -171,7 +171,7 @@ Sat2GroundNetDevice::ReceiveFromGround (const Ptr<Packet> &packet, DataRate bps,
   Simulator::Schedule (packet_tx_time,
                        &Sat2GroundNetDevice::ReceiveFromGroundFinish, this, packet, src,
                        protocolNumber);
-  mac_model.NewPacketRx (packet, packet_tx_time);
+  m_macModel->NewPacketRx (packet, packet_tx_time);
 }
 
 void
@@ -182,7 +182,7 @@ Sat2GroundNetDevice::ReceiveFromGroundFinish (const Ptr<Packet> &packet, const A
 
   m_phyRxEndTrace (packet);
 
-  if (!mac_model.HasCollided (packet))
+  if (!m_macModel->HasCollided (packet))
     {
       m_snifferTrace (packet);
       m_macRxTrace (packet);
