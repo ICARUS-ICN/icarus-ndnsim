@@ -55,7 +55,7 @@ jobs:
       - name: Configure
         run: |
           cd ns-3
-          CXX=${{ matrix.compiler }} ./waf configure -d ${{ matrix.build }} --enable-tests --enable-examples -o build/${{ matrix.build }}/${{ matrix.compiler }} --enable-modules=icarus,point-to-point-layout
+          CXX=${{ matrix.compiler }} ./waf configure -d ${{ matrix.build }} --enable-tests --enable-examples -o build/${{ matrix.build }}/${{ matrix.compiler }} --enable-modules=icarus,point-to-point-layout,netanim
       - name: Build
         run: |
           cd ns-3
