@@ -16,9 +16,15 @@ on:
 # A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
   build:
+    strategy:
+      matrix:
+        build: [debug, optimized]
+        compiler: [g++-10, clang++-12]
+
     # The type of runner that the job will run on
     runs-on: self-hosted
 
+    name: Build ${{ matrix.build }} with ${{ matrix.compiler }}
     # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
       - name: Checkout pybindgen
@@ -49,7 +55,7 @@ jobs:
       - name: Configure
         run: |
           cd ns-3
-          ./waf configure --enable-tests -o build/ --enable-modules=icarus,point-to-point-layout
+          CXX=${{ matrix.compiler }} ./waf configure -d ${{ matrix.build }} --enable-tests -o build/${{ matrix.build }}/${{ matrix.compiler }} --enable-modules=icarus,point-to-point-layout
       - name: Build
         run: |
           cd ns-3
