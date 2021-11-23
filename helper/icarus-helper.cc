@@ -26,6 +26,7 @@
 #include "ns3/log-macros-enabled.h"
 #include "ns3/ground-sat-channel.h"
 #include "ns3/log.h"
+#include "ns3/mac-model.h"
 #include "ns3/mobility-model.h"
 #include "ns3/names.h"
 #include "ns3/net-device-queue-interface.h"
@@ -53,6 +54,7 @@ IcarusHelper::IcarusHelper ()
   m_sat2GroundFactory.SetTypeId ("ns3::icarus::Sat2GroundNetDevice");
   m_groundStaFactory.SetTypeId ("ns3::icarus::GroundStaNetDevice");
   m_successModelFactory.SetTypeId ("ns3::icarus::GroundSatSuccessDistance");
+  m_macModelFactory.SetTypeId ("ns3::icarus::NoneMacModel");
 }
 
 void
@@ -86,6 +88,21 @@ IcarusHelper::SetSuccessModel (std::string type, const std::string &n1, const At
   m_successModelFactory.Set (n2, v2);
   m_successModelFactory.Set (n3, v3);
   m_successModelFactory.Set (n4, v4);
+}
+
+void
+IcarusHelper::SetMacModel (std::string type, const std::string &n1, const AttributeValue &v1,
+                           const std::string &n2, const AttributeValue &v2, const std::string &n3,
+                           const AttributeValue &v3, const std::string &n4,
+                           const AttributeValue &v4)
+{
+  NS_LOG_FUNCTION (this << type << n1 << n2 << n3 << n4);
+
+  m_macModelFactory.SetTypeId (type);
+  m_macModelFactory.Set (n1, v1);
+  m_macModelFactory.Set (n2, v2);
+  m_macModelFactory.Set (n3, v3);
+  m_macModelFactory.Set (n4, v4);
 }
 
 void
@@ -218,6 +235,7 @@ IcarusHelper::CreateDeviceForNode (Ptr<Node> node, ConstellationHelper *chelper)
       NS_ASSERT_MSG (chelper != nullptr,
                      "We need a ConstellationHelper to create a Satellite device");
       auto sat_device = m_sat2GroundFactory.Create<Sat2GroundNetDevice> ();
+      sat_device->SetAttribute ("MacModel", PointerValue (m_macModelFactory.Create<MacModel> ()));
       node->AddDevice (sat_device);
       const auto address = chelper->LaunchSatellite (sat_device);
       sat_device->SetAddress (address.ConvertTo ());
