@@ -49,15 +49,15 @@ namespace icarus {
   }
   
   void
-  NoneMacModel::NewPacketRx (uint64_t packet_uid, Time packet_tx_time)
+  NoneMacModel::NewPacketRx (const Ptr<Packet> &packet, Time packet_tx_time)
   {
-    NS_LOG_FUNCTION (this << packet_uid << packet_tx_time);
+    NS_LOG_FUNCTION (this << packet << packet_tx_time);
   }
   
   bool
-  NoneMacModel::HasCollided (uint64_t packet_uid)
+  NoneMacModel::HasCollided (const Ptr<Packet> &packet)
   {
-    NS_LOG_FUNCTION (this << packet_uid);
+    NS_LOG_FUNCTION (this << packet);
 
     return false;
   }

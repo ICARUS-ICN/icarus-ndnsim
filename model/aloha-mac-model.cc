@@ -59,31 +59,33 @@ namespace icarus {
   }
     
   void
-  AlohaMacModel::NewPacketRx (uint64_t packet_uid, Time packet_tx_time)
+  AlohaMacModel::NewPacketRx (const Ptr<Packet> &packet, Time packet_tx_time)
   {
-    NS_LOG_FUNCTION (this << packet_uid << packet_tx_time);
+    NS_LOG_FUNCTION (this << packet << packet_tx_time);
     
     if (busy_period_packet_uid > 0)
       {
         busy_period_collision = true;
-        NS_LOG_LOGIC ("Packet " << packet_uid << " causes collision");
+        NS_LOG_LOGIC ("Packet " << packet->GetUid () << " causes collision");
       }
     
     Time finish_tx_time = Simulator::Now () + packet_tx_time;
     if (busy_period_packet_uid == 0 || finish_tx_time >= busy_period_finish_time)
       {
-        busy_period_packet_uid = packet_uid;
+        busy_period_packet_uid = packet->GetUid ();
         busy_period_finish_time = finish_tx_time;
         NS_LOG_LOGIC ("Updating busy period info: " << busy_period_packet_uid << " " << busy_period_finish_time);
       }
   }
     
   bool
-  AlohaMacModel::HasCollided (uint64_t packet_uid)
+  AlohaMacModel::HasCollided (const Ptr<Packet> &packet)
   {
-    NS_LOG_FUNCTION (this << packet_uid);
+    NS_LOG_FUNCTION (this << packet);
     
     bool has_collided = busy_period_collision;
+    uint64_t packet_uid = packet->GetUid ();
+    
     if (has_collided)
       {
         NS_LOG_LOGIC ("Packet " << packet_uid << " discarded due to collision");

@@ -24,7 +24,7 @@
 #define MAC_MODEL_H
 
 #include "ns3/object.h"
-//#include "ns3/ptr.h"
+#include "ns3/packet.h"
 #include "ns3/nstime.h"
 
 namespace ns3 {
@@ -43,8 +43,8 @@ namespace icarus {
     };
     virtual MacProtocol GetMacProtocol (void) const = 0;
     
-    virtual void NewPacketRx (uint64_t packet_uid, Time packet_tx_time) = 0;
-    virtual bool HasCollided (uint64_t packet_uid) = 0;
+    virtual void NewPacketRx (const Ptr<Packet> &packet, Time packet_tx_time) = 0;
+    virtual bool HasCollided (const Ptr<Packet> &packet) = 0;
   };
     
 }
