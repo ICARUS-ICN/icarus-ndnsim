@@ -76,12 +76,12 @@ private:
   SatAddress m_address;
   enum { IDLE, TRANSMITTING } m_txMachineState = IDLE;
 
+  Ptr<AlohaMacModel> m_macModel = CreateObject<AlohaMacModel> ();
+
   void ReceiveFromGroundFinish (const Ptr<Packet> &packet, const Address &src,
                                 uint16_t protocolNumber);
   void TransmitStart (const Ptr<Packet> &packet);
   void TransmitComplete (const Ptr<Packet> &packet);
-
-  AlohaMacModel mac_model;
 };
 
 } // namespace icarus
