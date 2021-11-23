@@ -35,8 +35,7 @@ namespace icarus {
     static TypeId tid =
       TypeId ("ns3::icarus::MacModel")
       .SetParent<Object> ()
-      .SetGroupName ("ICARUS")
-      .AddConstructor<MacModel> ();
+      .SetGroupName ("ICARUS");
     
     return tid;
   }
@@ -50,28 +49,6 @@ namespace icarus {
   {
     NS_LOG_FUNCTION (this);
   }
-  
-  MacModel::MacProtocol
-  MacModel::GetMacProtocol (void) const
-  {
-    NS_LOG_FUNCTION (this);
-    
-    return NONE;
-  }
-  
-  void
-  MacModel::NewPacketRx (uint64_t packet_uid, Time packet_tx_time)
-  {
-    NS_LOG_FUNCTION (this << packet_uid << packet_tx_time);
-  }
-  
-  bool
-  MacModel::HasCollided (uint64_t packet_uid)
-  {
-    NS_LOG_FUNCTION (this << packet_uid);
-    
-    return false;
-  }
-  
+
 }
 }

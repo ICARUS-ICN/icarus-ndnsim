@@ -41,10 +41,10 @@ namespace icarus {
 		      NONE,
 		      ALOHA
     };
-    virtual MacProtocol GetMacProtocol (void) const;
+    virtual MacProtocol GetMacProtocol (void) const = 0;
     
-    virtual void NewPacketRx (uint64_t packet_uid, Time packet_tx_time);
-    virtual bool HasCollided (uint64_t packet_uid);
+    virtual void NewPacketRx (uint64_t packet_uid, Time packet_tx_time) = 0;
+    virtual bool HasCollided (uint64_t packet_uid) = 0;
   };
     
 }

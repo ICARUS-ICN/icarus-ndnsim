@@ -44,24 +44,22 @@ namespace icarus {
   NoneMacModel::GetMacProtocol (void) const
   {
     NS_LOG_FUNCTION (this);
-    
-    return MacModel::GetMacProtocol ();
+
+    return NONE;
   }
   
   void
   NoneMacModel::NewPacketRx (uint64_t packet_uid, Time packet_tx_time)
   {
     NS_LOG_FUNCTION (this << packet_uid << packet_tx_time);
-    
-    MacModel::NewPacketRx (packet_uid, packet_tx_time);
   }
   
   bool
   NoneMacModel::HasCollided (uint64_t packet_uid)
   {
     NS_LOG_FUNCTION (this << packet_uid);
-    
-    return MacModel::HasCollided (packet_uid);
+
+    return false;
   }
   
 }
