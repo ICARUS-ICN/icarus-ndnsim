@@ -25,35 +25,34 @@
 namespace ns3 {
 namespace icarus {
 
-  NS_LOG_COMPONENT_DEFINE ("icarus.NoneMacModel");
-  
-  NS_OBJECT_ENSURE_REGISTERED (NoneMacModel);
-  
-  TypeId
-  NoneMacModel::GetTypeId (void)
-  {
-    static TypeId tid =
-      TypeId ("ns3::icarus::NoneMacModel")
-      .SetParent<MacModel> ()
-      .SetGroupName ("ICARUS")
-      .AddConstructor<NoneMacModel> ();
-    
-    return tid;
-  }
-  
-  void
-  NoneMacModel::NewPacketRx (const Ptr<Packet> &packet, Time packet_tx_time)
-  {
-    NS_LOG_FUNCTION (this << packet << packet_tx_time);
-  }
-  
-  bool
-  NoneMacModel::HasCollided (const Ptr<Packet> &packet)
-  {
-    NS_LOG_FUNCTION (this << packet);
+NS_LOG_COMPONENT_DEFINE ("icarus.NoneMacModel");
 
-    return false;
-  }
-  
+NS_OBJECT_ENSURE_REGISTERED (NoneMacModel);
+
+TypeId
+NoneMacModel::GetTypeId (void)
+{
+  static TypeId tid = TypeId ("ns3::icarus::NoneMacModel")
+                          .SetParent<MacModel> ()
+                          .SetGroupName ("ICARUS")
+                          .AddConstructor<NoneMacModel> ();
+
+  return tid;
 }
+
+void
+NoneMacModel::NewPacketRx (const Ptr<Packet> &packet, Time packet_tx_time)
+{
+  NS_LOG_FUNCTION (this << packet << packet_tx_time);
 }
+
+bool
+NoneMacModel::HasCollided (const Ptr<Packet> &packet)
+{
+  NS_LOG_FUNCTION (this << packet);
+
+  return false;
+}
+
+} // namespace icarus
+} // namespace ns3

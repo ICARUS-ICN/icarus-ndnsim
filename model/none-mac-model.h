@@ -28,16 +28,16 @@
 namespace ns3 {
 namespace icarus {
 
-  class NoneMacModel : public MacModel
-  {
-  public:
-    static TypeId GetTypeId (void);
-    
-    virtual void NewPacketRx (const Ptr<Packet> &packet, Time packet_tx_time) override;
-    virtual bool HasCollided (const Ptr<Packet> &packet) override;
-  };
-    
-}
-}
+class NoneMacModel : public MacModel
+{
+public:
+  static TypeId GetTypeId (void);
+
+  virtual void NewPacketRx (const Ptr<Packet> &packet, Time packet_tx_time) override;
+  virtual bool HasCollided (const Ptr<Packet> &packet) override;
+};
+
+} // namespace icarus
+} // namespace ns3
 
 #endif

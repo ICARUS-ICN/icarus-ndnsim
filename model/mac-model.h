@@ -29,19 +29,19 @@
 
 namespace ns3 {
 namespace icarus {
-    
-  class MacModel : public Object
-  {
-  public:
-    static TypeId GetTypeId (void);
-    MacModel ();
-    virtual ~MacModel ();
-    
-    virtual void NewPacketRx (const Ptr<Packet> &packet, Time packet_tx_time) = 0;
-    virtual bool HasCollided (const Ptr<Packet> &packet) = 0;
-  };
-    
-}
-}
+
+class MacModel : public Object
+{
+public:
+  static TypeId GetTypeId (void);
+  MacModel ();
+  virtual ~MacModel ();
+
+  virtual void NewPacketRx (const Ptr<Packet> &packet, Time packet_tx_time) = 0;
+  virtual bool HasCollided (const Ptr<Packet> &packet) = 0;
+};
+
+} // namespace icarus
+} // namespace ns3
 
 #endif

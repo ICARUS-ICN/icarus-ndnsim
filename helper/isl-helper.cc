@@ -52,8 +52,8 @@ ISLHelper::ISLHelper ()
 
 void
 ISLHelper::SetQueue (std::string type, const std::string &n1, const AttributeValue &v1,
-                        const std::string &n2, const AttributeValue &v2, const std::string &n3,
-                        const AttributeValue &v3, const std::string &n4, const AttributeValue &v4)
+                     const std::string &n2, const AttributeValue &v2, const std::string &n3,
+                     const AttributeValue &v3, const std::string &n4, const AttributeValue &v4)
 {
   NS_LOG_FUNCTION (this << type << n1 << n2 << n3 << n4);
 
@@ -68,9 +68,9 @@ ISLHelper::SetQueue (std::string type, const std::string &n1, const AttributeVal
 
 void
 ISLHelper::SetSuccessModel (std::string type, const std::string &n1, const AttributeValue &v1,
-                               const std::string &n2, const AttributeValue &v2,
-                               const std::string &n3, const AttributeValue &v3,
-                               const std::string &n4, const AttributeValue &v4)
+                            const std::string &n2, const AttributeValue &v2, const std::string &n3,
+                            const AttributeValue &v3, const std::string &n4,
+                            const AttributeValue &v4)
 {
   NS_LOG_FUNCTION (this << type << n1 << n2 << n3 << n4);
 
@@ -109,19 +109,18 @@ ISLHelper::Install (const NodeContainer &c) const
 }
 
 NetDeviceContainer
-ISLHelper::Install(Ptr<Node> a, Ptr<Node> b) const
+ISLHelper::Install (Ptr<Node> a, Ptr<Node> b) const
 {
   NS_LOG_FUNCTION (this << a << b);
 
   NetDeviceContainer devices;
 
-  Ptr <Sat2SatChannel> channel = m_channelFactory.Create() -> GetObject<Sat2SatChannel>();
-  channel -> SetAttribute (
-    "TxSuccess",
-    PointerValue (m_successModelFactory.Create () -> GetObject<Sat2SatSuccessModel>())
-  );
-  devices.Add(InstallPriv(a,channel));
-  devices.Add(InstallPriv(b,channel));
+  Ptr<Sat2SatChannel> channel = m_channelFactory.Create ()->GetObject<Sat2SatChannel> ();
+  channel->SetAttribute (
+      "TxSuccess",
+      PointerValue (m_successModelFactory.Create ()->GetObject<Sat2SatSuccessModel> ()));
+  devices.Add (InstallPriv (a, channel));
+  devices.Add (InstallPriv (b, channel));
   return devices;
 }
 
@@ -145,14 +144,14 @@ ISLHelper::InstallPriv (Ptr<Node> node, Ptr<Sat2SatChannel> channel) const
 
 void
 ISLHelper::EnablePcapInternal (std::string prefix, Ptr<NetDevice> nd, bool promiscuous,
-                                  bool explicitFilename)
+                               bool explicitFilename)
 {
   //
   // All of the Pcap enable functions vector through here including the ones
   // that are wandering through all of devices on perhaps all of the nodes in
   // the system.  We can only deal with devices of type ISLHelper.
   //
-  NS_LOG_FUNCTION(this << prefix << nd);
+  NS_LOG_FUNCTION (this << prefix << nd);
   Ptr<SatNetDevice> device = nd->GetObject<SatNetDevice> ();
   if (device == 0)
     {
@@ -186,9 +185,9 @@ ISLHelper::EnablePcapInternal (std::string prefix, Ptr<NetDevice> nd, bool promi
 
 void
 ISLHelper::EnableAsciiInternal (Ptr<OutputStreamWrapper> stream, std::string prefix,
-                                   Ptr<NetDevice> nd, bool explicitFilename)
+                                Ptr<NetDevice> nd, bool explicitFilename)
 {
-  NS_LOG_FUNCTION(this << stream << prefix << nd);
+  NS_LOG_FUNCTION (this << stream << prefix << nd);
   //
   // All of the ascii enable functions vector through here including the ones
   // that are wandering through all of devices on perhaps all of the nodes in
@@ -239,7 +238,7 @@ ISLHelper::EnableAsciiInternal (Ptr<OutputStreamWrapper> stream, std::string pre
       // The MacRx trace source provides our "r" event.
       //
       asciiTraceHelper.HookDefaultReceiveSinkWithoutContext<SatNetDevice> (device, "MacRx",
-                                                                              theStream);
+                                                                           theStream);
 
       //
       // The "+", '-', and 'd' events are driven by trace sources actually in the

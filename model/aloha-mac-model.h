@@ -29,22 +29,22 @@
 namespace ns3 {
 namespace icarus {
 
-  class AlohaMacModel : public MacModel
-  {
-  public:
-    static TypeId GetTypeId (void);
-    AlohaMacModel ();
-    
-    virtual void NewPacketRx (const Ptr<Packet> &packet, Time packet_tx_time) override;
-    virtual bool HasCollided (const Ptr<Packet> &packet) override;
-    
-  private:
-    uint64_t busy_period_packet_uid;
-    Time busy_period_finish_time;
-    bool busy_period_collision;
-  };
-    
-}
-}
+class AlohaMacModel : public MacModel
+{
+public:
+  static TypeId GetTypeId (void);
+  AlohaMacModel ();
+
+  virtual void NewPacketRx (const Ptr<Packet> &packet, Time packet_tx_time) override;
+  virtual bool HasCollided (const Ptr<Packet> &packet) override;
+
+private:
+  uint64_t busy_period_packet_uid;
+  Time busy_period_finish_time;
+  bool busy_period_collision;
+};
+
+} // namespace icarus
+} // namespace ns3
 
 #endif

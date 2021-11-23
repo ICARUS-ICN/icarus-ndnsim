@@ -62,7 +62,7 @@ main (int argc, char **argv) -> int
   ObjectFactory circularOrbitFactory ("ns3::icarus::CircularOrbitMobilityModel");
 
   NetDeviceContainer netDevices (icarusHelper.Install (nodes, &constellationHelper));
-  netDevices.Add(islHelper.Install(nodes));
+  netDevices.Add (islHelper.Install (nodes));
 
   // Install NDN stack on all nodes
   ns3::ndn::StackHelper ndnHelper;
@@ -74,13 +74,13 @@ main (int argc, char **argv) -> int
   ndn::StrategyChoiceHelper::InstallAll ("/icarus", "/localhost/nfd/strategy/best-route");
 
   // Insert routes
-  auto proto = bird1 -> GetObject<ndn::L3Protocol>();
-  auto face = proto ->getFaceByNetDevice(bird1->GetDevice(1));
+  auto proto = bird1->GetObject<ndn::L3Protocol> ();
+  auto face = proto->getFaceByNetDevice (bird1->GetDevice (1));
 
-  ndn::FibHelper::AddRoute (bird1,"/icarus",face, int32_t(1));
-  
+  ndn::FibHelper::AddRoute (bird1, "/icarus", face, int32_t (1));
+
   // Installing applications
-  
+
   // Consumer
   ndn::AppHelper consumerHelper ("ns3::ndn::ConsumerCbr");
   // Consumer will request /prefix/0, /prefix/1, ...
@@ -98,10 +98,10 @@ main (int argc, char **argv) -> int
   AsciiTraceHelper ascii;
   auto stream = ascii.CreateFileStream ("/tmp/out.tr");
   stream->GetStream ()->precision (9);
-  islHelper.EnableAscii (stream,0,1);
-  islHelper.EnableAscii (stream, 1,1);
-  islHelper.EnablePcap ("/tmp/pcap-isl-vostping-1",0,1);
-  islHelper.EnablePcap("/tmp/pcap-isl-vostping-2",1,1);
+  islHelper.EnableAscii (stream, 0, 1);
+  islHelper.EnableAscii (stream, 1, 1);
+  islHelper.EnablePcap ("/tmp/pcap-isl-vostping-1", 0, 1);
+  islHelper.EnablePcap ("/tmp/pcap-isl-vostping-2", 1, 1);
 
   // Add channel drops to the ASCII trace
   Config::Connect ("/NodeList/0/DeviceList/1/$ns3::icarus::SatNetDevice/Channel/PhyTxDrop",

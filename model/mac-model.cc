@@ -25,30 +25,27 @@
 namespace ns3 {
 namespace icarus {
 
-  NS_LOG_COMPONENT_DEFINE ("icarus.MacModel");
-    
-  NS_OBJECT_ENSURE_REGISTERED (MacModel);
-    
-  TypeId
-  MacModel::GetTypeId (void)
-  {
-    static TypeId tid =
-      TypeId ("ns3::icarus::MacModel")
-      .SetParent<Object> ()
-      .SetGroupName ("ICARUS");
-    
-    return tid;
-  }
+NS_LOG_COMPONENT_DEFINE ("icarus.MacModel");
 
-  MacModel::MacModel ()
-  {
-    NS_LOG_FUNCTION (this);
-  }
-  
-  MacModel::~MacModel ()
-  {
-    NS_LOG_FUNCTION (this);
-  }
+NS_OBJECT_ENSURE_REGISTERED (MacModel);
 
+TypeId
+MacModel::GetTypeId (void)
+{
+  static TypeId tid = TypeId ("ns3::icarus::MacModel").SetParent<Object> ().SetGroupName ("ICARUS");
+
+  return tid;
 }
+
+MacModel::MacModel ()
+{
+  NS_LOG_FUNCTION (this);
 }
+
+MacModel::~MacModel ()
+{
+  NS_LOG_FUNCTION (this);
+}
+
+} // namespace icarus
+} // namespace ns3

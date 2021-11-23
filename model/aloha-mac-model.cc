@@ -26,76 +26,76 @@
 namespace ns3 {
 namespace icarus {
 
-  NS_LOG_COMPONENT_DEFINE ("icarus.AlohaMacModel");
+NS_LOG_COMPONENT_DEFINE ("icarus.AlohaMacModel");
 
-  NS_OBJECT_ENSURE_REGISTERED (AlohaMacModel);
-    
-  TypeId
-  AlohaMacModel::GetTypeId (void)
-  {
-    static TypeId tid =
-      TypeId ("ns3::icarus::AlohaMacModel")
-      .SetParent<MacModel> ()
-      .SetGroupName ("ICARUS")
-      .AddConstructor<AlohaMacModel> ();
-    
-    return tid;
-  }
+NS_OBJECT_ENSURE_REGISTERED (AlohaMacModel);
 
-  AlohaMacModel::AlohaMacModel ()
-  {
-    NS_LOG_FUNCTION (this);
-    
-    busy_period_packet_uid = 0;
-    busy_period_collision = false;
-  }
+TypeId
+AlohaMacModel::GetTypeId (void)
+{
+  static TypeId tid = TypeId ("ns3::icarus::AlohaMacModel")
+                          .SetParent<MacModel> ()
+                          .SetGroupName ("ICARUS")
+                          .AddConstructor<AlohaMacModel> ();
 
-  void
-  AlohaMacModel::NewPacketRx (const Ptr<Packet> &packet, Time packet_tx_time)
-  {
-    NS_LOG_FUNCTION (this << packet << packet_tx_time);
-    
-    if (busy_period_packet_uid > 0)
-      {
-        busy_period_collision = true;
-        NS_LOG_LOGIC ("Packet " << packet->GetUid () << " causes collision");
-      }
-    
-    Time finish_tx_time = Simulator::Now () + packet_tx_time;
-    if (busy_period_packet_uid == 0 || finish_tx_time >= busy_period_finish_time)
-      {
-        busy_period_packet_uid = packet->GetUid ();
-        busy_period_finish_time = finish_tx_time;
-        NS_LOG_LOGIC ("Updating busy period info: " << busy_period_packet_uid << " " << busy_period_finish_time);
-      }
-  }
-    
-  bool
-  AlohaMacModel::HasCollided (const Ptr<Packet> &packet)
-  {
-    NS_LOG_FUNCTION (this << packet);
-    
-    bool has_collided = busy_period_collision;
-    uint64_t packet_uid = packet->GetUid ();
-    
-    if (has_collided)
-      {
-        NS_LOG_LOGIC ("Packet " << packet_uid << " discarded due to collision");
-      }
-    else
-      {
-        NS_LOG_LOGIC ("Packet " << packet_uid << " correctly received");
-      }
-    
-    if (busy_period_packet_uid == packet_uid)
-      {
-        busy_period_packet_uid = 0;
-        busy_period_finish_time = Simulator::Now ();
-        busy_period_collision = false;
-        NS_LOG_LOGIC ("Cleaning busy period info");
-      }
-    return has_collided;
-  }
-  
+  return tid;
 }
+
+AlohaMacModel::AlohaMacModel ()
+{
+  NS_LOG_FUNCTION (this);
+
+  busy_period_packet_uid = 0;
+  busy_period_collision = false;
 }
+
+void
+AlohaMacModel::NewPacketRx (const Ptr<Packet> &packet, Time packet_tx_time)
+{
+  NS_LOG_FUNCTION (this << packet << packet_tx_time);
+
+  if (busy_period_packet_uid > 0)
+    {
+      busy_period_collision = true;
+      NS_LOG_LOGIC ("Packet " << packet->GetUid () << " causes collision");
+    }
+
+  Time finish_tx_time = Simulator::Now () + packet_tx_time;
+  if (busy_period_packet_uid == 0 || finish_tx_time >= busy_period_finish_time)
+    {
+      busy_period_packet_uid = packet->GetUid ();
+      busy_period_finish_time = finish_tx_time;
+      NS_LOG_LOGIC ("Updating busy period info: " << busy_period_packet_uid << " "
+                                                  << busy_period_finish_time);
+    }
+}
+
+bool
+AlohaMacModel::HasCollided (const Ptr<Packet> &packet)
+{
+  NS_LOG_FUNCTION (this << packet);
+
+  bool has_collided = busy_period_collision;
+  uint64_t packet_uid = packet->GetUid ();
+
+  if (has_collided)
+    {
+      NS_LOG_LOGIC ("Packet " << packet_uid << " discarded due to collision");
+    }
+  else
+    {
+      NS_LOG_LOGIC ("Packet " << packet_uid << " correctly received");
+    }
+
+  if (busy_period_packet_uid == packet_uid)
+    {
+      busy_period_packet_uid = 0;
+      busy_period_finish_time = Simulator::Now ();
+      busy_period_collision = false;
+      NS_LOG_LOGIC ("Cleaning busy period info");
+    }
+  return has_collided;
+}
+
+} // namespace icarus
+} // namespace ns3
