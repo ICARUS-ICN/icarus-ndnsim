@@ -37,12 +37,6 @@ namespace icarus {
     MacModel ();
     virtual ~MacModel ();
     
-    enum MacProtocol {
-		      NONE,
-		      ALOHA
-    };
-    virtual MacProtocol GetMacProtocol (void) const = 0;
-    
     virtual void NewPacketRx (const Ptr<Packet> &packet, Time packet_tx_time) = 0;
     virtual bool HasCollided (const Ptr<Packet> &packet) = 0;
   };

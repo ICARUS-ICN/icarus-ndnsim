@@ -50,14 +50,6 @@ namespace icarus {
     busy_period_collision = false;
   }
 
-  MacModel::MacProtocol
-  AlohaMacModel::GetMacProtocol (void) const
-  {
-    NS_LOG_FUNCTION (this);
-    
-    return ALOHA;
-  }
-    
   void
   AlohaMacModel::NewPacketRx (const Ptr<Packet> &packet, Time packet_tx_time)
   {
