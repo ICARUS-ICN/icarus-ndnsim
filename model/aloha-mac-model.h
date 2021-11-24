@@ -35,7 +35,6 @@ namespace icarus {
     static TypeId GetTypeId (void);
     AlohaMacModel ();
     
-    virtual MacProtocol GetMacProtocol (void) const override;
     virtual void NewPacketRx (const Ptr<Packet> &packet, Time packet_tx_time) override;
     virtual bool HasCollided (const Ptr<Packet> &packet) override;
     

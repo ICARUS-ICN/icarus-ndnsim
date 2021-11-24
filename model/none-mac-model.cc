@@ -41,14 +41,6 @@ namespace icarus {
     return tid;
   }
   
-  MacModel::MacProtocol
-  NoneMacModel::GetMacProtocol (void) const
-  {
-    NS_LOG_FUNCTION (this);
-
-    return NONE;
-  }
-  
   void
   NoneMacModel::NewPacketRx (const Ptr<Packet> &packet, Time packet_tx_time)
   {
