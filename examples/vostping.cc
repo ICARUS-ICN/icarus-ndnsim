@@ -23,8 +23,10 @@
 #include "ns3/icarus-helper.h"
 #include "ns3/mobility-module.h"
 #include "ns3/icarus-module.h"
+#include "ns3/nstime.h"
 #include "ns3/trace-helper.h"
 #include "ns3/ndnSIM-module.h"
+#include "src/core/model/config.h"
 
 #include <boost/units/systems/si/length.hpp>
 #include <boost/units/systems/si/plane_angle.hpp>
@@ -55,6 +57,10 @@ main (int argc, char **argv) -> int
   auto bird = nodes.Get (0);
   auto ground = nodes.Get (1);
 
+  // Track best satellite every minute
+  Config::SetDefault ("ns3::icarus::GroundNodeSatTracker::TrackingInterval",
+                      TimeValue (Minutes (1)));
+
   IcarusHelper icarusHelper;
   ConstellationHelper constellationHelper (quantity<length> (250 * kilo * meters),
                                            quantity<plane_angle> (60.0 * degrees), 2, 1, 0);
@@ -80,11 +86,6 @@ main (int argc, char **argv) -> int
 
   // Choosing forwarding strategy
   ndn::StrategyChoiceHelper::InstallAll ("/icarus", "/localhost/nfd/strategy/best-route");
-
-  // Setting a destination address on the Ground Net Device.
-  // In a real setting *something* should track the **best** satellite.
-  DynamicCast<GroundStaNetDevice> (ground->GetDevice (0))
-      ->SetRemoteAddress (bird->GetDevice (0)->GetAddress ());
 
   // Installing applications
 
