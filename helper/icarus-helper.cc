@@ -39,6 +39,7 @@
 #include "ns3/sat-address.h"
 #include "ns3/ground-sta-transport.h"
 #include "ns3/ndnSIM/NFD/daemon/face/generic-link-service.hpp"
+#include "ns3/ground-node-sat-tracker.h"
 
 namespace ns3 {
 namespace icarus {
@@ -55,6 +56,7 @@ IcarusHelper::IcarusHelper ()
   m_groundStaFactory.SetTypeId ("ns3::icarus::GroundStaNetDevice");
   m_successModelFactory.SetTypeId ("ns3::icarus::GroundSatSuccessDistance");
   m_macModelFactory.SetTypeId ("ns3::icarus::NoneMacModel");
+  m_trackerModelFactory.SetTypeId ("ns3::icarus::GroundNodeSatTracker");
 }
 
 void
@@ -103,6 +105,21 @@ IcarusHelper::SetMacModel (std::string type, const std::string &n1, const Attrib
   m_macModelFactory.Set (n2, v2);
   m_macModelFactory.Set (n3, v3);
   m_macModelFactory.Set (n4, v4);
+}
+
+void
+IcarusHelper::SetTrackerModel (std::string type, const std::string &n1, const AttributeValue &v1,
+                               const std::string &n2, const AttributeValue &v2,
+                               const std::string &n3, const AttributeValue &v3,
+                               const std::string &n4, const AttributeValue &v4)
+{
+  NS_LOG_FUNCTION (this << type << n1 << n2 << n3 << n4);
+
+  m_trackerModelFactory.SetTypeId (type);
+  m_trackerModelFactory.Set (n1, v1);
+  m_trackerModelFactory.Set (n2, v2);
+  m_trackerModelFactory.Set (n3, v3);
+  m_trackerModelFactory.Set (n4, v4);
 }
 
 void
@@ -247,6 +264,11 @@ IcarusHelper::CreateDeviceForNode (Ptr<Node> node, ConstellationHelper *chelper)
   const auto ground_device = m_groundStaFactory.Create<GroundStaNetDevice> ();
   ground_device->SetAddress (Mac48Address::Allocate ());
   node->AddDevice (ground_device);
+
+  auto tracker = m_trackerModelFactory.Create<GroundNodeSatTracker> ();
+  node->AggregateObject (tracker);
+  tracker->Start ();
+
   return ground_device;
 }
 

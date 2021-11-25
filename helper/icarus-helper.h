@@ -106,6 +106,10 @@ public:
                     const AttributeValue &v3 = EmptyAttributeValue (), const std::string &n4 = "",
                     const AttributeValue &v4 = EmptyAttributeValue ());
 
+  void SetTrackerModel (std::string type, const std::string &n1, const AttributeValue &v1,
+                        const std::string &n2, const AttributeValue &v2, const std::string &n3,
+                        const AttributeValue &v3, const std::string &n4, const AttributeValue &v4);
+
   /**
    * \param n1 the name of the attribute to set \param v1 the value of the
    * attribute to set
@@ -264,6 +268,7 @@ private:
   ObjectFactory m_channelFactory; //!< factory for the channel
   ObjectFactory m_successModelFactory; //!> factory for the success models
   ObjectFactory m_macModelFactory; //!> factory for the MAC models
+  ObjectFactory m_trackerModelFactory; //!> factory for the Tracker models
 };
 
 } // namespace icarus
