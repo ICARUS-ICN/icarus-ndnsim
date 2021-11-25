@@ -11,6 +11,7 @@ def build(bld):
     module.source = [
         'model/circular-orbit.cc',
         'model/constellation.cc',
+        'model/ground-node-sat-tracker.cc',
         'model/ground-sat-channel.cc',
         'model/ground-sat-success-distance.cc',
         'model/ground-sat-success-model.cc',
@@ -43,6 +44,7 @@ def build(bld):
         'model/circular-orbit.h',
         'model/constellation.h',
         'model/sat2ground-net-device.h',
+        'model/ground-node-sat-tracker.h',
         'model/ground-sat-channel.h',
         'model/ground-sat-success-distance.h',
         'model/ground-sat-success-model.h',
