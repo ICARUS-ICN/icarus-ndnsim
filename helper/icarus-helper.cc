@@ -54,7 +54,7 @@ IcarusHelper::IcarusHelper ()
   m_channelFactory.SetTypeId ("ns3::icarus::GroundSatChannel");
   m_sat2GroundFactory.SetTypeId ("ns3::icarus::Sat2GroundNetDevice");
   m_groundStaFactory.SetTypeId ("ns3::icarus::GroundStaNetDevice");
-  m_successModelFactory.SetTypeId ("ns3::icarus::GroundSatSuccessDistance");
+  m_successModelFactory.SetTypeId ("ns3::icarus::GroundSatSuccessElevation");
   m_macModelFactory.SetTypeId ("ns3::icarus::NoneMacModel");
   m_trackerModelFactory.SetTypeId ("ns3::icarus::GroundNodeSatTracker");
 }
