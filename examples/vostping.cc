@@ -26,7 +26,6 @@
 #include "ns3/nstime.h"
 #include "ns3/trace-helper.h"
 #include "ns3/ndnSIM-module.h"
-#include "src/core/model/config.h"
 
 #include <boost/units/systems/si/length.hpp>
 #include <boost/units/systems/si/plane_angle.hpp>
@@ -48,18 +47,18 @@ main (int argc, char **argv) -> int
   using boost::units::si::meters;
   using boost::units::si::plane_angle;
 
-  CommandLine cmd;
+  // Track best satellite every minute
+  Config::SetDefault ("ns3::icarus::GroundNodeSatTracker::TrackingInterval",
+                      TimeValue (Minutes (1)));
 
+  CommandLine cmd;
+  cmd.AddValue ("trackingInterval", "ns3::icarus::GroundNodeSatTracker::TrackingInterval");
   cmd.Parse (argc, argv);
 
   NodeContainer nodes;
   nodes.Create (2);
   auto bird = nodes.Get (0);
   auto ground = nodes.Get (1);
-
-  // Track best satellite every minute
-  Config::SetDefault ("ns3::icarus::GroundNodeSatTracker::TrackingInterval",
-                      TimeValue (Minutes (1)));
 
   IcarusHelper icarusHelper;
   ConstellationHelper constellationHelper (quantity<length> (250 * kilo * meters),
