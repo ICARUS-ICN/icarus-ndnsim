@@ -119,7 +119,7 @@ SatNetDevice::GetTypeId (void)
   return tid;
 }
 
-SatNetDevice::SatNetDevice () : m_txMachineState (IDLE), m_channel (0)
+SatNetDevice::SatNetDevice () : m_channel (0), m_txMachineState (IDLE)
 {
   NS_LOG_FUNCTION (this);
 }
