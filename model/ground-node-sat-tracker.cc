@@ -43,11 +43,11 @@ GroundNodeSatTracker::GetTypeId (void) noexcept
           .SetParent<Object> ()
           .SetGroupName ("ICARUS")
           .AddConstructor<GroundNodeSatTracker> ()
-          .AddAttribute (
-              "TrackingInterval",
-              "The amount of time between two consecutive antenna adjustments (0 disables tracking)",
-              TimeValue (Seconds (0)), MakeTimeAccessor (&GroundNodeSatTracker::m_interval),
-              MakeTimeChecker ());
+          .AddAttribute ("TrackingInterval",
+                         "The amount of time between two consecutive antenna adjustments (0 "
+                         "disables tracking)",
+                         TimeValue (Seconds (0)),
+                         MakeTimeAccessor (&GroundNodeSatTracker::m_interval), MakeTimeChecker ());
 
   return tid;
 }
