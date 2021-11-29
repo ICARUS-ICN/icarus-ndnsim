@@ -45,7 +45,7 @@ GroundNodeSatTracker::GetTypeId (void) noexcept
           .AddConstructor<GroundNodeSatTracker> ()
           .AddAttribute (
               "TrackingInterval",
-              "The amount of time between to consecutive antenna adjustments (0 disables tracking)",
+              "The amount of time between two consecutive antenna adjustments (0 disables tracking)",
               TimeValue (Seconds (0)), MakeTimeAccessor (&GroundNodeSatTracker::m_interval),
               MakeTimeChecker ());
 
