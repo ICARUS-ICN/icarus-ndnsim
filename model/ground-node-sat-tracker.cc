@@ -23,16 +23,10 @@
 #include "ground-node-sat-tracker.h"
 #include "ns3/constellation.h"
 #include "ns3/ground-sta-net-device.h"
-#include "ns3/log.h"
 #include "ns3/mobility-model.h"
-#include "ns3/node.h"
-#include "ns3/nstime.h"
-#include "ns3/ptr.h"
 #include "ns3/random-variable-stream.h"
 #include "ns3/sat2ground-net-device.h"
 #include "ns3/simulator.h"
-#include "src/core/model/assert.h"
-#include "src/core/model/log-macros-disabled.h"
 
 namespace ns3 {
 namespace icarus {
@@ -111,7 +105,7 @@ GroundNodeSatTracker::GetNetDevice () const noexcept
     {
       const auto node = GetObject<Node> ();
 
-      for (uint32_t i = 0; i < node->GetNDevices (); i++)
+      for (auto i = 0u; i < node->GetNDevices (); i++)
         {
           const auto dev = DynamicCast<GroundStaNetDevice> (node->GetDevice (i));
           if (dev != nullptr)
