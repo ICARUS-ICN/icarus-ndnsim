@@ -111,7 +111,7 @@ GroundNodeSatTracker::GetNetDevice () const noexcept
     {
       const auto node = GetObject<Node> ();
 
-      for (auto i = 0; i < node->GetNDevices (); i++)
+      for (uint32_t i = 0; i < node->GetNDevices (); i++)
         {
           const auto dev = DynamicCast<GroundStaNetDevice> (node->GetDevice (i));
           if (dev != nullptr)
