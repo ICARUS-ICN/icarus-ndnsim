@@ -101,6 +101,19 @@ public:
   void SetChannelAttribute (const std::string &n1, const AttributeValue &v1);
 
   /**
+   * This method creates four ns3::Sat2SatChannel for each node with the attributes
+   * configured by ISLHelper::SetChannelAttribute. For each Ptr<Node> in the input
+   * container: it creates an ns3::icarus::SatNetDevice (with the attributes
+   * configured by ISLHelper::SetDeviceAttribute); adds the device to the node; and
+   * attaches the four channels.
+   * 
+   * @param c The NodeContainer holding the nodes to be changed
+   * @param chelper The constellation helper
+   * @return NetDeviceContainer 
+   */
+  NetDeviceContainer Install(const NodeContainer &c, ConstellationHelper *chelper);
+
+  /**
    * This method creates an ns3::Sat2SatChannel with the attributes configured by
    * ISLHelper::SetChannelAttribute. For each Ptr<node> in the input container:
    * it creates an ns3::icarus::SatNetDevice (with the attributes
