@@ -124,7 +124,7 @@ logLocation (const Ptr<Constellation> &constellation)
       for (std::size_t index = 0; index < constellation->GetPlaneSize (); index++)
         {
           const auto &sat = constellation->GetSatellite (plane, index);
-          const auto &mobility = sat->GetObject<CircularOrbitMobilityModel> ();
+          const auto &mobility = sat->GetNode ()->GetObject<CircularOrbitMobilityModel> ();
 
           NS_ASSERT (mobility != nullptr);
           NS_LOG_DEBUG ("Satellite: ("
