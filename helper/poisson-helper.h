@@ -21,18 +21,18 @@
 #ifndef POISSON_HELPER_H
 #define POISSON_HELPER_H
 
-#include "ns3/object-factory.h"
-#include "ns3/address.h"
-#include "ns3/attribute.h"
-#include "ns3/net-device.h"
-#include "ns3/node-container.h"
 #include "ns3/application-container.h"
+#include <memory>
+#include <string>
 
 namespace ns3 {
 
+class Address;
+class AttributeValue;
 class DataRate;
-
-#define POISSON_MAX_DATA_RATE 1e9
+class NodeContainer;
+class OnOffHelper;
+namespace icarus {
 
 /**
  * \ingroup onoff
@@ -51,8 +51,11 @@ public:
    *        factory type used to create sockets for the applications.
    *        A typical value would be ns3::UdpSocketFactory.
    * \param address The address of the remote node to send traffic to.
+   * \param poissonRate DataRate object for the Poisson sending rate
+   * \param packetSize Size in bytes of the packet payloads generated
    */
-  PoissonHelper (std::string protocol, Address address);
+  PoissonHelper (const std::string &protocol, const Address &address, DataRate poissonRate,
+                 uint32_t packetSize = 512u, uint32_t headerSize = 0u) noexcept;
 
   /**
    * Helper function used to set the underlying application attributes.
@@ -60,7 +63,7 @@ public:
    * \param name The name of the application attribute to set
    * \param value The value of the application attribute to set
    */
-  void SetAttribute (std::string name, const AttributeValue &value);
+  void SetAttribute (const std::string &name, const AttributeValue &value) noexcept;
 
   /**
    * Install an ns3::OnOffApplication simulating Poisson traffic on each 
@@ -71,7 +74,7 @@ public:
    * will be installed.
    * \returns Container of Ptr to the applications installed.
    */
-  ApplicationContainer Install (NodeContainer c) const;
+  ApplicationContainer Install (const NodeContainer &c) const;
 
   /**
    * Install an ns3::OnOffApplication simulating Poisson traffic on the node 
@@ -89,7 +92,7 @@ public:
    * \param nodeName The node on which an OnOffApplication will be installed.
    * \returns Container of Ptr to the applications installed.
    */
-  ApplicationContainer Install (std::string nodeName) const;
+  ApplicationContainer Install (const std::string &nodeName) const;
 
   /**
   * Assign a fixed random variable stream number to the random variables
@@ -102,29 +105,15 @@ public:
   *          should be modified to use a fixed stream
   * \return the number of stream indices assigned by this helper
   */
-  int64_t AssignStreams (NodeContainer c, int64_t stream);
-
-  /**
-   * Helper function to set the sending rate of the Poisson application.
-   *
-   * \param poissonRate DataRate object for the Poisson sending rate
-   * \param packetSize Size in bytes of the packet payloads generated
-   */
-  void SetPoissonRate (DataRate poissonRate, uint32_t packetSize = 512);
+  int64_t AssignStreams (const NodeContainer &c, int64_t stream);
 
 private:
-  /**
-   * Install an ns3::OnOffApplication simulating Poisson traffic on the node 
-   * configured with all the attributes set with SetAttribute.
-   *
-   * \param node The node on which an OnOffApplication will be installed.
-   * \returns Ptr to the application installed.
-   */
-  Ptr<Application> InstallPriv (Ptr<Node> node) const;
+  static const DataRate POISSON_MAX_DATA_RATE;
 
-  ObjectFactory m_factory; //!< Object factory.
+  std::unique_ptr<OnOffHelper> m_impl;
 };
 
+} // namespace icarus
 } // namespace ns3
 
 #endif /* POISSON_HELPER_H */
