@@ -55,7 +55,7 @@ public:
    * \param packetSize Size in bytes of the packet payloads generated
    */
   PoissonHelper (const std::string &protocol, const Address &address, DataRate poissonRate,
-                 uint32_t packetSize = 512u, uint32_t headerSize = 0u) noexcept;
+                 uint32_t headerSize, uint32_t packetSize = 512u) noexcept;
 
   /**
    * Helper function used to set the underlying application attributes.

@@ -35,8 +35,8 @@ namespace icarus {
 const DataRate PoissonHelper::POISSON_MAX_DATA_RATE{"1Gbps"};
 
 PoissonHelper::PoissonHelper (const std::string &protocol, const Address &address,
-                              DataRate poissonRate, uint32_t packetSize,
-                              uint32_t headerSize) noexcept
+                              DataRate poissonRate, uint32_t headerSize,
+                              uint32_t packetSize) noexcept
 
     : m_impl (std::make_unique<OnOffHelper> (protocol, address))
 {
