@@ -20,11 +20,14 @@
 
 #include "poisson-helper.h"
 
+#include "ns3/double.h"
+#include "ns3/object.h"
 #include "ns3/on-off-helper.h"
+#include "ns3/pointer.h"
+#include "ns3/random-variable-stream.h"
 #include "ns3/string.h"
 #include "ns3/uinteger.h"
 #include <memory>
-#include <sstream>
 
 namespace ns3 {
 namespace icarus {
@@ -37,17 +40,18 @@ PoissonHelper::PoissonHelper (const std::string &protocol, const Address &addres
 
     : m_impl (std::make_unique<OnOffHelper> (protocol, address))
 {
-  m_impl->SetAttribute ("PacketSize", UintegerValue (packetSize));
+  auto ctrVariable = CreateObject<ConstantRandomVariable> ();
   const double t_on = packetSize * 8.0 / POISSON_MAX_DATA_RATE.GetBitRate ();
+  ctrVariable->SetAttribute ("Constant", DoubleValue (t_on));
+
+  auto expVariable = CreateObject<ExponentialRandomVariable> ();
   const double t_off = 8.0 * (packetSize + headerSize) / poissonRate.GetBitRate () - t_on;
+  expVariable->SetAttribute ("Mean", DoubleValue (t_off));
+  expVariable->SetAttribute ("Bound", DoubleValue (0.0));
 
-  std::ostringstream onTimeString{"ns3::ConstantRandomVariable[Constant="};
-  onTimeString << t_on << ']';
-  m_impl->SetAttribute ("OnTime", StringValue (onTimeString.str ()));
-
-  std::ostringstream offTimeString{"ns3::ExponentialRandomVariable[Mean="};
-  offTimeString << t_off << "|Bound=0]";
-  m_impl->SetAttribute ("OffTime", StringValue (offTimeString.str ()));
+  m_impl->SetAttribute ("PacketSize", UintegerValue (packetSize));
+  m_impl->SetAttribute ("OnTime", PointerValue (ctrVariable));
+  m_impl->SetAttribute ("OffTime", PointerValue (expVariable));
 }
 
 void
