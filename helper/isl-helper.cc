@@ -99,48 +99,72 @@ ISLHelper::SetChannelAttribute (const std::string &n1, const AttributeValue &v1)
   m_channelFactory.Set (n1, v1);
 }
 
-NetDeviceContainer ISLHelper::Install(const NodeContainer &c, ConstellationHelper *chelper){
+NetDeviceContainer
+ISLHelper::Install (const NodeContainer &c, ConstellationHelper *chelper)
+{
   NetDeviceContainer devices;
   uint16_t constellationId = -1;
   uint32_t nNodes = c.GetN ();
-  for (uint32_t i = 0; i < nNodes; ++i){
-    Ptr<Node> n = c.Get (i);
-    Ptr<NetDevice> netDevice = n->GetDevice (0);
-    Ptr<Sat2GroundNetDevice> sat2GroundNetDevice = netDevice -> GetObject<Sat2GroundNetDevice> ();
+  for (uint32_t i = 0; i < nNodes; ++i)
+    {
+      Ptr<Node> n = c.Get (i);
+      Ptr<NetDevice> netDevice = n->GetDevice (0);
+      Ptr<Sat2GroundNetDevice> sat2GroundNetDevice = netDevice->GetObject<Sat2GroundNetDevice> ();
 
-    Address address = sat2GroundNetDevice->GetAddress ();
-    SatAddress satAddress = SatAddress::ConvertFrom (address);
-    if (constellationId != -1){
-      NS_ASSERT (constellationId == satAddress.getConstellationId ());
+      Address address = sat2GroundNetDevice->GetAddress ();
+      SatAddress satAddress = SatAddress::ConvertFrom (address);
+      if (constellationId != -1)
+        {
+          NS_ASSERT (constellationId == satAddress.getConstellationId ());
+        }
+      else
+        {
+          constellationId = satAddress.getConstellationId ();
+        }
     }
-    else{
-      constellationId = satAddress.getConstellationId ();
-    }
-  }
 
-  Ptr<Constellation> constellation = chelper -> GetConstellation();
-  NS_ASSERT(nNodes == constellation -> GetSize ());
-  uint32_t nPlanes = constellation -> GetNPlanes ();
-  uint32_t nNodesPerPlane = constellation -> GetPlaneSize ();
-  for (uint32_t i = 0; i< nPlanes; ++i){
-    for (uint32_t j = 0; j < nNodesPerPlane; ++j){
-      Ptr<Sat2GroundNetDevice> nd1 = constellation -> GetSatellite (i,j);
-      Ptr<Node> n1 = nd1 -> GetNode ();
-      if (j < nNodesPerPlane -1){
-        Ptr<Sat2GroundNetDevice> nd2 = constellation -> GetSatellite (i, j+1);
-        Ptr<Node> n2 = nd2 -> GetNode ();
-        devices.Add (Install (n1,n2));
-      } else if (j == nNodesPerPlane -1)
-      {
-        Ptr<Sat2GroundNetDevice> nd2 = constellation -> GetSatellite (i, 0);
-        Ptr<Node> n2 = nd2 -> GetNode ();
-        devices.Add (Install (n1,n2));
-      }
-      // Add inter-plane links   
-      
+  Ptr<Constellation> constellation = chelper->GetConstellation ();
+  NS_ASSERT (nNodes == constellation->GetSize ());
+
+  uint32_t nPlanes = constellation->GetNPlanes ();
+  uint32_t nNodesPerPlane = constellation->GetPlaneSize ();
+
+  for (uint32_t i = 0; i < nPlanes; ++i)
+    {
+      for (uint32_t j = 0; j < nNodesPerPlane; ++j)
+        {
+          Ptr<Sat2GroundNetDevice> nd1 = constellation->GetSatellite (i, j);
+          Ptr<Node> n1 = nd1->GetNode ();
+          // Install intra-plane links
+          if (j < nNodesPerPlane - 1)
+            {
+              Ptr<Sat2GroundNetDevice> nd2 = constellation->GetSatellite (i, j + 1);
+              Ptr<Node> n2 = nd2->GetNode ();
+              devices.Add (Install (n1, n2));
+            }
+          else if (j == nNodesPerPlane - 1)
+            {
+              Ptr<Sat2GroundNetDevice> nd2 = constellation->GetSatellite (i, 0);
+              Ptr<Node> n2 = nd2->GetNode ();
+              devices.Add (Install (n1, n2));
+            }
+          // Install inter-plane links
+          if (i < nPlanes - 1)
+            {
+              Ptr<Sat2GroundNetDevice> nd2 =
+                  constellation->GetSatellite (i + 1, (j != 0) ? j - 1 : nNodesPerPlane - 1);
+              Ptr<Node> n2 = nd2->GetNode ();
+              devices.Add (Install (n1, n2));
+            }
+          else if (i == nPlanes - 1)
+            {
+              Ptr<Sat2GroundNetDevice> nd2 =
+                  constellation->GetSatellite (0, (j != 0) ? j - 1 : nNodesPerPlane - 1);
+              Ptr<Node> n2 = nd2->GetNode ();
+              devices.Add (Install (n1, n2));
+            }
+        }
     }
-  }
-  
   return devices;
 }
 
