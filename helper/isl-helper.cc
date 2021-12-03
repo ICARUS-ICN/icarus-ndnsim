@@ -184,10 +184,9 @@ ISLHelper::Install (Ptr<Node> a, Ptr<Node> b) const
 
   NetDeviceContainer devices;
 
-  Ptr<Sat2SatChannel> channel = m_channelFactory.Create ()->GetObject<Sat2SatChannel> ();
-  channel->SetAttribute (
-      "TxSuccess",
-      PointerValue (m_successModelFactory.Create ()->GetObject<Sat2SatSuccessModel> ()));
+  Ptr<Sat2SatChannel> channel = m_channelFactory.Create<Sat2SatChannel> ();
+  channel->SetAttribute ("TxSuccess",
+                         PointerValue (m_successModelFactory.Create<Sat2SatSuccessModel> ()));
   devices.Add (InstallPriv (a, channel));
   devices.Add (InstallPriv (b, channel));
   return devices;
