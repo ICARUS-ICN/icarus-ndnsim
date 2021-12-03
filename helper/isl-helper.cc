@@ -33,7 +33,7 @@
 #include "ns3/config.h"
 #include "ns3/assert.h"
 #include "ns3/sat2sat-success-model.h"
-#include "src/icarus/utils/sat-address.h"
+#include "ns3/sat-address.h"
 
 namespace ns3 {
 namespace icarus {
