@@ -19,96 +19,66 @@
  */
 
 #include "poisson-helper.h"
+
+#include "ns3/on-off-helper.h"
 #include "ns3/string.h"
-#include "ns3/data-rate.h"
 #include "ns3/uinteger.h"
-#include "ns3/names.h"
-#include "ns3/random-variable-stream.h"
-#include "ns3/onoff-application.h"
-#include "ns3/double.h"
+#include <memory>
+#include <sstream>
 
 namespace ns3 {
+namespace icarus {
 
-PoissonHelper::PoissonHelper (std::string protocol, Address address)
+const DataRate PoissonHelper::POISSON_MAX_DATA_RATE{"1Gbps"};
+
+PoissonHelper::PoissonHelper (const std::string &protocol, const Address &address,
+                              DataRate poissonRate, uint32_t packetSize,
+                              uint32_t headerSize) noexcept
+
+    : m_impl (std::make_unique<OnOffHelper> (OnOffHelper (protocol, address)))
 {
-  m_factory.SetTypeId ("ns3::OnOffApplication");
-  m_factory.Set ("Protocol", StringValue (protocol));
-  m_factory.Set ("Remote", AddressValue (address));
-  m_factory.Set ("DataRate", DataRateValue (POISSON_MAX_DATA_RATE));
+  m_impl->SetAttribute ("PacketSize", UintegerValue (packetSize));
+  const double t_on = packetSize * 8.0 / POISSON_MAX_DATA_RATE.GetBitRate ();
+  const double t_off = 8.0 * (packetSize + headerSize) / poissonRate.GetBitRate () - t_on;
+
+  std::ostringstream onTimeString{"ns3::ConstantRandomVariable[Constant="};
+  onTimeString << t_on << ']';
+  m_impl->SetAttribute ("OnTime", StringValue (onTimeString.str ()));
+
+  std::ostringstream offTimeString{"ns3::ExponentialRandomVariable[Mean="};
+  offTimeString << t_off << "|Bound=0]";
+  m_impl->SetAttribute ("OffTime", StringValue (offTimeString.str ()));
 }
 
 void
-PoissonHelper::SetAttribute (std::string name, const AttributeValue &value)
+PoissonHelper::SetAttribute (const std::string &name, const AttributeValue &value) noexcept
 {
-  m_factory.Set (name, value);
+  m_impl->SetAttribute (name, value);
 }
 
 ApplicationContainer
 PoissonHelper::Install (Ptr<Node> node) const
 {
-  return ApplicationContainer (InstallPriv (node));
+  return m_impl->Install (node);
 }
 
 ApplicationContainer
-PoissonHelper::Install (std::string nodeName) const
+PoissonHelper::Install (const std::string &nodeName) const
 {
-  Ptr<Node> node = Names::Find<Node> (nodeName);
-  return ApplicationContainer (InstallPriv (node));
+  return m_impl->Install (nodeName);
 }
 
 ApplicationContainer
-PoissonHelper::Install (NodeContainer c) const
+PoissonHelper::Install (const NodeContainer &c) const
 {
-  ApplicationContainer apps;
-  for (NodeContainer::Iterator i = c.Begin (); i != c.End (); ++i)
-    {
-      apps.Add (InstallPriv (*i));
-    }
-
-  return apps;
-}
-
-Ptr<Application>
-PoissonHelper::InstallPriv (Ptr<Node> node) const
-{
-  Ptr<Application> app = m_factory.Create<Application> ();
-  node->AddApplication (app);
-
-  return app;
+  return m_impl->Install (c);
 }
 
 int64_t
-PoissonHelper::AssignStreams (NodeContainer c, int64_t stream)
+PoissonHelper::AssignStreams (const NodeContainer &c, int64_t stream)
 {
-  int64_t currentStream = stream;
-  Ptr<Node> node;
-  for (NodeContainer::Iterator i = c.Begin (); i != c.End (); ++i)
-    {
-      node = (*i);
-      for (uint32_t j = 0; j < node->GetNApplications (); j++)
-        {
-          Ptr<OnOffApplication> onoff = DynamicCast<OnOffApplication> (node->GetApplication (j));
-          if (onoff)
-            {
-              currentStream += onoff->AssignStreams (currentStream);
-            }
-        }
-    }
-  return (currentStream - stream);
+  return m_impl->AssignStreams (c, stream);
 }
 
-void
-PoissonHelper::SetPoissonRate (DataRate poissonRate, uint32_t packetSize)
-{
-  m_factory.Set ("PacketSize", UintegerValue (packetSize));
-  DoubleValue t_on = DoubleValue (packetSize * 8.0 / POISSON_MAX_DATA_RATE);
-  uint32_t header_size = 28; // IP + UDP headers size
-  DoubleValue t_off =
-      DoubleValue ((packetSize + header_size) * 8.0 / poissonRate.GetBitRate () - t_on.Get ());
-  m_factory.Set ("OnTime", StringValue ("ns3::ConstantRandomVariable[Constant=" +
-                                        t_on.SerializeToString (NULL) + "]"));
-  m_factory.Set ("OffTime", StringValue ("ns3::ExponentialRandomVariable[Mean=" +
-                                         t_off.SerializeToString (NULL) + "|Bound=0]"));
-}
-
+} // namespace icarus
 } // namespace ns3
