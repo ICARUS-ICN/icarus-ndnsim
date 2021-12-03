@@ -111,7 +111,7 @@ public:
    * @param chelper The constellation helper
    * @return NetDeviceContainer 
    */
-  NetDeviceContainer Install(const NodeContainer &c, ConstellationHelper *chelper);
+  NetDeviceContainer Install (const NodeContainer &c, ConstellationHelper *chelper);
 
   /**
    * This method creates an ns3::Sat2SatChannel with the attributes configured by
