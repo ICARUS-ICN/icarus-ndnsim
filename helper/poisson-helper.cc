@@ -27,12 +27,13 @@
 #include "ns3/random-variable-stream.h"
 #include "ns3/string.h"
 #include "ns3/uinteger.h"
+#include <limits>
 #include <memory>
 
 namespace ns3 {
 namespace icarus {
 
-const DataRate PoissonHelper::POISSON_MAX_DATA_RATE{"1Gbps"};
+const DataRate PoissonHelper::POISSON_MAX_DATA_RATE{std::numeric_limits<uint64_t>::max ()};
 
 PoissonHelper::PoissonHelper (const std::string &protocol, const Address &address,
                               DataRate poissonRate, uint32_t headerSize,
