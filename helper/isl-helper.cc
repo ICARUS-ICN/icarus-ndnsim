@@ -105,10 +105,9 @@ ISLHelper::Install (const NodeContainer &c, ConstellationHelper *chelper)
   NetDeviceContainer devices;
   uint16_t constellationId = 0;
   uint32_t nNodes = c.GetN ();
-  for (uint32_t i = 0; i < nNodes; ++i)
+  for (auto node = c.Begin (); node != c.End (); node++)
     {
-      Ptr<Node> n = c.Get (i);
-      Ptr<NetDevice> netDevice = n->GetDevice (0);
+      Ptr<NetDevice> netDevice = (*node)->GetDevice (0);
       Ptr<Sat2GroundNetDevice> sat2GroundNetDevice = netDevice->GetObject<Sat2GroundNetDevice> ();
 
       Address address = sat2GroundNetDevice->GetAddress ();
