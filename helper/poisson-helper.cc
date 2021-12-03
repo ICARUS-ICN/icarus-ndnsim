@@ -49,6 +49,7 @@ PoissonHelper::PoissonHelper (const std::string &protocol, const Address &addres
   expVariable->SetAttribute ("Mean", DoubleValue (t_off));
   expVariable->SetAttribute ("Bound", DoubleValue (0.0));
 
+  m_impl->SetAttribute ("DataRate", DataRateValue (POISSON_MAX_DATA_RATE));
   m_impl->SetAttribute ("PacketSize", UintegerValue (packetSize));
   m_impl->SetAttribute ("OnTime", PointerValue (cteVariable));
   m_impl->SetAttribute ("OffTime", PointerValue (expVariable));
