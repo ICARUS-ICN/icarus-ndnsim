@@ -103,7 +103,7 @@ NetDeviceContainer
 ISLHelper::Install (const NodeContainer &c, ConstellationHelper *chelper)
 {
   NetDeviceContainer devices;
-  uint16_t constellationId = -1;
+  uint16_t constellationId = 0;
   uint32_t nNodes = c.GetN ();
   for (uint32_t i = 0; i < nNodes; ++i)
     {
@@ -113,7 +113,7 @@ ISLHelper::Install (const NodeContainer &c, ConstellationHelper *chelper)
 
       Address address = sat2GroundNetDevice->GetAddress ();
       SatAddress satAddress = SatAddress::ConvertFrom (address);
-      if (constellationId != -1)
+      if (constellationId != 0)
         {
           NS_ASSERT (constellationId == satAddress.getConstellationId ());
         }
