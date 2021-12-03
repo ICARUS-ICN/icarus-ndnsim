@@ -40,9 +40,9 @@ PoissonHelper::PoissonHelper (const std::string &protocol, const Address &addres
 
     : m_impl (std::make_unique<OnOffHelper> (protocol, address))
 {
-  auto ctrVariable = CreateObject<ConstantRandomVariable> ();
+  auto cteVariable = CreateObject<ConstantRandomVariable> ();
   const double t_on = packetSize * 8.0 / POISSON_MAX_DATA_RATE.GetBitRate ();
-  ctrVariable->SetAttribute ("Constant", DoubleValue (t_on));
+  cteVariable->SetAttribute ("Constant", DoubleValue (t_on));
 
   auto expVariable = CreateObject<ExponentialRandomVariable> ();
   const double t_off = 8.0 * (packetSize + headerSize) / poissonRate.GetBitRate () - t_on;
@@ -50,7 +50,7 @@ PoissonHelper::PoissonHelper (const std::string &protocol, const Address &addres
   expVariable->SetAttribute ("Bound", DoubleValue (0.0));
 
   m_impl->SetAttribute ("PacketSize", UintegerValue (packetSize));
-  m_impl->SetAttribute ("OnTime", PointerValue (ctrVariable));
+  m_impl->SetAttribute ("OnTime", PointerValue (cteVariable));
   m_impl->SetAttribute ("OffTime", PointerValue (expVariable));
 }
 
