@@ -124,7 +124,8 @@ ISLHelper::Install (const NodeContainer &c, ConstellationHelper *chelper)
     }
 
   Ptr<Constellation> constellation = chelper->GetConstellation ();
-  NS_ASSERT (nNodes == constellation->GetSize ());
+  NS_ASSERT_MSG (nNodes == constellation->GetSize (),
+                 "We need a complete constellation before installing all ISL.");
 
   uint32_t nPlanes = constellation->GetNPlanes ();
   uint32_t nNodesPerPlane = constellation->GetPlaneSize ();
