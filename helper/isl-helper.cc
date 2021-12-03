@@ -104,7 +104,7 @@ ISLHelper::Install (const NodeContainer &c, ConstellationHelper *chelper)
 {
   NetDeviceContainer devices;
   uint16_t constellationId = 0;
-  uint32_t nNodes = c.GetN ();
+
   for (auto node = c.Begin (); node != c.End (); node++)
     {
       Ptr<NetDevice> netDevice = (*node)->GetDevice (0);
@@ -123,11 +123,11 @@ ISLHelper::Install (const NodeContainer &c, ConstellationHelper *chelper)
     }
 
   Ptr<Constellation> constellation = chelper->GetConstellation ();
-  NS_ASSERT_MSG (nNodes == constellation->GetSize (),
+  NS_ASSERT_MSG (c.GetN () == constellation->GetSize (),
                  "We need a complete constellation before installing all ISL.");
 
-  uint32_t nPlanes = constellation->GetNPlanes ();
-  uint32_t nNodesPerPlane = constellation->GetPlaneSize ();
+  const auto nPlanes = constellation->GetNPlanes ();
+  const auto nNodesPerPlane = constellation->GetPlaneSize ();
 
   for (uint32_t i = 0; i < nPlanes; ++i)
     {
