@@ -35,7 +35,7 @@ PoissonHelper::PoissonHelper (const std::string &protocol, const Address &addres
                               DataRate poissonRate, uint32_t packetSize,
                               uint32_t headerSize) noexcept
 
-    : m_impl (std::make_unique<OnOffHelper> (OnOffHelper (protocol, address)))
+    : m_impl (std::make_unique<OnOffHelper> (protocol, address))
 {
   m_impl->SetAttribute ("PacketSize", UintegerValue (packetSize));
   const double t_on = packetSize * 8.0 / POISSON_MAX_DATA_RATE.GetBitRate ();
