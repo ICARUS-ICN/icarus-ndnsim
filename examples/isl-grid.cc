@@ -34,6 +34,7 @@
 #include <boost/units/systems/si/prefixes.hpp>
 #include <boost/units/systems/si/length.hpp>
 #include <cstddef>
+#include <string>
 
 NS_LOG_COMPONENT_DEFINE ("icarus.ISLGridExample");
 
@@ -126,9 +127,8 @@ logLinks (const Ptr<Constellation> &constellation)
         {
           const auto &sat = constellation->GetSatellite (plane, index);
           const auto nlinks = sat->GetNode ()->GetNDevices ();
-          NS_LOG_DEBUG ("Satellite: ("
-                        << plane << ", " << index << ") has " << nlinks
-                        << " links");
+          NS_LOG_DEBUG ("Satellite: (" << plane << ", " << index << ") has "
+                                       << std::to_string (nlinks) << " links");
         }
     }
 
