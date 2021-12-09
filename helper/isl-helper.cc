@@ -142,7 +142,8 @@ ISLHelper::Install (const NodeContainer &c, ConstellationHelper *chelper)
               Ptr<Node> n2 = nd2->GetNode ();
               devices.Add (Install (n1, n2));
             }
-          else if (j == nNodesPerPlane - 1)
+          else if (j == nNodesPerPlane - 1 && j != 0 && j != 1) // We avoid creating one loop
+            // (in case of only one node per plane) and double links (in case of only two nodes per plane)
             {
               Ptr<Sat2GroundNetDevice> nd2 = constellation->GetSatellite (i, 0);
               Ptr<Node> n2 = nd2->GetNode ();
@@ -156,7 +157,9 @@ ISLHelper::Install (const NodeContainer &c, ConstellationHelper *chelper)
               Ptr<Node> n2 = nd2->GetNode ();
               devices.Add (Install (n1, n2));
             }
-          else if (i == nPlanes - 1)
+          else if (i == nPlanes - 1 && i != 0 &&
+                   i != 1) // We avoid creating one loop (in case of only one plane) and
+            // double links (in case of only two planes)
             {
               Ptr<Sat2GroundNetDevice> nd2 =
                   constellation->GetSatellite (0, (j != 0) ? j - 1 : nNodesPerPlane - 1);
