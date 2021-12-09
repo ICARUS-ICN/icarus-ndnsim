@@ -22,6 +22,7 @@
 #include "ns3/circular-orbit.h"
 
 // An essential include is test.h
+#include "ns3/icarus-helper.h"
 #include "ns3/mobility-model.h"
 #include "ns3/object-factory.h"
 #include "ns3/object.h"
@@ -32,6 +33,7 @@
 #include <boost/units/systems/si/length.hpp>
 #include <boost/units/systems/si/plane_angle.hpp>
 #include <boost/units/systems/angle/degrees.hpp>
+#include <boost/units/systems/si/prefixes.hpp>
 
 // Do not put your test classes in namespace ns3.  You may find it useful
 // to use the using directive to access the ns3 namespace directly
@@ -99,6 +101,58 @@ CircularOrbitTestCase1::DoRun (void)
   NS_TEST_ASSERT_MSG_EQ_TOL (mmodel->GetPosition ().x, -2.09605e6, 1000, "Position is wrong");
 }
 
+class ISLGridTestCase : public TestCase
+{
+public:
+  ISLGridTestCase ();
+  virtual ~ISLGridTestCase ();
+
+private:
+  virtual void DoRun (void);
+};
+
+ISLGridTestCase::ISLGridTestCase () : TestCase ("Check ISL grid link formation")
+{
+}
+
+ISLGridTestCase::~ISLGridTestCase ()
+{
+}
+
+void
+ISLGridTestCase::DoRun (void)
+{
+
+  using namespace boost::units;
+  using namespace boost::units::si;
+  using boost::units::si::kilo_type;
+
+  IcarusHelper icarusHelper;
+  ISLHelper islHelper;
+  ConstellationHelper constellationHelper (quantity<length> (250 * kilo * meters),
+                                           quantity<plane_angle> (60 * degree::degree), 6, 20, 1);
+
+  NodeContainer nodes;
+  nodes.Create (6 * 20);
+  icarusHelper.Install (nodes, &constellationHelper);
+  islHelper.Install (nodes, &constellationHelper);
+  const auto &constellation = constellationHelper.GetConstellation ();
+
+  for (std::size_t plane = 0; plane < constellation->GetNPlanes (); plane++)
+    {
+      for (std::size_t index = 0; index < constellation->GetPlaneSize (); index++)
+        {
+          const auto &sat = constellation->GetSatellite (plane, index);
+          const auto nlinks = sat->GetNode ()->GetNDevices ();
+          NS_TEST_ASSERT_MSG_EQ (nlinks, 5, "Number of links is wrong!");
+        }
+    }
+
+  ns3::Simulator::Stop (Seconds (2));
+
+  ns3::Simulator::Run ();
+}
+
 // The TestSuite class names the TestSuite, identifies what type of TestSuite,
 // and enables the TestCases to be run.  Typically, only the constructor for
 // this class must be defined
@@ -113,6 +167,7 @@ IcarusTestSuite::IcarusTestSuite () : TestSuite ("icarus", UNIT)
 {
   // TestDuration for TestCase can be QUICK, EXTENSIVE or TAKES_FOREVER
   AddTestCase (new CircularOrbitTestCase1, TestCase::QUICK);
+  AddTestCase (new ISLGridTestCase, TestCase::QUICK);
 }
 
 // Do not forget to allocate an instance of this TestSuite
