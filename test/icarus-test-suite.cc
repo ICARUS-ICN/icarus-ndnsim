@@ -101,26 +101,26 @@ CircularOrbitTestCase1::DoRun (void)
   NS_TEST_ASSERT_MSG_EQ_TOL (mmodel->GetPosition ().x, -2.09605e6, 1000, "Position is wrong");
 }
 
-class ISLGridTestCase : public TestCase
+class ISLGridTestCase1 : public TestCase
 {
 public:
-  ISLGridTestCase ();
-  virtual ~ISLGridTestCase ();
+  ISLGridTestCase1 ();
+  virtual ~ISLGridTestCase1 ();
 
 private:
   virtual void DoRun (void);
 };
 
-ISLGridTestCase::ISLGridTestCase () : TestCase ("Check ISL grid link formation")
+ISLGridTestCase1::ISLGridTestCase1 () : TestCase ("Check default ISL grid link formation")
 {
 }
 
-ISLGridTestCase::~ISLGridTestCase ()
+ISLGridTestCase1::~ISLGridTestCase1 ()
 {
 }
 
 void
-ISLGridTestCase::DoRun (void)
+ISLGridTestCase1::DoRun (void)
 {
 
   using namespace boost::units;
@@ -153,6 +153,319 @@ ISLGridTestCase::DoRun (void)
   ns3::Simulator::Run ();
 }
 
+class ISLGridTestCase2 : public TestCase
+{
+public:
+  ISLGridTestCase2 ();
+  virtual ~ISLGridTestCase2 ();
+
+private:
+  virtual void DoRun (void);
+};
+
+ISLGridTestCase2::ISLGridTestCase2 () : TestCase ("Check single node ISL grid link formation")
+{
+}
+
+ISLGridTestCase2::~ISLGridTestCase2 ()
+{
+}
+
+void
+ISLGridTestCase2::DoRun (void)
+{
+
+  using namespace boost::units;
+  using namespace boost::units::si;
+  using boost::units::si::kilo_type;
+
+  IcarusHelper icarusHelper;
+  ISLHelper islHelper;
+  ConstellationHelper constellationHelper (quantity<length> (250 * kilo * meters),
+                                           quantity<plane_angle> (60 * degree::degree), 1, 1, 1);
+
+  NodeContainer nodes;
+  nodes.Create (1);
+  icarusHelper.Install (nodes, &constellationHelper);
+  islHelper.Install (nodes, &constellationHelper);
+  const auto &constellation = constellationHelper.GetConstellation ();
+
+  for (std::size_t plane = 0; plane < constellation->GetNPlanes (); plane++)
+    {
+      for (std::size_t index = 0; index < constellation->GetPlaneSize (); index++)
+        {
+          const auto &sat = constellation->GetSatellite (plane, index);
+          const auto nlinks = sat->GetNode ()->GetNDevices ();
+          NS_TEST_ASSERT_MSG_EQ (nlinks, 1, "Number of links is wrong!");
+        }
+    }
+
+  ns3::Simulator::Stop (Seconds (2));
+
+  ns3::Simulator::Run ();
+}
+
+class ISLGridTestCase3 : public TestCase
+{
+public:
+  ISLGridTestCase3 ();
+  virtual ~ISLGridTestCase3 ();
+
+private:
+  virtual void DoRun (void);
+};
+
+ISLGridTestCase3::ISLGridTestCase3 () : TestCase ("Check 2 nodes per plane ISL grid link formation")
+{
+}
+
+ISLGridTestCase3::~ISLGridTestCase3 ()
+{
+}
+
+void
+ISLGridTestCase3::DoRun (void)
+{
+
+  using namespace boost::units;
+  using namespace boost::units::si;
+  using boost::units::si::kilo_type;
+
+  IcarusHelper icarusHelper;
+  ISLHelper islHelper;
+  ConstellationHelper constellationHelper (quantity<length> (250 * kilo * meters),
+                                           quantity<plane_angle> (60 * degree::degree), 1, 2, 1);
+
+  NodeContainer nodes;
+  nodes.Create (2);
+  icarusHelper.Install (nodes, &constellationHelper);
+  islHelper.Install (nodes, &constellationHelper);
+  const auto &constellation = constellationHelper.GetConstellation ();
+
+  for (std::size_t plane = 0; plane < constellation->GetNPlanes (); plane++)
+    {
+      for (std::size_t index = 0; index < constellation->GetPlaneSize (); index++)
+        {
+          const auto &sat = constellation->GetSatellite (plane, index);
+          const auto nlinks = sat->GetNode ()->GetNDevices ();
+          NS_TEST_ASSERT_MSG_EQ (nlinks, 2, "Number of links is wrong!");
+        }
+    }
+
+  ns3::Simulator::Stop (Seconds (2));
+
+  ns3::Simulator::Run ();
+}
+
+class ISLGridTestCase4 : public TestCase
+{
+public:
+  ISLGridTestCase4 ();
+  virtual ~ISLGridTestCase4 ();
+
+private:
+  virtual void DoRun (void);
+};
+
+ISLGridTestCase4::ISLGridTestCase4 ()
+    : TestCase ("Check 2 planes of 1 node ISL grid link formation")
+{
+}
+
+ISLGridTestCase4::~ISLGridTestCase4 ()
+{
+}
+
+void
+ISLGridTestCase4::DoRun (void)
+{
+
+  using namespace boost::units;
+  using namespace boost::units::si;
+  using boost::units::si::kilo_type;
+
+  IcarusHelper icarusHelper;
+  ISLHelper islHelper;
+  ConstellationHelper constellationHelper (quantity<length> (250 * kilo * meters),
+                                           quantity<plane_angle> (60 * degree::degree), 2, 1, 1);
+
+  NodeContainer nodes;
+  nodes.Create (2);
+  icarusHelper.Install (nodes, &constellationHelper);
+  islHelper.Install (nodes, &constellationHelper);
+  const auto &constellation = constellationHelper.GetConstellation ();
+
+  for (std::size_t plane = 0; plane < constellation->GetNPlanes (); plane++)
+    {
+      for (std::size_t index = 0; index < constellation->GetPlaneSize (); index++)
+        {
+          const auto &sat = constellation->GetSatellite (plane, index);
+          const auto nlinks = sat->GetNode ()->GetNDevices ();
+          NS_TEST_ASSERT_MSG_EQ (nlinks, 2, "Number of links is wrong!");
+        }
+    }
+
+  ns3::Simulator::Stop (Seconds (2));
+
+  ns3::Simulator::Run ();
+}
+
+class ISLGridTestCase5 : public TestCase
+{
+public:
+  ISLGridTestCase5 ();
+  virtual ~ISLGridTestCase5 ();
+
+private:
+  virtual void DoRun (void);
+};
+
+ISLGridTestCase5::ISLGridTestCase5 () : TestCase ("Check 2x2 ISL grid link formation")
+{
+}
+
+ISLGridTestCase5::~ISLGridTestCase5 ()
+{
+}
+
+void
+ISLGridTestCase5::DoRun (void)
+{
+
+  using namespace boost::units;
+  using namespace boost::units::si;
+  using boost::units::si::kilo_type;
+
+  IcarusHelper icarusHelper;
+  ISLHelper islHelper;
+  ConstellationHelper constellationHelper (quantity<length> (250 * kilo * meters),
+                                           quantity<plane_angle> (60 * degree::degree), 2, 2, 1);
+
+  NodeContainer nodes;
+  nodes.Create (2 * 2);
+  icarusHelper.Install (nodes, &constellationHelper);
+  islHelper.Install (nodes, &constellationHelper);
+  const auto &constellation = constellationHelper.GetConstellation ();
+
+  for (std::size_t plane = 0; plane < constellation->GetNPlanes (); plane++)
+    {
+      for (std::size_t index = 0; index < constellation->GetPlaneSize (); index++)
+        {
+          const auto &sat = constellation->GetSatellite (plane, index);
+          const auto nlinks = sat->GetNode ()->GetNDevices ();
+          NS_TEST_ASSERT_MSG_EQ (nlinks, 3, "Number of links is wrong!");
+        }
+    }
+
+  ns3::Simulator::Stop (Seconds (2));
+
+  ns3::Simulator::Run ();
+}
+
+class ISLGridTestCase6 : public TestCase
+{
+public:
+  ISLGridTestCase6 ();
+  virtual ~ISLGridTestCase6 ();
+
+private:
+  virtual void DoRun (void);
+};
+
+ISLGridTestCase6::ISLGridTestCase6 () : TestCase ("Check 3x2 ISL grid link formation")
+{
+}
+
+ISLGridTestCase6::~ISLGridTestCase6 ()
+{
+}
+
+void
+ISLGridTestCase6::DoRun (void)
+{
+
+  using namespace boost::units;
+  using namespace boost::units::si;
+  using boost::units::si::kilo_type;
+
+  IcarusHelper icarusHelper;
+  ISLHelper islHelper;
+  ConstellationHelper constellationHelper (quantity<length> (250 * kilo * meters),
+                                           quantity<plane_angle> (60 * degree::degree), 3, 2, 1);
+
+  NodeContainer nodes;
+  nodes.Create (3 * 2);
+  icarusHelper.Install (nodes, &constellationHelper);
+  islHelper.Install (nodes, &constellationHelper);
+  const auto &constellation = constellationHelper.GetConstellation ();
+
+  for (std::size_t plane = 0; plane < constellation->GetNPlanes (); plane++)
+    {
+      for (std::size_t index = 0; index < constellation->GetPlaneSize (); index++)
+        {
+          const auto &sat = constellation->GetSatellite (plane, index);
+          const auto nlinks = sat->GetNode ()->GetNDevices ();
+          NS_TEST_ASSERT_MSG_EQ (nlinks, 4, "Number of links is wrong!");
+        }
+    }
+
+  ns3::Simulator::Stop (Seconds (2));
+
+  ns3::Simulator::Run ();
+}
+
+class ISLGridTestCase7 : public TestCase
+{
+public:
+  ISLGridTestCase7 ();
+  virtual ~ISLGridTestCase7 ();
+
+private:
+  virtual void DoRun (void);
+};
+
+ISLGridTestCase7::ISLGridTestCase7 () : TestCase ("Check 2x3 ISL grid link formation")
+{
+}
+
+ISLGridTestCase7::~ISLGridTestCase7 ()
+{
+}
+
+void
+ISLGridTestCase7::DoRun (void)
+{
+
+  using namespace boost::units;
+  using namespace boost::units::si;
+  using boost::units::si::kilo_type;
+
+  IcarusHelper icarusHelper;
+  ISLHelper islHelper;
+  ConstellationHelper constellationHelper (quantity<length> (250 * kilo * meters),
+                                           quantity<plane_angle> (60 * degree::degree), 2, 3, 1);
+
+  NodeContainer nodes;
+  nodes.Create (2 * 3);
+  icarusHelper.Install (nodes, &constellationHelper);
+  islHelper.Install (nodes, &constellationHelper);
+  const auto &constellation = constellationHelper.GetConstellation ();
+
+  for (std::size_t plane = 0; plane < constellation->GetNPlanes (); plane++)
+    {
+      for (std::size_t index = 0; index < constellation->GetPlaneSize (); index++)
+        {
+          const auto &sat = constellation->GetSatellite (plane, index);
+          const auto nlinks = sat->GetNode ()->GetNDevices ();
+          NS_TEST_ASSERT_MSG_EQ (nlinks, 4, "Number of links is wrong!");
+        }
+    }
+
+  ns3::Simulator::Stop (Seconds (2));
+
+  ns3::Simulator::Run ();
+}
+
 // The TestSuite class names the TestSuite, identifies what type of TestSuite,
 // and enables the TestCases to be run.  Typically, only the constructor for
 // this class must be defined
@@ -167,7 +480,13 @@ IcarusTestSuite::IcarusTestSuite () : TestSuite ("icarus", UNIT)
 {
   // TestDuration for TestCase can be QUICK, EXTENSIVE or TAKES_FOREVER
   AddTestCase (new CircularOrbitTestCase1, TestCase::QUICK);
-  AddTestCase (new ISLGridTestCase, TestCase::QUICK);
+  AddTestCase (new ISLGridTestCase1, TestCase::QUICK);
+  AddTestCase (new ISLGridTestCase2, TestCase::QUICK);
+  AddTestCase (new ISLGridTestCase3, TestCase::QUICK);
+  AddTestCase (new ISLGridTestCase4, TestCase::QUICK);
+  AddTestCase (new ISLGridTestCase5, TestCase::QUICK);
+  AddTestCase (new ISLGridTestCase6, TestCase::QUICK);
+  AddTestCase (new ISLGridTestCase7, TestCase::QUICK);
 }
 
 // Do not forget to allocate an instance of this TestSuite
