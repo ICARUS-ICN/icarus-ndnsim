@@ -52,6 +52,7 @@ public:
    *        A typical value would be ns3::UdpSocketFactory.
    * \param address The address of the remote node to send traffic to.
    * \param poissonRate DataRate object for the Poisson sending rate
+   * \param headerSize Size in bytes of the packet headers generated
    * \param packetSize Size in bytes of the packet payloads generated
    */
   PoissonHelper (const std::string &protocol, const Address &address, DataRate poissonRate,
