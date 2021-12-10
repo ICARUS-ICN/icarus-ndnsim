@@ -22,6 +22,7 @@
 
 #include "sat2ground-net-device.h"
 #include "icarus-net-device.h"
+#include "ns3/assert.h"
 #include "ns3/ground-sta-net-device.h"
 #include "ns3/log-macros-enabled.h"
 #include "ns3/log.h"
@@ -140,7 +141,7 @@ Sat2GroundNetDevice::GetTypeId (void)
           .AddAttribute (
               "Address", "The link-layer address of this device.", SatAddressValue (SatAddress ()),
               MakeSatAddressAccessor (&Sat2GroundNetDevice::m_address), MakeSatAddressChecker ())
-          .AddAttribute ("MacModel", "The MAC protocol for received frames", PointerValue (nullptr),
+          .AddAttribute ("MacModel", "The MAC protocol for received frames", PointerValue (),
                          MakePointerAccessor (&Sat2GroundNetDevice::m_macModel),
                          MakePointerChecker<MacModel> ());
 
@@ -168,16 +169,14 @@ Sat2GroundNetDevice::ReceiveFromGround (const Ptr<Packet> &packet, DataRate bps,
                                         uint16_t protocolNumber)
 {
   NS_LOG_FUNCTION (this << packet << bps << src << protocolNumber);
+  NS_ASSERT_MSG (m_macModel != nullptr, "Need a MacModel to receive packets.");
 
   m_phyRxBeginTrace (packet);
   Time packet_tx_time = bps.CalculateBytesTxTime (packet->GetSize ());
   Simulator::Schedule (packet_tx_time, &Sat2GroundNetDevice::ReceiveFromGroundFinish, this, packet,
                        src, protocolNumber);
 
-  if (m_macModel != nullptr)
-    {
-      m_macModel->NewPacketRx (packet, packet_tx_time);
-    }
+  m_macModel->NewPacketRx (packet, packet_tx_time);
 }
 
 void
@@ -185,10 +184,11 @@ Sat2GroundNetDevice::ReceiveFromGroundFinish (const Ptr<Packet> &packet, const A
                                               uint16_t protocolNumber)
 {
   NS_LOG_FUNCTION (this << packet << protocolNumber);
+  NS_ASSERT_MSG (m_macModel != nullptr, "Need a MacModel to receive packets.");
 
   m_phyRxEndTrace (packet);
 
-  if (m_macModel == nullptr || !m_macModel->HasCollided (packet))
+  if (m_macModel->HasCollided (packet) == false)
     {
       m_snifferTrace (packet);
       m_macRxTrace (packet);
