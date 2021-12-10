@@ -108,8 +108,6 @@ public:
   int64_t AssignStreams (const NodeContainer &c, int64_t stream);
 
 private:
-  static const DataRate POISSON_MAX_DATA_RATE;
-
   std::unique_ptr<OnOffHelper> m_impl;
 };
 

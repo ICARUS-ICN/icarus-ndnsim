@@ -21,19 +21,14 @@
 #include "poisson-helper.h"
 
 #include "ns3/double.h"
-#include "ns3/object.h"
 #include "ns3/on-off-helper.h"
 #include "ns3/pointer.h"
 #include "ns3/random-variable-stream.h"
-#include "ns3/string.h"
 #include "ns3/uinteger.h"
 #include <limits>
-#include <memory>
 
 namespace ns3 {
 namespace icarus {
-
-const DataRate PoissonHelper::POISSON_MAX_DATA_RATE{std::numeric_limits<uint64_t>::max ()};
 
 PoissonHelper::PoissonHelper (const std::string &protocol, const Address &address,
                               DataRate poissonRate, uint32_t headerSize,
@@ -41,8 +36,9 @@ PoissonHelper::PoissonHelper (const std::string &protocol, const Address &addres
 
     : m_impl (std::make_unique<OnOffHelper> (protocol, address))
 {
+  static const auto maxDataRate{DataRate (std::numeric_limits<uint64_t>::max ()).GetBitRate ()};
   auto cteVariable = CreateObject<ConstantRandomVariable> ();
-  const double t_on = packetSize * 8.0 / POISSON_MAX_DATA_RATE.GetBitRate ();
+  const double t_on = packetSize * 8.0 / maxDataRate;
   cteVariable->SetAttribute ("Constant", DoubleValue (t_on));
 
   auto expVariable = CreateObject<ExponentialRandomVariable> ();
@@ -50,7 +46,7 @@ PoissonHelper::PoissonHelper (const std::string &protocol, const Address &addres
   expVariable->SetAttribute ("Mean", DoubleValue (t_off));
   expVariable->SetAttribute ("Bound", DoubleValue (0.0));
 
-  m_impl->SetAttribute ("DataRate", DataRateValue (POISSON_MAX_DATA_RATE));
+  m_impl->SetAttribute ("DataRate", DataRateValue (maxDataRate));
   m_impl->SetAttribute ("PacketSize", UintegerValue (packetSize));
   m_impl->SetAttribute ("OnTime", PointerValue (cteVariable));
   m_impl->SetAttribute ("OffTime", PointerValue (expVariable));
