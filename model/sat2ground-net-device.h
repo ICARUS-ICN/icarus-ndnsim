@@ -29,7 +29,7 @@
 #include "ns3/ground-sat-channel.h"
 #include "icarus-net-device.h"
 #include "ns3/sat-address.h"
-#include "mac-model.h"
+#include "ns3/mac-model.h"
 
 namespace ns3 {
 namespace icarus {
