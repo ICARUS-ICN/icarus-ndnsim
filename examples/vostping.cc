@@ -75,7 +75,7 @@ main (int argc, char **argv) -> int
   staticHelper.SetMobilityModel ("ns3::ConstantPositionMobilityModel");
   staticHelper.Install (ground);
 
-  NetDeviceContainer netDevices (icarusHelper.Install (nodes, &constellationHelper));
+  NetDeviceContainer netDevices (icarusHelper.Install (nodes, constellationHelper));
 
   // Install NDN stack on all nodes
   ns3::ndn::StackHelper ndnHelper;

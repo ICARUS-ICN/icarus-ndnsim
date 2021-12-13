@@ -155,7 +155,7 @@ main (int argc, char **argv) -> int
 
   NodeContainer nodes;
   nodes.Create (6 * 4);
-  icarusHelper.Install (nodes, &constellationHelper);
+  icarusHelper.Install (nodes, constellationHelper);
 
   ns3::Simulator::Stop (Days (7));
 

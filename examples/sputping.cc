@@ -88,7 +88,7 @@ main (int argc, char **argv) -> int
   staticHelper.Install (ground1);
   staticHelper.Install (ground2);
 
-  NetDeviceContainer netDevices (icarusHelper.Install (nodes, &chelper));
+  NetDeviceContainer netDevices (icarusHelper.Install (nodes, chelper));
 
   InternetStackHelper ipStack;
   ipStack.Install (nodes);

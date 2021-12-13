@@ -80,8 +80,8 @@ main (int argc, char **argv) -> int
 
   NodeContainer nodes;
   nodes.Create (6 * 20);
-  icarusHelper.Install (nodes, &constellationHelper);
-  islHelper.Install (nodes, &constellationHelper);
+  icarusHelper.Install (nodes, constellationHelper);
+  islHelper.Install (nodes, constellationHelper);
 
   ns3::Simulator::Stop (Seconds (2));
 

@@ -134,8 +134,8 @@ ISLGridTestCase1::DoRun (void)
 
   NodeContainer nodes;
   nodes.Create (6 * 20);
-  icarusHelper.Install (nodes, &constellationHelper);
-  islHelper.Install (nodes, &constellationHelper);
+  icarusHelper.Install (nodes, constellationHelper);
+  islHelper.Install (nodes, constellationHelper);
   const auto &constellation = constellationHelper.GetConstellation ();
 
   for (std::size_t plane = 0; plane < constellation->GetNPlanes (); plane++)
@@ -186,8 +186,8 @@ ISLGridTestCase2::DoRun (void)
 
   NodeContainer nodes;
   nodes.Create (1);
-  icarusHelper.Install (nodes, &constellationHelper);
-  islHelper.Install (nodes, &constellationHelper);
+  icarusHelper.Install (nodes, constellationHelper);
+  islHelper.Install (nodes, constellationHelper);
   const auto &constellation = constellationHelper.GetConstellation ();
 
   for (std::size_t plane = 0; plane < constellation->GetNPlanes (); plane++)
@@ -238,8 +238,8 @@ ISLGridTestCase3::DoRun (void)
 
   NodeContainer nodes;
   nodes.Create (2);
-  icarusHelper.Install (nodes, &constellationHelper);
-  islHelper.Install (nodes, &constellationHelper);
+  icarusHelper.Install (nodes, constellationHelper);
+  islHelper.Install (nodes, constellationHelper);
   const auto &constellation = constellationHelper.GetConstellation ();
 
   for (std::size_t plane = 0; plane < constellation->GetNPlanes (); plane++)
@@ -291,8 +291,8 @@ ISLGridTestCase4::DoRun (void)
 
   NodeContainer nodes;
   nodes.Create (2);
-  icarusHelper.Install (nodes, &constellationHelper);
-  islHelper.Install (nodes, &constellationHelper);
+  icarusHelper.Install (nodes, constellationHelper);
+  islHelper.Install (nodes, constellationHelper);
   const auto &constellation = constellationHelper.GetConstellation ();
 
   for (std::size_t plane = 0; plane < constellation->GetNPlanes (); plane++)
@@ -343,8 +343,8 @@ ISLGridTestCase5::DoRun (void)
 
   NodeContainer nodes;
   nodes.Create (2 * 2);
-  icarusHelper.Install (nodes, &constellationHelper);
-  islHelper.Install (nodes, &constellationHelper);
+  icarusHelper.Install (nodes, constellationHelper);
+  islHelper.Install (nodes, constellationHelper);
   const auto &constellation = constellationHelper.GetConstellation ();
 
   for (std::size_t plane = 0; plane < constellation->GetNPlanes (); plane++)
@@ -395,8 +395,8 @@ ISLGridTestCase6::DoRun (void)
 
   NodeContainer nodes;
   nodes.Create (3 * 2);
-  icarusHelper.Install (nodes, &constellationHelper);
-  islHelper.Install (nodes, &constellationHelper);
+  icarusHelper.Install (nodes, constellationHelper);
+  islHelper.Install (nodes, constellationHelper);
   const auto &constellation = constellationHelper.GetConstellation ();
 
   for (std::size_t plane = 0; plane < constellation->GetNPlanes (); plane++)
@@ -447,8 +447,8 @@ ISLGridTestCase7::DoRun (void)
 
   NodeContainer nodes;
   nodes.Create (2 * 3);
-  icarusHelper.Install (nodes, &constellationHelper);
-  islHelper.Install (nodes, &constellationHelper);
+  icarusHelper.Install (nodes, constellationHelper);
+  islHelper.Install (nodes, constellationHelper);
   const auto &constellation = constellationHelper.GetConstellation ();
 
   for (std::size_t plane = 0; plane < constellation->GetNPlanes (); plane++)
