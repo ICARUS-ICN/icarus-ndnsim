@@ -100,7 +100,7 @@ ISLHelper::SetChannelAttribute (const std::string &n1, const AttributeValue &v1)
 }
 
 NetDeviceContainer
-ISLHelper::Install (const NodeContainer &c, ConstellationHelper *chelper)
+ISLHelper::Install (const NodeContainer &c, ConstellationHelper &chelper)
 {
   NetDeviceContainer devices;
   uint16_t constellationId = 0;
@@ -122,7 +122,7 @@ ISLHelper::Install (const NodeContainer &c, ConstellationHelper *chelper)
         }
     }
 
-  Ptr<Constellation> constellation = chelper->GetConstellation ();
+  Ptr<Constellation> constellation = chelper.GetConstellation ();
   NS_ASSERT_MSG (c.GetN () == constellation->GetSize (),
                  "We need a complete constellation before installing all ISL.");
 

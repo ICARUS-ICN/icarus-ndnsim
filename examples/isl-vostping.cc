@@ -61,7 +61,7 @@ main (int argc, char **argv) -> int
 
   ObjectFactory circularOrbitFactory ("ns3::icarus::CircularOrbitMobilityModel");
 
-  NetDeviceContainer netDevices (icarusHelper.Install (nodes, &constellationHelper));
+  NetDeviceContainer netDevices (icarusHelper.Install (nodes, constellationHelper));
   netDevices.Add (islHelper.Install (nodes));
 
   // Install NDN stack on all nodes
