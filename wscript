@@ -9,6 +9,11 @@
 def build(bld):
     module = bld.create_ns3_module('icarus', ['mobility', 'ndnSIM'])
     module.source = [
+        'helper/constellation-helper.cc',
+        'helper/icarus-helper.cc',
+        'helper/isl-helper.cc',
+        'helper/poisson-helper.cc',
+        'model/aloha-mac-model.cc',
         'model/circular-orbit.cc',
         'model/constellation.cc',
         'model/ground-node-sat-tracker.cc',
@@ -18,34 +23,33 @@ def build(bld):
         'model/ground-sat-success-model.cc',
         'model/ground-sta-net-device.cc',
         'model/ground-sta-transport.cc',
+        'model/icarus-net-device.cc',
+        'model/mac-model.cc',
+        'model/none-mac-model.cc',
         'model/sat2ground-net-device.cc',
         'model/satpos/planet.cc',
-        'model/icarus-net-device.cc',
-        'helper/constellation-helper.cc',
-        'helper/icarus-helper.cc',
-        'helper/isl-helper.cc',
-        'helper/poisson-helper.cc',
-        'utils/sat-address.cc',
         'model/sat2sat-channel.cc',
         'model/sat2sat-success-model.cc',
         'model/sat-net-device.cc',
-        'model/mac-model.cc',
-        'model/none-mac-model.cc',
-        'model/aloha-mac-model.cc'
+        'utils/sat-address.cc'
     ]
 
     module_test = bld.create_ns3_module_test_library('icarus')
     module_test.source = [
-        'test/icarus-test-suite.cc',
         'test/icarus-address-test-suite.cc',
+        'test/icarus-test-suite.cc',
     ]
 
     headers = bld(features='ns3header')
     headers.module = 'icarus'
     headers.source = [
+        'helper/constellation-helper.h',
+        'helper/icarus-helper.h',
+        'helper/isl-helper.h',
+        'helper/poisson-helper.h',
+        'model/aloha-mac-model.h',
         'model/circular-orbit.h',
         'model/constellation.h',
-        'model/sat2ground-net-device.h',
         'model/ground-node-sat-tracker.h',
         'model/ground-sat-channel.h',
         'model/ground-sat-success-distance.h',
@@ -54,17 +58,13 @@ def build(bld):
         'model/ground-sta-net-device.h',
         'model/ground-sta-transport.h',
         'model/icarus-net-device.h',
-        'helper/constellation-helper.h',
-        'helper/icarus-helper.h',
-        'helper/isl-helper.h',
-        'helper/poisson-helper.h',
-        'utils/sat-address.h',
+        'model/mac-model.h',
+        'model/none-mac-model.h',
+        'model/sat2ground-net-device.h',
         'model/sat2sat-channel.h',
         'model/sat2sat-success-model.h',
         'model/sat-net-device.h',
-        'model/mac-model.h',
-        'model/none-mac-model.h',
-        'model/aloha-mac-model.h'
+        'utils/sat-address.h',
     ]
 
     if bld.env.ENABLE_EXAMPLES:
