@@ -118,11 +118,20 @@ private:
   virtual void DoRun (void) override;
 };
 
+namespace {
+std::string
+GetTestName (std::size_t planes, std::size_t plane_size) noexcept
+{
+  std::ostringstream name ("Check ISL grid link formation: ");
+  name << planes << "×" << plane_size;
+
+  return name.str ();
+}
+} // namespace
+
 ISLGridTestCase1::ISLGridTestCase1 (std::size_t n_planes, std::size_t n_satellites_per_plane,
                                     std::size_t expected_links)
-    : TestCase ((std::ostringstream ("Check ISL grid link formation: ", std::ios_base::ate)
-                 << n_planes << "×" << n_satellites_per_plane)
-                    .str ()),
+    : TestCase (GetTestName (n_planes, n_satellites_per_plane)),
       m_NPlanes (n_planes),
       m_NSatellitesPerPlane (n_satellites_per_plane),
       m_NExpectedLinks (expected_links)
