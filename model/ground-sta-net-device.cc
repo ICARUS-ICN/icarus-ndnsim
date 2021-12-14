@@ -164,7 +164,10 @@ GroundStaNetDevice::GetTypeId (void)
           .AddAttribute ("RemoteAddress", "The link-layer address of the remote satellite.",
                          SatAddressValue (SatAddress (0, 0, 0)),
                          MakeSatAddressAccessor (&GroundStaNetDevice::m_remoteAddress),
-                         MakeSatAddressChecker ());
+                         MakeSatAddressChecker ())
+          .AddAttribute ("MacModel", "The MAC protocol for transmitted frames", PointerValue (),
+                         MakePointerAccessor (&GroundStaNetDevice::m_macModel),
+                         MakePointerChecker<MacModel> ());
 
   return tid;
 }
@@ -349,24 +352,22 @@ GroundStaNetDevice::Send (Ptr<Packet> packet, const Address &, uint16_t protocol
 
   if (m_txMachineState == IDLE)
     {
-      if (GetQueue ()->IsEmpty () == false)
-        {
-          auto packet = GetQueue ()->Dequeue ();
-          m_snifferTrace (packet);
-          TransmitStart (packet);
-        }
+      m_txMachineState = BUSY;
+      Simulator::Schedule (m_macModel->TimeToNextSlot (), &GroundStaNetDevice::TransmitStart, this);
     }
 
   return true;
 }
 
 void
-GroundStaNetDevice::TransmitStart (const Ptr<Packet> &packet)
+GroundStaNetDevice::TransmitStart ()
 {
-  NS_LOG_FUNCTION (this << packet);
-  NS_ASSERT_MSG (m_txMachineState == IDLE,
-                 "Must be IDLE to transmit. Tx state is: " << m_txMachineState);
-  m_txMachineState = TRANSMITTING;
+  NS_LOG_FUNCTION (this);
+  NS_ASSERT_MSG (m_txMachineState == BUSY,
+                 "Must be BUSY to transmit. Tx state is: " << m_txMachineState);
+
+  auto packet = GetQueue ()->Dequeue ();
+  m_snifferTrace (packet);
 
   GroundSatTag tag;
   packet->PeekPacketTag (tag);
@@ -385,16 +386,35 @@ GroundStaNetDevice::TransmitComplete (const Ptr<Packet> &packet)
   NS_LOG_FUNCTION (this << packet);
 
   m_phyTxEndTrace (packet);
-  m_txMachineState = IDLE;
 
   GroundSatTag tag;
   packet->RemovePacketTag (tag);
 
-  if (GetQueue ()->IsEmpty () == false)
+  if (GetQueue ()->IsEmpty ())
     {
-      auto next_packet = GetQueue ()->Dequeue ();
-      m_snifferTrace (next_packet);
-      TransmitStart (next_packet);
+      m_txMachineState = IDLE;
+    }
+  else
+    {
+      Time pktTxDelay = m_macModel->TimeToNextSlot ();
+      if (pktTxDelay.IsZero ())
+        {
+          TransmitStart ();
+        }
+      else
+        {
+          // Maybe more than one frame could be sent in current slot
+          Time nextPktTxTime =
+              GetDataRate ().CalculateBytesTxTime (GetQueue ()->Peek ()->GetSize ());
+          if (nextPktTxTime <= pktTxDelay)
+            {
+              TransmitStart ();
+            }
+          else
+            {
+              Simulator::Schedule (pktTxDelay, &GroundStaNetDevice::TransmitStart, this);
+            }
+        }
     }
 }
 

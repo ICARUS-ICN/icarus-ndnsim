@@ -31,7 +31,7 @@
 #include "ns3/queue.h"
 #include "ns3/ground-sat-channel.h"
 #include "icarus-net-device.h"
-
+#include "ns3/mac-model.h"
 namespace ns3 {
 namespace icarus {
 
@@ -85,14 +85,15 @@ public:
       remoteAddressChange;
 
 private:
-  enum { IDLE, TRANSMITTING } m_txMachineState = IDLE;
+  enum { IDLE, BUSY } m_txMachineState = IDLE;
+  Ptr<MacModel> m_macModel;
 
   Mac48Address m_localAddress;
   SatAddress m_remoteAddress;
 
   void ReceiveFromSatFinish (const Ptr<Packet> &packet, const Address &src,
                              uint16_t protocolNumber);
-  void TransmitStart (const Ptr<Packet> &packet);
+  void TransmitStart ();
   void TransmitComplete (const Ptr<Packet> &packet);
 };
 

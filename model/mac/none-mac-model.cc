@@ -40,6 +40,14 @@ NoneMacModel::GetTypeId (void)
   return tid;
 }
 
+Time
+NoneMacModel::TimeToNextSlot ()
+{
+  NS_LOG_FUNCTION (this);
+
+  return Seconds (0);
+}
+
 void
 NoneMacModel::NewPacketRx (const Ptr<Packet> &packet, Time packet_tx_time)
 {

@@ -35,13 +35,15 @@ public:
   static TypeId GetTypeId (void);
   AlohaMacModel ();
 
+  virtual Time TimeToNextSlot () override;
   virtual void NewPacketRx (const Ptr<Packet> &packet, Time packet_tx_time) override;
   virtual bool HasCollided (const Ptr<Packet> &packet) override;
 
 private:
-  uint64_t busy_period_packet_uid;
-  Time busy_period_finish_time;
-  bool busy_period_collision;
+  Time m_slotDuration;
+  uint64_t m_busyPeriodPacketUid;
+  Time m_busyPeriodFinishTime;
+  bool m_busyPeriodCollision;
 };
 
 } // namespace icarus
