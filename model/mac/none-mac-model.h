@@ -33,6 +33,7 @@ class NoneMacModel : public MacModel
 public:
   static TypeId GetTypeId (void);
 
+  virtual Time TimeToNextSlot () override;
   virtual void NewPacketRx (const Ptr<Packet> &packet, Time packet_tx_time) override;
   virtual bool HasCollided (const Ptr<Packet> &packet) override;
 };
