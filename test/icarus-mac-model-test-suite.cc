@@ -40,6 +40,7 @@
 #include <boost/units/systems/si/plane_angle.hpp>
 #include <boost/units/systems/angle/degrees.hpp>
 #include <boost/units/systems/si/prefixes.hpp>
+#include <boost/math/constants/constants.hpp>
 #include <ios>
 
 using namespace ns3;
@@ -184,6 +185,131 @@ SlottedAloha::DoRun ()
   Simulator::Destroy ();
 }
 
+class RegularAloha : public TestCase
+{
+public:
+  RegularAloha ();
+
+private:
+  const double m_g;
+  const std::size_t m_nodes;
+  const std::size_t m_payloadSize;
+  const Time m_transmissionDuration;
+  const DataRate m_channelDataRate;
+  NodeContainer m_nodesContainer;
+  ApplicationContainer m_clientApps, m_sinkApps;
+
+  virtual void DoSetup () override;
+  virtual void DoRun () override;
+};
+
+RegularAloha::RegularAloha ()
+    : TestCase ("Regular Aloha g=0.5"),
+      m_g (0.5),
+      m_nodes (10),
+      m_payloadSize (100),
+      m_transmissionDuration (Seconds (1)),
+      m_channelDataRate (DataRate ("100Mbps"))
+{
+  NS_LOG_FUNCTION (this);
+}
+
+void
+RegularAloha::DoSetup ()
+{
+  NS_LOG_FUNCTION (this);
+  using boost::units::quantity;
+  using boost::units::degree::degrees;
+  using boost::units::si::kilo;
+  using boost::units::si::length;
+  using boost::units::si::meters;
+  using boost::units::si::plane_angle;
+
+  Config::SetDefault ("ns3::icarus::IcarusNetDevice::DataRate", DataRateValue (m_channelDataRate));
+  Config::SetDefault ("ns3::icarus::GroundNodeSatTracker::TrackingInterval",
+                      TimeValue (Minutes (1)));
+
+  m_nodesContainer.Create (m_nodes);
+
+  ConstellationHelper constelHelper (quantity<length> (250 * kilo * meters),
+                                     quantity<plane_angle> (60.0 * degrees), 1, 1, 0);
+
+  /* Setting positions and mobility model to the ground nodes */
+  ObjectFactory staticPositionsFactory ("ns3::ListPositionAllocator");
+  auto staticPositions = staticPositionsFactory.Create<ListPositionAllocator> ();
+  staticPositions->Add (GeographicPositions::GeographicToCartesianCoordinates (
+      42.1704632, -8.6877909, 450, GeographicPositions::WGS84)); // Our School
+  MobilityHelper staticHelper;
+  staticHelper.SetPositionAllocator (staticPositions);
+  staticHelper.SetMobilityModel ("ns3::ConstantPositionMobilityModel");
+  staticHelper.Install (m_nodesContainer);
+
+  auto sat_node = CreateObject<Node> ();
+  m_nodesContainer.Add (sat_node);
+
+  const auto header_size = Ipv4Header ().GetSerializedSize () + UdpHeader ().GetSerializedSize ();
+
+  IcarusHelper icarusHelper;
+  icarusHelper.SetMacModel ("ns3::icarus::AlohaMacModel", "SlotDuration", TimeValue (Seconds (0)));
+  auto netDevices (icarusHelper.Install (m_nodesContainer, constelHelper));
+
+  /* Configuring IP stack at the nodes */
+  Config::SetDefault ("ns3::Ipv4::IpForward", BooleanValue (false));
+  InternetStackHelper ipStack;
+  ipStack.Install (m_nodesContainer);
+  Ipv4AddressHelper address;
+  address.SetBase ("10.0.0.0", "255.255.255.0");
+  Ipv4InterfaceContainer ipInterfaces = address.Assign (netDevices);
+  /* Configuring Poisson clients at the ground nodes */
+  PoissonHelper clientHelper ("ns3::UdpSocketFactory",
+                              Address (InetSocketAddress (ipInterfaces.GetAddress (m_nodes), 7667)),
+                              DataRate (m_channelDataRate.GetBitRate () * m_g / m_nodes),
+                              header_size, m_payloadSize);
+
+  // Do not install app into satellite
+  for (auto i = 0u; i < m_nodes; i++)
+    {
+      m_clientApps.Add (clientHelper.Install (m_nodesContainer.Get (i)));
+    }
+
+  /* Configuring traffic sink at the satellite node */
+  PacketSinkHelper sinkHelper ("ns3::UdpSocketFactory",
+                               Address (InetSocketAddress (Ipv4Address::GetAny (), 7667)));
+  m_sinkApps = sinkHelper.Install (sat_node);
+}
+
+void
+RegularAloha::DoRun ()
+{
+  NS_LOG_FUNCTION (this);
+  using namespace boost::math::double_constants;
+
+  auto totalRx = Create<PacketCounterCalculator> ();
+  totalRx->SetKey ("rx-frames");
+  Config::Connect ("/NodeList/*/DeviceList/0/$ns3::icarus::Sat2GroundNetDevice/MacRx",
+                   MakeCallback (&PacketCounterCalculator::PacketUpdate, totalRx));
+
+  auto totalTx = Create<PacketCounterCalculator> ();
+  totalTx->SetKey ("tx-frames");
+  Config::Connect ("/NodeList/*/DeviceList/0/$ns3::icarus::GroundStaNetDevice/TxQueue/Enqueue",
+                   MakeCallback (&PacketCounterCalculator::PacketUpdate, totalTx));
+
+  const Time init_application_time = Seconds (268896.0);
+  m_clientApps.Start (init_application_time);
+  m_sinkApps.Start (init_application_time);
+
+  m_clientApps.Stop (init_application_time + m_transmissionDuration);
+  Simulator::Stop (init_application_time + m_transmissionDuration +
+                   Seconds (1)); // Add 1 second to let all the packets enough time to arrive
+  Simulator::Run ();
+
+  NS_TEST_ASSERT_MSG_EQ_TOL (
+      m_g * (totalRx->GetCount () / static_cast<double> (totalTx->GetCount ())), 1 / (2 * e), 5e-2,
+      "Not equal");
+
+  Simulator::Destroy ();
+}
+
 class IcarusMacModelTestSuite : public TestSuite
 {
 public:
@@ -192,6 +318,7 @@ public:
 
 IcarusMacModelTestSuite::IcarusMacModelTestSuite () : TestSuite ("icarus.mac-model", UNIT)
 {
+  AddTestCase (new RegularAloha, TestCase::EXTENSIVE);
   for (auto g = 0.1; g < 1; g += 0.1)
     {
       AddTestCase (new SlottedAloha (g), TestCase::EXTENSIVE);
