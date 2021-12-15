@@ -37,6 +37,7 @@ def build(bld):
     module_test = bld.create_ns3_module_test_library('icarus')
     module_test.source = [
         'test/icarus-address-test-suite.cc',
+        'test/icarus-mac-model-test-suite.cc',
         'test/icarus-test-suite.cc',
     ]
 
