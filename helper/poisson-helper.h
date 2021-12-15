@@ -22,6 +22,7 @@
 #define POISSON_HELPER_H
 
 #include "ns3/application-container.h"
+#include "ns3/on-off-helper.h"
 #include <memory>
 #include <string>
 
@@ -31,7 +32,7 @@ class Address;
 class AttributeValue;
 class DataRate;
 class NodeContainer;
-class OnOffHelper;
+
 namespace icarus {
 
 /**
