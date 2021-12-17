@@ -44,7 +44,7 @@ AlohaMacModel::GetTypeId (void)
   return tid;
 }
 
-AlohaMacModel::AlohaMacModel () : m_busyPeriodPacketUid (0), m_busyPeriodCollision (false)
+AlohaMacModel::AlohaMacModel () : m_busyPeriodPacketUid (boost::none), m_busyPeriodCollision (false)
 {
   NS_LOG_FUNCTION (this);
 }
@@ -75,18 +75,18 @@ AlohaMacModel::NewPacketRx (const Ptr<Packet> &packet, Time packet_tx_time)
   NS_LOG_FUNCTION (this << packet << packet_tx_time);
 
   Time now = Simulator::Now ();
-  if (m_busyPeriodPacketUid > 0 && now < m_busyPeriodFinishTime)
+  if (m_busyPeriodPacketUid && now < m_busyPeriodFinishTime)
     {
       m_busyPeriodCollision = true;
       NS_LOG_LOGIC ("Packet " << packet->GetUid () << " causes collision");
     }
 
   Time finish_tx_time = now + packet_tx_time;
-  if (m_busyPeriodPacketUid == 0 || finish_tx_time >= m_busyPeriodFinishTime)
+  if (!m_busyPeriodPacketUid || finish_tx_time >= m_busyPeriodFinishTime)
     {
       m_busyPeriodPacketUid = packet->GetUid ();
       m_busyPeriodFinishTime = finish_tx_time;
-      NS_LOG_LOGIC ("Updating busy period info: " << m_busyPeriodPacketUid << " "
+      NS_LOG_LOGIC ("Updating busy period info: " << m_busyPeriodPacketUid.value () << " "
                                                   << m_busyPeriodFinishTime);
     }
 }
@@ -110,7 +110,7 @@ AlohaMacModel::HasCollided (const Ptr<Packet> &packet)
 
   if (m_busyPeriodPacketUid == packet_uid)
     {
-      m_busyPeriodPacketUid = 0;
+      m_busyPeriodPacketUid = boost::none;
       m_busyPeriodFinishTime = Simulator::Now ();
       m_busyPeriodCollision = false;
       NS_LOG_LOGIC ("Cleaning busy period info");
