@@ -61,6 +61,7 @@ jobs:
           cd ns-3
           ./waf build
       - name: Check
+        if: matrix.build != 'debug'
         run: |
           cd ns-3
           ./test.py -m -s icarus -v
