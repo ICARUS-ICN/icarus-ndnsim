@@ -298,24 +298,22 @@ Sat2GroundNetDevice::Send (Ptr<Packet> packet, const Address &dest, uint16_t pro
       "Should we be able to perform simultaneous transmissions to DIFFERENT ground stations?");
   if (m_txMachineState == IDLE)
     {
-      if (GetQueue ()->IsEmpty () == false)
-        {
-          auto packet = GetQueue ()->Dequeue ();
-          m_snifferTrace (packet);
-          TransmitStart (packet);
-        }
+      m_txMachineState = BUSY;
+      TransmitStart ();
     }
 
   return true;
 }
 
 void
-Sat2GroundNetDevice::TransmitStart (const Ptr<Packet> &packet)
+Sat2GroundNetDevice::TransmitStart ()
 {
-  NS_LOG_FUNCTION (this << packet);
-  NS_ASSERT_MSG (m_txMachineState == IDLE,
-                 "Must be IDLE to transmit. Tx state is: " << m_txMachineState);
-  m_txMachineState = TRANSMITTING;
+  NS_LOG_FUNCTION (this);
+  NS_ASSERT_MSG (m_txMachineState == BUSY,
+                 "Must be BUSY to transmit. Tx state is: " << m_txMachineState);
+
+  auto packet = GetQueue ()->Dequeue ();
+  m_snifferTrace (packet);
 
   SatGroundTag tag;
   packet->PeekPacketTag (tag);
@@ -334,16 +332,17 @@ Sat2GroundNetDevice::TransmitComplete (const Ptr<Packet> &packet)
   NS_LOG_FUNCTION (this << packet);
 
   m_phyTxEndTrace (packet);
-  m_txMachineState = IDLE;
 
   SatGroundTag tag;
   packet->RemovePacketTag (tag);
 
-  if (GetQueue ()->IsEmpty () == false)
+  if (GetQueue ()->IsEmpty ())
     {
-      auto next_packet = GetQueue ()->Dequeue ();
-      m_snifferTrace (next_packet);
-      TransmitStart (next_packet);
+      m_txMachineState = IDLE;
+    }
+  else
+    {
+      TransmitStart ();
     }
 }
 

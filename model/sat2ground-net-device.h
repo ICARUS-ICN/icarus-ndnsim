@@ -75,11 +75,11 @@ public:
 private:
   SatAddress m_address;
   Ptr<MacModel> m_macModel;
-  enum { IDLE, TRANSMITTING } m_txMachineState = IDLE;
+  enum { IDLE, BUSY } m_txMachineState = IDLE;
 
   void ReceiveFromGroundFinish (const Ptr<Packet> &packet, const Address &src,
                                 uint16_t protocolNumber);
-  void TransmitStart (const Ptr<Packet> &packet);
+  void TransmitStart ();
   void TransmitComplete (const Ptr<Packet> &packet);
 };
 
