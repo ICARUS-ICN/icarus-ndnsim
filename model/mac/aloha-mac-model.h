@@ -26,6 +26,8 @@
 #include "mac-model.h"
 #include "ns3/nstime.h"
 
+#include <boost/optional.hpp>
+
 namespace ns3 {
 namespace icarus {
 
@@ -41,7 +43,7 @@ public:
 
 private:
   Time m_slotDuration;
-  uint64_t m_busyPeriodPacketUid;
+  boost::optional<uint64_t> m_busyPeriodPacketUid;
   Time m_busyPeriodFinishTime;
   bool m_busyPeriodCollision;
 };
