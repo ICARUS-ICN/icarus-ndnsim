@@ -18,6 +18,8 @@
  * Author: Pablo Iglesias Sanuy <pabliglesias@alumnos.uvigo.es>
  */
 
+#include "helper/ndn-app-helper.hpp"
+#include "ndn-cxx/lp/geo-tag.hpp"
 #include "ns3/assert.h"
 #include "ns3/command-line.h"
 #include "ns3/config.h"
@@ -28,7 +30,8 @@
 #include "ns3/node-container.h"
 #include "ns3/simulator.h"
 #include "ns3/geographic-positions.h"
-#include "src/icarus/helper/isl-helper.h"
+#include "ns3/isl-helper.h"
+#include "ns3/string.h"
 
 #include <boost/units/io.hpp>
 #include <boost/units/systems/angle/degrees.hpp>
@@ -36,12 +39,24 @@
 #include <boost/units/systems/si/prefixes.hpp>
 #include <boost/units/systems/si/length.hpp>
 #include <cstddef>
+#include <cstdint>
+#include <memory>
 #include <string>
 
 namespace ns3 {
 using namespace icarus;
 
 NS_LOG_COMPONENT_DEFINE ("icarus.Ground2GroundPingExample");
+
+std::shared_ptr<ndn::lp::GeoTag>
+AddGeoTag ()
+{
+  ndn::lp::GeoTag geoTag;
+  auto pos = GeographicPositions::GeographicToCartesianCoordinates (40.712742, -74.013382, -17,
+                                                                    GeographicPositions::WGS84);
+  geoTag.setPosX ({pos.x, pos.y, pos.z});
+  return std::make_shared<ndn::lp::GeoTag> (geoTag);
+}
 
 auto
 main (int argc, char **argv) -> int
@@ -57,7 +72,7 @@ main (int argc, char **argv) -> int
   cmd.AddValue ("trackingInterval", "ns3::icarus::GroundNodeSatTracker::TrackingInterval");
   cmd.Parse (argc, argv);
 
-  auto n_nodes = (6 * 20) + 2;
+  uint32_t n_nodes = (6 * 20) + 2;
   NodeContainer nodes;
   nodes.Create (n_nodes);
   auto ground1 = nodes.Get (n_nodes - 1);
@@ -70,6 +85,7 @@ main (int argc, char **argv) -> int
     }
 
   IcarusHelper icarusHelper;
+  icarusHelper.SetEnableGeoTags (&AddGeoTag);
   ISLHelper islHelper;
   ConstellationHelper constellationHelper (quantity<length> (250 * kilo * meters),
                                            quantity<plane_angle> (60 * degree::degree), 6, 20, 1);
@@ -88,6 +104,40 @@ main (int argc, char **argv) -> int
   icarusHelper.Install (nodes, constellationHelper);
 
   islHelper.Install (birds, constellationHelper);
+
+  // Install NDN stack on all nodes
+  ns3::ndn::StackHelper ndnHelper;
+  icarusHelper.FixNdnStackHelper (ndnHelper);
+  ndnHelper.SetDefaultRoutes (true);
+  ndnHelper.InstallAll ();
+
+  // Choosing forwarding strategy
+  ndn::StrategyChoiceHelper::InstallAll ("/icarus", "/localhost/nfd/strategy/best-route");
+
+  // Installing applications
+
+  // Consumer
+  ndn::AppHelper consumerHelper ("ns3::ndn::ConsumerCbr");
+  consumerHelper.SetPrefix ("/icarus/ground2/vostping");
+  consumerHelper.SetAttribute("Frequency", StringValue("1"));
+  auto apps = consumerHelper.Install (ground1);
+
+  // Producer
+  ndn::AppHelper producerHelper ("ns3::ndn::Producer");
+  // Producer will reply to all requests starting with /prefix
+  producerHelper.SetPrefix ("/icarus/ground2/vostping");
+  producerHelper.SetAttribute ("PayloadSize", StringValue ("1024"));
+  producerHelper.Install (ground2); // Satellite node
+
+  AsciiTraceHelper ascii;
+  auto stream = ascii.CreateFileStream ("/tmp/out.tr");
+  stream->GetStream ()->precision (9);
+  icarusHelper.EnableAsciiAll (stream);
+  icarusHelper.EnablePcapAll ("/tmp/pcap-sputping");
+
+  // Add channel drops to the ASCII trace
+  Config::Connect ("/NodeList/0/DeviceList/0/$ns3::icarus::IcarusNetDevice/Channel/PhyTxDrop",
+                   MakeBoundCallback (&AsciiTraceHelper::DefaultDropSinkWithContext, stream));
 
   ns3::Simulator::Stop (Days (7));
 
