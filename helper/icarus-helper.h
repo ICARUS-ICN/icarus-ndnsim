@@ -20,6 +20,7 @@
 #ifndef ICARUS_HELPER_H
 #define ICARUS_HELPER_H
 
+#include "ndn-cxx/lp/geo-tag.hpp"
 #include "ns3/icarus-module.h"
 
 #include "ns3/simple-ref-count.h"
@@ -27,6 +28,8 @@
 #include "ns3/ground-sat-channel.h"
 #include "ns3/icarus-net-device.h"
 #include "src/ndnSIM/helper/ndn-stack-helper.hpp"
+#include <functional>
+#include <memory>
 
 namespace ns3 {
 namespace icarus {
@@ -128,7 +131,7 @@ public:
    */
   void SetChannelAttribute (const std::string &n1, const AttributeValue &v1);
 
-  static void FixNdnStackHelper (ndn::StackHelper &sh);
+  void FixNdnStackHelper (ndn::StackHelper &sh);
   /**
    * This method creates an ns3::icarus::GroundStaNetDevice or
    * ns3::icarus::Sat2GroundNetDevice with the attributes configured by
@@ -247,6 +250,8 @@ public:
   virtual void EnableAsciiInternal (Ptr<OutputStreamWrapper> stream, std::string prefix,
                                     Ptr<NetDevice> nd, bool explicitFilename);
 
+  void SetEnableGeoTags (std::function<std::shared_ptr<ndn::lp::GeoTag> ()> enableGeoTags);
+
 private:
   /**
    * This method creates an ns3::icarus::GroundStaNetDevice or
@@ -262,6 +267,11 @@ private:
 
   Ptr<IcarusNetDevice> CreateDeviceForNode (Ptr<Node> node, ConstellationHelper &chelper) const;
 
+  std::string constructFaceUri (Ptr<NetDevice> netDevice);
+
+  std::shared_ptr<nfd::face::Face>
+  GroundStaNetDeviceCallback (Ptr<Node> node, Ptr<ndn::L3Protocol> ndn, Ptr<NetDevice> netDevice);
+
   ObjectFactory m_queueFactory; //!< factory for the queues
   ObjectFactory m_sat2GroundFactory; //!< factory for downstream NetDevices
   ObjectFactory m_groundStaFactory; //!< factory for downstream NetDevices
@@ -269,6 +279,8 @@ private:
   ObjectFactory m_successModelFactory; //!> factory for the success models
   ObjectFactory m_macModelFactory; //!> factory for the MAC models
   ObjectFactory m_trackerModelFactory; //!> factory for the Tracker models
+
+  std::function<std::shared_ptr<ndn::lp::GeoTag> ()> m_enableGeoTags;
 };
 
 } // namespace icarus

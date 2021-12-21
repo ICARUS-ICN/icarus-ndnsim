@@ -40,13 +40,14 @@
 #include "ns3/ground-sta-transport.h"
 #include "ns3/ndnSIM/NFD/daemon/face/generic-link-service.hpp"
 #include "ns3/ground-node-sat-tracker.h"
+#include <memory>
 
 namespace ns3 {
 namespace icarus {
 
 NS_LOG_COMPONENT_DEFINE ("icarus.IcarusHelper");
 
-IcarusHelper::IcarusHelper ()
+IcarusHelper::IcarusHelper () : m_enableGeoTags (nullptr)
 {
   NS_LOG_FUNCTION (this);
 
@@ -432,11 +433,16 @@ IcarusHelper::EnableAsciiInternal (Ptr<OutputStreamWrapper> stream, std::string 
                    MakeBoundCallback (&AsciiTraceHelper::DefaultDropSinkWithContext, stream));
 }
 
-namespace {
+void
+IcarusHelper::SetEnableGeoTags (std::function<std::shared_ptr<ndn::lp::GeoTag> ()> enableGeoTags)
+{
+  m_enableGeoTags = enableGeoTags;
+  return;
+}
 
 // Adapted from ndn-stack-helper.cpp
 std::string
-constructFaceUri (Ptr<NetDevice> netDevice)
+IcarusHelper::constructFaceUri (Ptr<NetDevice> netDevice)
 {
   std::string uri = "netdev://";
   Address address = netDevice->GetAddress ();
@@ -449,7 +455,8 @@ constructFaceUri (Ptr<NetDevice> netDevice)
 }
 
 std::shared_ptr<nfd::face::Face>
-GroundStaNetDeviceCallback (Ptr<Node> node, Ptr<ndn::L3Protocol> ndn, Ptr<NetDevice> netDevice)
+IcarusHelper::GroundStaNetDeviceCallback (Ptr<Node> node, Ptr<ndn::L3Protocol> ndn,
+                                          Ptr<NetDevice> netDevice)
 {
   NS_LOG_DEBUG ("Creating default Face on node " << node->GetId ());
 
@@ -458,6 +465,7 @@ GroundStaNetDeviceCallback (Ptr<Node> node, Ptr<ndn::L3Protocol> ndn, Ptr<NetDev
   opts.allowFragmentation = true;
   opts.allowReassembly = true;
   opts.allowCongestionMarking = true;
+  opts.enableGeoTags = m_enableGeoTags;
 
   auto linkService = std::make_unique<::nfd::face::GenericLinkService> (opts);
 
@@ -472,7 +480,6 @@ GroundStaNetDeviceCallback (Ptr<Node> node, Ptr<ndn::L3Protocol> ndn, Ptr<NetDev
 
   return face;
 }
-} // namespace
 
 void
 IcarusHelper::FixNdnStackHelper (ndn::StackHelper &sh)
@@ -480,7 +487,7 @@ IcarusHelper::FixNdnStackHelper (ndn::StackHelper &sh)
   NS_LOG_FUNCTION (&sh);
 
   sh.AddFaceCreateCallback (GroundStaNetDevice::GetTypeId (),
-                            MakeCallback (GroundStaNetDeviceCallback));
+                            MakeCallback (&IcarusHelper::GroundStaNetDeviceCallback,this));
 }
 
 } // namespace icarus
