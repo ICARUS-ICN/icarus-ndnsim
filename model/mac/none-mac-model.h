@@ -34,8 +34,11 @@ public:
   static TypeId GetTypeId (void);
 
   virtual Time TimeToNextSlot () override;
-  virtual void NewPacketRx (const Ptr<Packet> &packet, Time packet_tx_time) override;
-  virtual bool HasCollided (const Ptr<Packet> &packet) override;
+  virtual void StartPacketRx (const Ptr<Packet> &packet, Time packet_tx_time,
+                              std::function<void (void)>) override;
+
+private:
+  void FinishReception (std::function<void (void)> net_device_cb) const;
 };
 
 } // namespace icarus

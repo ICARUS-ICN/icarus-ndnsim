@@ -26,6 +26,7 @@
 #include "ns3/object.h"
 #include "ns3/packet.h"
 #include "ns3/nstime.h"
+#include <functional>
 
 namespace ns3 {
 namespace icarus {
@@ -38,8 +39,8 @@ public:
   virtual ~MacModel ();
 
   virtual Time TimeToNextSlot () = 0;
-  virtual void NewPacketRx (const Ptr<Packet> &packet, Time packet_tx_time) = 0;
-  virtual bool HasCollided (const Ptr<Packet> &packet) = 0;
+  virtual void StartPacketRx (const Ptr<Packet> &packet, Time packet_tx_time,
+                              std::function<void (void)>) = 0;
 };
 
 } // namespace icarus

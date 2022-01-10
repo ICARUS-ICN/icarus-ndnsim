@@ -38,14 +38,16 @@ public:
   AlohaMacModel ();
 
   virtual Time TimeToNextSlot () override;
-  virtual void NewPacketRx (const Ptr<Packet> &packet, Time packet_tx_time) override;
-  virtual bool HasCollided (const Ptr<Packet> &packet) override;
+  virtual void StartPacketRx (const Ptr<Packet> &packet, Time packet_tx_time,
+                              std::function<void (void)>) override;
 
 private:
   Time m_slotDuration;
   boost::optional<uint64_t> m_busyPeriodPacketUid;
   Time m_busyPeriodFinishTime;
   bool m_busyPeriodCollision;
+
+  void FinishReception (const Ptr<Packet> &packet, std::function<void (void)>);
 };
 
 } // namespace icarus

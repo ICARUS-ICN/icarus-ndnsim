@@ -21,6 +21,7 @@
 #include "none-mac-model.h"
 #include "ns3/log-macros-enabled.h"
 #include "ns3/log.h"
+#include "ns3/simulator.h"
 
 namespace ns3 {
 namespace icarus {
@@ -49,17 +50,20 @@ NoneMacModel::TimeToNextSlot ()
 }
 
 void
-NoneMacModel::NewPacketRx (const Ptr<Packet> &packet, Time packet_tx_time)
+NoneMacModel::StartPacketRx (const Ptr<Packet> &packet, Time packet_tx_time,
+                             std::function<void (void)> net_device_cb)
 {
-  NS_LOG_FUNCTION (this << packet << packet_tx_time);
+  NS_LOG_FUNCTION (this << packet << packet_tx_time << &net_device_cb);
+
+  Simulator::Schedule (packet_tx_time, &NoneMacModel::FinishReception, this, net_device_cb);
 }
 
-bool
-NoneMacModel::HasCollided (const Ptr<Packet> &packet)
+void
+NoneMacModel::FinishReception (std::function<void (void)> net_device_cb) const
 {
-  NS_LOG_FUNCTION (this << packet);
+  NS_LOG_FUNCTION (this << &net_device_cb);
 
-  return false;
+  return net_device_cb ();
 }
 
 } // namespace icarus
