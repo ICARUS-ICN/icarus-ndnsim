@@ -70,9 +70,10 @@ AlohaMacModel::TimeToNextSlot ()
 }
 
 void
-AlohaMacModel::NewPacketRx (const Ptr<Packet> &packet, Time packet_tx_time)
+AlohaMacModel::StartPacketRx (const Ptr<Packet> &packet, Time packet_tx_time,
+                              std::function<void (void)> net_device_cb)
 {
-  NS_LOG_FUNCTION (this << packet << packet_tx_time);
+  NS_LOG_FUNCTION (this << packet << packet_tx_time << &net_device_cb);
 
   Time now = Simulator::Now ();
   if (m_busyPeriodPacketUid && now < m_busyPeriodFinishTime)
@@ -88,25 +89,18 @@ AlohaMacModel::NewPacketRx (const Ptr<Packet> &packet, Time packet_tx_time)
       m_busyPeriodFinishTime = finish_tx_time;
       NS_LOG_LOGIC ("Updating busy period info: " << m_busyPeriodPacketUid.value () << " "
                                                   << m_busyPeriodFinishTime);
+      Simulator::Schedule (packet_tx_time, &AlohaMacModel::FinishReception, this, packet,
+                           net_device_cb);
     }
 }
 
-bool
-AlohaMacModel::HasCollided (const Ptr<Packet> &packet)
+void
+AlohaMacModel::FinishReception (const Ptr<Packet> &packet, std::function<void (void)> net_device_cb)
 {
-  NS_LOG_FUNCTION (this << packet);
+  NS_LOG_FUNCTION (this << packet << &net_device_cb);
 
   bool has_collided = m_busyPeriodCollision;
   uint64_t packet_uid = packet->GetUid ();
-
-  if (has_collided)
-    {
-      NS_LOG_LOGIC ("Packet " << packet_uid << " discarded due to collision");
-    }
-  else
-    {
-      NS_LOG_LOGIC ("Packet " << packet_uid << " correctly received");
-    }
 
   if (m_busyPeriodPacketUid == packet_uid)
     {
@@ -115,7 +109,18 @@ AlohaMacModel::HasCollided (const Ptr<Packet> &packet)
       m_busyPeriodCollision = false;
       NS_LOG_LOGIC ("Cleaning busy period info");
     }
-  return has_collided;
+
+  if (has_collided)
+    {
+      NS_LOG_LOGIC ("Packet " << packet_uid << " discarded due to collision");
+    }
+  else
+    {
+      NS_LOG_LOGIC ("Packet " << packet_uid << " correctly received");
+
+      // Call the NetDevice for further processing
+      net_device_cb ();
+    }
 }
 
 } // namespace icarus
