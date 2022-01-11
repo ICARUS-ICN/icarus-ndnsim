@@ -37,7 +37,8 @@ public:
   static TypeId GetTypeId (void);
   AlohaMacModel ();
 
-  virtual Time TimeToNextSlot () override;
+  virtual void Send (const Ptr<Packet> &packet, std::function<Time (void)> transmit_callback,
+                     std::function<void (void)> finish_callback) override;
   virtual void StartPacketRx (const Ptr<Packet> &packet, Time packet_tx_time,
                               std::function<void (void)>) override;
 
@@ -47,7 +48,10 @@ private:
   Time m_busyPeriodFinishTime;
   bool m_busyPeriodCollision;
 
+  void DoSend (const Ptr<Packet> &packet, std::function<Time (void)> transmit_callback,
+               std::function<void (void)> finish_callback) const;
   void FinishReception (const Ptr<Packet> &packet, std::function<void (void)>);
+  void FinishTransmission (std::function<void (void)>) const;
 };
 
 } // namespace icarus

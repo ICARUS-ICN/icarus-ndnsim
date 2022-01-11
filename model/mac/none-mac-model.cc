@@ -41,12 +41,14 @@ NoneMacModel::GetTypeId (void)
   return tid;
 }
 
-Time
-NoneMacModel::TimeToNextSlot ()
+void
+NoneMacModel::Send (const Ptr<Packet> &packet, std::function<Time (void)> transmit_callback,
+                    std::function<void (void)> finish_callback)
 {
-  NS_LOG_FUNCTION (this);
+  NS_LOG_FUNCTION (this << packet << &transmit_callback << &finish_callback);
 
-  return Seconds (0);
+  const Time tx_length = transmit_callback ();
+  Simulator::Schedule (tx_length, &NoneMacModel::FinishTransmission, this, finish_callback);
 }
 
 void
@@ -64,6 +66,14 @@ NoneMacModel::FinishReception (std::function<void (void)> net_device_cb) const
   NS_LOG_FUNCTION (this << &net_device_cb);
 
   return net_device_cb ();
+}
+
+void
+NoneMacModel::FinishTransmission (std::function<void (void)> finish_callback) const
+{
+  NS_LOG_FUNCTION (this << &finish_callback);
+
+  return finish_callback ();
 }
 
 } // namespace icarus
