@@ -141,7 +141,7 @@ Sat2GroundNetDevice::GetTypeId (void)
           .AddAttribute (
               "Address", "The link-layer address of this device.", SatAddressValue (SatAddress ()),
               MakeSatAddressAccessor (&Sat2GroundNetDevice::m_address), MakeSatAddressChecker ())
-          .AddAttribute ("MacModel", "The MAC protocol for received frames", PointerValue (),
+          .AddAttribute ("MacModelRx", "The MAC protocol for received frames", PointerValue (),
                          MakePointerAccessor (&Sat2GroundNetDevice::m_macModel),
                          MakePointerChecker<MacModel> ());
 
