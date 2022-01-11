@@ -352,8 +352,7 @@ GroundStaNetDevice::Send (Ptr<Packet> packet, const Address &, uint16_t protocol
 
   if (m_txMachineState == IDLE)
     {
-      m_txMachineState = BUSY;
-      Simulator::Schedule (m_macModel->TimeToNextSlot (), &GroundStaNetDevice::TransmitStart, this);
+      TransmitStart ();
     }
 
   return true;
@@ -363,21 +362,29 @@ void
 GroundStaNetDevice::TransmitStart ()
 {
   NS_LOG_FUNCTION (this);
-  NS_ASSERT_MSG (m_txMachineState == BUSY,
-                 "Must be BUSY to transmit. Tx state is: " << m_txMachineState);
+  NS_ASSERT_MSG (m_txMachineState == IDLE,
+                 "Must be IDLE to begin transmission. Tx state is: " << m_txMachineState);
 
+  m_txMachineState = BUSY;
   auto packet = GetQueue ()->Dequeue ();
-  m_snifferTrace (packet);
 
   GroundSatTag tag;
   packet->PeekPacketTag (tag);
   const auto dst = tag.GetDst ();
   const auto proto = tag.GetProto ();
 
-  m_phyTxBeginTrace (packet);
-  Time endTx = GetInternalChannel ()->Transmit2Sat (packet, GetDataRate (),
+  m_macModel->Send (
+      packet,
+      [=] (void) -> Time {
+        m_snifferTrace (packet);
+        m_phyTxBeginTrace (packet);
+        return GetInternalChannel ()->Transmit2Sat (packet, GetDataRate (),
                                                     GetObject<GroundStaNetDevice> (), dst, proto);
-  Simulator::Schedule (endTx, &GroundStaNetDevice::TransmitComplete, this, packet);
+      },
+      [=] (void) {
+        m_phyTxEndTrace (packet);
+        TransmitComplete (packet);
+      });
 }
 
 void
@@ -385,36 +392,13 @@ GroundStaNetDevice::TransmitComplete (const Ptr<Packet> &packet)
 {
   NS_LOG_FUNCTION (this << packet);
 
-  m_phyTxEndTrace (packet);
-
   GroundSatTag tag;
   packet->RemovePacketTag (tag);
+  m_txMachineState = IDLE;
 
-  if (GetQueue ()->IsEmpty ())
+  if (GetQueue ()->IsEmpty () == false)
     {
-      m_txMachineState = IDLE;
-    }
-  else
-    {
-      Time pktTxDelay = m_macModel->TimeToNextSlot ();
-      if (pktTxDelay.IsZero ())
-        {
-          TransmitStart ();
-        }
-      else
-        {
-          // Maybe more than one frame could be sent in current slot
-          Time nextPktTxTime =
-              GetDataRate ().CalculateBytesTxTime (GetQueue ()->Peek ()->GetSize ());
-          if (nextPktTxTime <= pktTxDelay)
-            {
-              TransmitStart ();
-            }
-          else
-            {
-              Simulator::Schedule (pktTxDelay, &GroundStaNetDevice::TransmitStart, this);
-            }
-        }
+      TransmitStart ();
     }
 }
 

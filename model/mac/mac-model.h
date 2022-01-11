@@ -38,7 +38,8 @@ public:
   MacModel ();
   virtual ~MacModel ();
 
-  virtual Time TimeToNextSlot () = 0;
+  virtual void Send (const Ptr<Packet> &packet, std::function<Time (void)> transmit_callback,
+                     std::function<void (void)> finish_callback) = 0;
   virtual void StartPacketRx (const Ptr<Packet> &packet, Time packet_tx_time,
                               std::function<void (void)>) = 0;
 };

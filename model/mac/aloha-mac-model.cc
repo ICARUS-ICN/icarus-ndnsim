@@ -49,10 +49,11 @@ AlohaMacModel::AlohaMacModel () : m_busyPeriodPacketUid (boost::none), m_busyPer
   NS_LOG_FUNCTION (this);
 }
 
-Time
-AlohaMacModel::TimeToNextSlot ()
+void
+AlohaMacModel::Send (const Ptr<Packet> &packet, std::function<Time (void)> transmit_callback,
+                     std::function<void (void)> finish_callback)
 {
-  NS_LOG_FUNCTION (this);
+  NS_LOG_FUNCTION (this << packet << &transmit_callback << &finish_callback);
 
   Time time_to_next_slot = Seconds (0);
   if (m_slotDuration.IsStrictlyPositive ())
@@ -65,8 +66,28 @@ AlohaMacModel::TimeToNextSlot ()
           time_to_next_slot = (slot.GetHigh () + 1) * m_slotDuration - now;
         }
     }
+
   NS_LOG_LOGIC ("Time until the next slot: " << time_to_next_slot);
-  return time_to_next_slot;
+  Simulator::Schedule (time_to_next_slot, &AlohaMacModel::DoSend, this, packet, transmit_callback,
+                       finish_callback);
+}
+
+void
+AlohaMacModel::DoSend (const Ptr<Packet> &packet, std::function<Time (void)> transmit_callback,
+                       std::function<void (void)> finish_callback) const
+{
+  NS_LOG_FUNCTION (this << packet << &transmit_callback << &finish_callback);
+
+  Time tx_time = transmit_callback ();
+  Simulator::Schedule (tx_time, &AlohaMacModel::FinishTransmission, this, finish_callback);
+}
+
+void
+AlohaMacModel::FinishTransmission (std::function<void (void)> finish_callback) const
+{
+  NS_LOG_FUNCTION (this << &finish_callback);
+
+  return finish_callback ();
 }
 
 void
