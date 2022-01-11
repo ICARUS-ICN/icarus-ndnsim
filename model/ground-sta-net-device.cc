@@ -165,7 +165,7 @@ GroundStaNetDevice::GetTypeId (void)
                          SatAddressValue (SatAddress (0, 0, 0)),
                          MakeSatAddressAccessor (&GroundStaNetDevice::m_remoteAddress),
                          MakeSatAddressChecker ())
-          .AddAttribute ("MacModel", "The MAC protocol for transmitted frames", PointerValue (),
+          .AddAttribute ("MacModelTx", "The MAC protocol for transmitted frames", PointerValue (),
                          MakePointerAccessor (&GroundStaNetDevice::m_macModel),
                          MakePointerChecker<MacModel> ());
 

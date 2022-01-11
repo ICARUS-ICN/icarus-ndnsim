@@ -247,7 +247,7 @@ IcarusHelper::CreateDeviceForNode (Ptr<Node> node, ConstellationHelper &chelper)
   if (node->GetObject<MobilityModel> () == nullptr)
     {
       auto sat_device = m_sat2GroundFactory.Create<Sat2GroundNetDevice> ();
-      sat_device->SetAttribute ("MacModel", PointerValue (m_macModelFactory.Create<MacModel> ()));
+      sat_device->SetAttribute ("MacModelRx", PointerValue (m_macModelFactory.Create<MacModel> ()));
       node->AddDevice (sat_device);
       const auto address = chelper.LaunchSatellite (sat_device);
       sat_device->SetAddress (address.ConvertTo ());
@@ -257,7 +257,7 @@ IcarusHelper::CreateDeviceForNode (Ptr<Node> node, ConstellationHelper &chelper)
 
   // This is NOT a satellite
   const auto ground_device = m_groundStaFactory.Create<GroundStaNetDevice> ();
-  ground_device->SetAttribute ("MacModel", PointerValue (m_macModelFactory.Create<MacModel> ()));
+  ground_device->SetAttribute ("MacModelTx", PointerValue (m_macModelFactory.Create<MacModel> ()));
   ground_device->SetAddress (Mac48Address::Allocate ());
   node->AddDevice (ground_device);
 
