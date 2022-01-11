@@ -110,9 +110,10 @@ AlohaMacModel::StartPacketRx (const Ptr<Packet> &packet, Time packet_tx_time,
       m_busyPeriodFinishTime = finish_tx_time;
       NS_LOG_LOGIC ("Updating busy period info: " << m_busyPeriodPacketUid.value () << " "
                                                   << m_busyPeriodFinishTime);
-      Simulator::Schedule (packet_tx_time, &AlohaMacModel::FinishReception, this, packet,
-                           net_device_cb);
     }
+
+  Simulator::Schedule (packet_tx_time, &AlohaMacModel::FinishReception, this, packet,
+                       net_device_cb);
 }
 
 void
