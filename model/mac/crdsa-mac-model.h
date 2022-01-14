@@ -47,11 +47,11 @@ public:
 
 private:
   Time m_slotDuration;
-  uint16_t m_slotsPerFrame;
   uint16_t m_replicasPerPacket;
   boost::optional<uint64_t> m_busyPeriodPacketUid;
   Time m_busyPeriodFinishTime;
   bool m_busyPeriodCollision;
+  std::vector<uint16_t> m_slotIds;
 
   uint16_t NumReplicasPerPacket (void);
   std::vector<uint16_t> GetSelectedSlots (void);
