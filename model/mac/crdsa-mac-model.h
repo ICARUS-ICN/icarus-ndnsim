@@ -42,6 +42,9 @@ public:
   virtual void StartPacketRx (const Ptr<Packet> &packet, Time packet_tx_time,
                               std::function<void (void)>) override;
 
+  uint16_t GetSlotsPerFrame () const;
+  void SetSlotsPerFrame (uint16_t nSlots);
+
 private:
   Time m_slotDuration;
   uint16_t m_slotsPerFrame;
