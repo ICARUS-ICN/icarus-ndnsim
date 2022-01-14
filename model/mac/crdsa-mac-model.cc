@@ -19,10 +19,13 @@
  */
 
 #include "crdsa-mac-model.h"
+#include "ns3/assert.h"
+#include "ns3/log-macros-disabled.h"
 #include "ns3/log-macros-enabled.h"
 #include "ns3/log.h"
 #include "ns3/simulator.h"
 #include "ns3/uinteger.h"
+#include <algorithm>
 
 namespace ns3 {
 namespace icarus {
@@ -71,7 +74,7 @@ CrdsaMacModel::GetSlotsPerFrame () const
 {
   NS_LOG_FUNCTION (this);
 
-  return m_slotsPerFrame;
+  return m_slotIds.size ();
 }
 
 void
@@ -79,7 +82,14 @@ CrdsaMacModel::SetSlotsPerFrame (uint16_t nSlots)
 {
   NS_LOG_FUNCTION (this << nSlots);
 
-  m_slotsPerFrame = nSlots;
+  m_slotIds = std::vector<uint16_t> ();
+  m_slotIds.reserve (nSlots);
+  for (auto i = 0u; i < nSlots; i++)
+    {
+      m_slotIds.push_back (i);
+    }
+
+  NS_ASSERT (GetSlotsPerFrame () == nSlots);
 }
 
 std::vector<uint16_t>
@@ -87,14 +97,10 @@ CrdsaMacModel::GetSelectedSlots (void)
 {
   NS_LOG_FUNCTION (this);
 
-  std::vector<uint16_t> slots;
-  for (auto i = 0u; i < m_slotsPerFrame; i++)
-    {
-      slots.push_back (i);
-    }
-  std::random_shuffle (slots.begin (), slots.end ());
-  std::vector<uint16_t> selectedSlots (slots.begin (), slots.begin () + NumReplicasPerPacket ());
-  //std::sort (selectedSlots.begin (), selectedSlots.end ());
+  std::random_shuffle (m_slotIds.begin (), m_slotIds.end ());
+  std::vector<uint16_t> selectedSlots (m_slotIds.begin (),
+                                       m_slotIds.begin () + NumReplicasPerPacket ());
+
   return selectedSlots;
 }
 
@@ -105,14 +111,14 @@ CrdsaMacModel::Send (const Ptr<Packet> &packet, std::function<Time (void)> trans
   NS_LOG_FUNCTION (this << packet << &transmit_callback << &finish_callback);
 
   Time time_to_next_frame = Seconds (0);
-  if (m_slotsPerFrame > 0 && m_slotDuration.IsStrictlyPositive ())
+  if (GetSlotsPerFrame () > 0 && m_slotDuration.IsStrictlyPositive ())
     {
       Time now = Simulator::Now ();
-      int64x64_t frame = now / (m_slotDuration * m_slotsPerFrame);
+      int64x64_t frame = now / (m_slotDuration * GetSlotsPerFrame ());
       // If fractional part of frame is 0, then we are already at the beginning of the next frame
       if (frame.GetLow () > 0)
         {
-          time_to_next_frame = (frame.GetHigh () + 1) * m_slotDuration * m_slotsPerFrame - now;
+          time_to_next_frame = (frame.GetHigh () + 1) * m_slotDuration * GetSlotsPerFrame () - now;
         }
     }
   NS_LOG_LOGIC ("Time until the next frame: " << time_to_next_frame);
