@@ -55,7 +55,7 @@ GroundSatChannel::GetTypeId (void)
                          MakePointerChecker<GroundSatSuccessModel> ())
           .AddTraceSource ("PhyTxDrop",
                            "Trace source indicating a packet has been "
-                           "completely received by the device",
+                           "dropped by the channel",
                            MakeTraceSourceAccessor (&GroundSatChannel::m_phyTxDropTrace),
                            "ns3::Packet::TracedCallback");
 
