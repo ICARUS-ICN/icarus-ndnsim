@@ -42,7 +42,8 @@ CrdsaMacModel::GetTypeId (void)
           .AddAttribute ("SlotDuration", "The duration of a slot.", TimeValue (Seconds (0)),
                          MakeTimeAccessor (&CrdsaMacModel::m_slotDuration), MakeTimeChecker ())
           .AddAttribute ("SlotsPerFrame", "The number of slots in a frame.", UintegerValue (1),
-                         MakeUintegerAccessor (&CrdsaMacModel::m_slotsPerFrame),
+                         MakeUintegerAccessor (&CrdsaMacModel::SetSlotsPerFrame,
+                                               &CrdsaMacModel::GetSlotsPerFrame),
                          MakeUintegerChecker<uint16_t> ())
           .AddAttribute ("ReplicasPerPacket", "The number of replicas per packet.",
                          UintegerValue (1),
@@ -63,6 +64,22 @@ CrdsaMacModel::NumReplicasPerPacket (void)
   NS_LOG_FUNCTION (this);
 
   return m_replicasPerPacket;
+}
+
+uint16_t
+CrdsaMacModel::GetSlotsPerFrame () const
+{
+  NS_LOG_FUNCTION (this);
+
+  return m_slotsPerFrame;
+}
+
+void
+CrdsaMacModel::SetSlotsPerFrame (uint16_t nSlots)
+{
+  NS_LOG_FUNCTION (this << nSlots);
+
+  m_slotsPerFrame = nSlots;
 }
 
 std::vector<uint16_t>
