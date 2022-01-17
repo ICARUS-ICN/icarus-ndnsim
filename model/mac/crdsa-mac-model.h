@@ -35,13 +35,13 @@ namespace icarus {
 class ReplicasDistroPolynomial : public Object
 {
 public:
-  ReplicasDistroPolynomial (const std::vector<double> &c) : coefficients (c)
+  ReplicasDistroPolynomial (const std::vector<double> &c)
+      : coefficients (c), rng (CreateObject<UniformRandomVariable> ())
   {
-    rng = CreateObject<UniformRandomVariable> ();
   }
 
   uint16_t
-  NumReplicasPerPacket (void)
+  NumReplicasPerPacket (void) const
   {
     double p = rng->GetValue ();
     double coeffSum = 0;
