@@ -25,11 +25,41 @@
 
 #include "mac-model.h"
 #include "ns3/nstime.h"
+#include "ns3/random-variable-stream.h"
 
 #include <boost/optional.hpp>
 
 namespace ns3 {
 namespace icarus {
+
+class ReplicasDistroPolynomial : public Object
+{
+public:
+  ReplicasDistroPolynomial (const std::vector<double> &c) : coefficients (c)
+  {
+    rng = CreateObject<UniformRandomVariable> ();
+  }
+
+  uint16_t
+  NumReplicasPerPacket (void)
+  {
+    double p = rng->GetValue ();
+    double coeffSum = 0;
+    for (auto n = 0u; n < coefficients.size (); n++)
+      {
+        coeffSum += coefficients[n];
+        if (coefficients[n] > 0 && p < coeffSum)
+          {
+            return n;
+          }
+      }
+    return 0;
+  }
+
+private:
+  const std::vector<double> coefficients;
+  Ptr<UniformRandomVariable> rng;
+};
 
 class CrdsaMacModel : public MacModel
 {
@@ -48,6 +78,7 @@ public:
 private:
   Time m_slotDuration;
   uint16_t m_replicasPerPacket;
+  Ptr<ReplicasDistroPolynomial> m_replicasDistribution;
   boost::optional<uint64_t> m_busyPeriodPacketUid;
   Time m_busyPeriodFinishTime;
   bool m_busyPeriodCollision;

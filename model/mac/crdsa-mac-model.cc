@@ -25,7 +25,7 @@
 #include "ns3/log.h"
 #include "ns3/simulator.h"
 #include "ns3/uinteger.h"
-#include <algorithm>
+#include "ns3/pointer.h"
 
 namespace ns3 {
 namespace icarus {
@@ -51,7 +51,11 @@ CrdsaMacModel::GetTypeId (void)
           .AddAttribute ("ReplicasPerPacket", "The number of replicas per packet.",
                          UintegerValue (1),
                          MakeUintegerAccessor (&CrdsaMacModel::m_replicasPerPacket),
-                         MakeUintegerChecker<uint16_t> ());
+                         MakeUintegerChecker<uint16_t> ())
+          .AddAttribute ("ReplicasDistribution",
+                         "The distribution of the number of replicas per packet.", PointerValue (),
+                         MakePointerAccessor (&CrdsaMacModel::m_replicasDistribution),
+                         MakePointerChecker<ReplicasDistroPolynomial> ());
 
   return tid;
 }
@@ -66,6 +70,10 @@ CrdsaMacModel::NumReplicasPerPacket (void)
 {
   NS_LOG_FUNCTION (this);
 
+  if (m_replicasDistribution)
+    {
+      return m_replicasDistribution->NumReplicasPerPacket ();
+    }
   return m_replicasPerPacket;
 }
 
