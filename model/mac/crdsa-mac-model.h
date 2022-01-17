@@ -44,16 +44,21 @@ public:
   NumReplicasPerPacket (void) const
   {
     double p = rng->GetValue ();
+    uint16_t numReplicas = 0;
     double coeffSum = 0;
     for (auto n = 0u; n < coefficients.size (); n++)
       {
         coeffSum += coefficients[n];
         if (coefficients[n] > 0 && p < coeffSum)
           {
-            return n;
+            numReplicas = n;
+            break;
           }
       }
-    return 0;
+
+    NS_ASSERT_MSG (numReplicas > 0, "Invalid number of replicas per packet");
+
+    return numReplicas;
   }
 
 private:
