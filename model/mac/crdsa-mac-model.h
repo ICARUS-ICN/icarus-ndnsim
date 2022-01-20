@@ -27,6 +27,7 @@
 #include "ns3/nstime.h"
 #include "ns3/random-variable-stream.h"
 
+#include <map>
 #include <boost/optional.hpp>
 
 namespace ns3 {
@@ -66,6 +67,41 @@ private:
   Ptr<UniformRandomVariable> rng;
 };
 
+class BusyPeriod : public Object
+{
+public:
+  BusyPeriod (const Time &finish_time, std::map<uint64_t, uint32_t> collided_packets)
+      : finishTime (finish_time), collidedPackets (collided_packets)
+  {
+  }
+
+  Time
+  GetFinishTime (void) const
+  {
+    return finishTime;
+  }
+
+  std::map<uint64_t, uint32_t>
+  GetCollidedPackets (void) const
+  {
+    return collidedPackets;
+  }
+
+  bool
+  RemoveCollidedPacket (uint64_t packet_uid)
+  {
+    auto removed = collidedPackets.erase (packet_uid);
+
+    NS_ASSERT_MSG (removed == 1, "Collided packet cannot be removed from the busy period");
+
+    return true;
+  }
+
+private:
+  const Time finishTime;
+  std::map<uint64_t, uint32_t> collidedPackets;
+};
+
 class CrdsaMacModel : public MacModel
 {
 public:
@@ -87,6 +123,9 @@ private:
   boost::optional<uint64_t> m_busyPeriodPacketUid;
   Time m_busyPeriodFinishTime;
   bool m_busyPeriodCollision;
+  std::map<uint64_t, uint32_t> m_busyPeriodCollidedPackets;
+  std::vector<Ptr<BusyPeriod>> m_activeBusyPeriods;
+  std::map<uint64_t, Time> m_activeReceivedPackets;
   std::vector<uint16_t> m_slotIds;
 
   uint16_t NumReplicasPerPacket (void);
@@ -95,6 +134,12 @@ private:
                       std::function<void (void)> finish_callback) const;
   void FinishReception (const Ptr<Packet> &packet, std::function<void (void)>);
   void FinishTransmission (std::function<void (void)>) const;
+
+  void CleanActiveBusyPeriods (Time limit_time);
+  void CleanActiveReceivedPackets (Time limit_time);
+  void PrintActiveBusyPeriods (void) const;
+  void PrintActiveReceivedPackets (void) const;
+  std::map<uint64_t, uint32_t> MakeInterferenceCancellation (void);
 };
 
 } // namespace icarus
