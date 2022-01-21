@@ -63,7 +63,7 @@ CrdsaMacModel::GetTypeId (void)
 CrdsaMacModel::CrdsaMacModel ()
     : m_busyPeriodPacketUid (boost::none),
       m_busyPeriodCollision (false),
-      m_busyPeriodCollidedPackets (std::map<uint64_t, uint32_t> ()),
+      m_busyPeriodCollidedPackets (std::map<uint64_t, std::function<void (void)>> ()),
       m_activeBusyPeriods (std::vector<Ptr<BusyPeriod>> ()),
       m_activeReceivedPackets (std::map<uint64_t, Time> ())
 {
@@ -204,18 +204,19 @@ CrdsaMacModel::CleanActiveReceivedPackets (Time limit_time)
     }
 }
 
-std::map<uint64_t, uint32_t>
+std::map<uint64_t, std::function<void (void)>>
 CrdsaMacModel::MakeInterferenceCancellation (void)
 {
   NS_LOG_FUNCTION (this);
 
-  std::map<uint64_t, uint32_t> recoveredPackets;
+  std::map<uint64_t, std::function<void (void)>> recoveredPackets;
 
   if (!m_activeBusyPeriods.empty ())
     {
       auto it = m_activeBusyPeriods.begin ();
       while (it != m_activeBusyPeriods.end ())
         {
+          // Remove correctly received packets from busy periods
           for (auto collided : (*it)->GetCollidedPackets ())
             {
               auto received = m_activeReceivedPackets.find (collided.first);
@@ -227,13 +228,16 @@ CrdsaMacModel::MakeInterferenceCancellation (void)
           auto n = (*it)->GetCollidedPackets ().size ();
           if (n == 0)
             {
+              // Remove empty busy periods
               it = m_activeBusyPeriods.erase (it);
             }
           else
             {
               if (n == 1)
                 {
-                  auto recovered = (*it)->GetCollidedPackets ().begin ();
+                  // A previously collided packet can be recovered
+                  auto collidedPackets = (*it)->GetCollidedPackets ();
+                  auto recovered = collidedPackets.begin ();
                   recoveredPackets.insert ({recovered->first, recovered->second});
                 }
               ++it;
@@ -261,12 +265,11 @@ CrdsaMacModel::PrintActiveBusyPeriods (void) const
           std::cout << " { " << bp->GetFinishTime () << ": ";
           for (auto const &collided : bp->GetCollidedPackets ())
             {
-              std::cout << collided.first << " " << collided.second << " ";
+              std::cout << collided.first << " " << &collided.second << " ";
             }
           std::cout << "}\n";
         }
     }
-  //std::cout << "\n";
 }
 
 void
@@ -284,7 +287,6 @@ CrdsaMacModel::PrintActiveReceivedPackets (void) const
           std::cout << " {" << received.first << ": " << received.second << " }\n";
         }
     }
-  //std::cout << "\n";
 }
 
 void
@@ -309,7 +311,7 @@ CrdsaMacModel::StartPacketRx (const Ptr<Packet> &packet, Time packet_tx_time,
                                                   << m_busyPeriodFinishTime);
     }
 
-  m_busyPeriodCollidedPackets.insert ({packet->GetUid (), packet->GetSize ()});
+  m_busyPeriodCollidedPackets.insert ({packet->GetUid (), net_device_cb});
   Simulator::Schedule (packet_tx_time, &CrdsaMacModel::FinishReception, this, packet,
                        net_device_cb);
 }
@@ -331,15 +333,19 @@ CrdsaMacModel::FinishReception (const Ptr<Packet> &packet, std::function<void (v
     {
       NS_LOG_LOGIC ("Packet " << packet_uid << " correctly received");
 
-      m_activeReceivedPackets[packet_uid] = now;
-      // Call the NetDevice for further processing
-      net_device_cb ();
+      if (m_activeReceivedPackets.find (packet_uid) == m_activeReceivedPackets.end ())
+        {
+          // This is the first time this packet is correctly received
+          m_activeReceivedPackets[packet_uid] = now;
+          net_device_cb ();
+        }
     }
 
   if (m_busyPeriodPacketUid == packet_uid)
     {
       if (has_collided)
         {
+          // New busy period with collided packets
           m_activeBusyPeriods.push_back (
               CreateObject<BusyPeriod> (m_busyPeriodFinishTime, m_busyPeriodCollidedPackets));
         }
@@ -349,7 +355,9 @@ CrdsaMacModel::FinishReception (const Ptr<Packet> &packet, std::function<void (v
       PrintActiveBusyPeriods ();
       PrintActiveReceivedPackets ();
 
-      std::map<uint64_t, uint32_t> recoveredPackets = MakeInterferenceCancellation ();
+      // Check if any previously collided packet can be recovered
+      std::map<uint64_t, std::function<void (void)>> recoveredPackets =
+          MakeInterferenceCancellation ();
       while (!recoveredPackets.empty ())
         {
           for (auto const &recovered : recoveredPackets)
@@ -357,19 +365,19 @@ CrdsaMacModel::FinishReception (const Ptr<Packet> &packet, std::function<void (v
               NS_LOG_LOGIC ("Packet " << recovered.first << " correctly recovered");
 
               m_activeReceivedPackets[recovered.first] = now;
-              // Call the NetDevice for further processing
-              // Pending...
+              recovered.second ();
             }
           recoveredPackets = MakeInterferenceCancellation ();
         }
       PrintActiveBusyPeriods ();
       PrintActiveReceivedPackets ();
 
+      NS_LOG_LOGIC ("Cleaning busy period info");
+
       m_busyPeriodPacketUid = boost::none;
       m_busyPeriodFinishTime = now;
       m_busyPeriodCollision = false;
       m_busyPeriodCollidedPackets.clear ();
-      NS_LOG_LOGIC ("Cleaning busy period info");
     }
 }
 
