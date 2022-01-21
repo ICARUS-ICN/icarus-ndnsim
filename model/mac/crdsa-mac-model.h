@@ -42,10 +42,10 @@ public:
   static TypeId GetTypeId (void);
   CrdsaMacModel ();
 
-  virtual void Send (const Ptr<Packet> &packet, std::function<Time (void)> transmit_callback,
-                     std::function<void (void)> finish_callback) override;
+  virtual void Send (const Ptr<Packet> &packet, txPacketCallback transmit_callback,
+                     rxPacketCallback finish_callback) override;
   virtual void StartPacketRx (const Ptr<Packet> &packet, Time packet_tx_time,
-                              std::function<void (void)>) override;
+                              rxPacketCallback cb) override;
 
   uint16_t GetSlotsPerFrame () const;
   void SetSlotsPerFrame (uint16_t nSlots);
@@ -57,23 +57,23 @@ private:
   boost::optional<uint64_t> m_busyPeriodPacketUid;
   Time m_busyPeriodFinishTime;
   bool m_busyPeriodCollision;
-  std::map<uint64_t, std::function<void (void)>> m_busyPeriodCollidedPackets;
+  std::map<uint64_t, rxPacketCallback> m_busyPeriodCollidedPackets;
   std::vector<Ptr<BusyPeriod>> m_activeBusyPeriods;
   std::map<uint64_t, Time> m_activeReceivedPackets;
   std::vector<uint16_t> m_slotIds;
 
   uint16_t NumReplicasPerPacket (void);
   std::vector<uint16_t> GetSelectedSlots (void);
-  void StartPacketTx (const Ptr<Packet> &packet, std::function<Time (void)> transmit_callback,
-                      std::function<void (void)> finish_callback) const;
-  void FinishReception (const Ptr<Packet> &packet, std::function<void (void)>);
-  void FinishTransmission (std::function<void (void)>) const;
+  void StartPacketTx (const Ptr<Packet> &packet, txPacketCallback transmit_callback,
+                      rxPacketCallback finish_callback) const;
+  void FinishReception (const Ptr<Packet> &packet, rxPacketCallback cb);
+  void FinishTransmission (rxPacketCallback cb) const;
 
   void CleanActiveBusyPeriods (Time limit_time);
   void CleanActiveReceivedPackets (Time limit_time);
   void PrintActiveBusyPeriods (void) const;
   void PrintActiveReceivedPackets (void) const;
-  std::map<uint64_t, std::function<void (void)>> MakeInterferenceCancellation (void);
+  std::vector<std::pair<uint64_t, rxPacketCallback>> MakeInterferenceCancellation (void);
 };
 
 } // namespace icarus
