@@ -33,41 +33,8 @@
 namespace ns3 {
 namespace icarus {
 
-class ReplicasDistroPolynomial : public Object
-{
-public:
-  ReplicasDistroPolynomial (const std::vector<double> &c)
-      : coefficients (c), rng (CreateObject<UniformRandomVariable> ())
-  {
-  }
-
-  uint16_t
-  NumReplicasPerPacket (void) const
-  {
-    double p = rng->GetValue ();
-    uint16_t numReplicas = 0;
-    double coeffSum = 0;
-    for (auto n = 0u; n < coefficients.size (); n++)
-      {
-        coeffSum += coefficients[n];
-        if (coefficients[n] > 0 && p < coeffSum)
-          {
-            numReplicas = n;
-            break;
-          }
-      }
-
-    NS_ASSERT_MSG (numReplicas > 0, "Invalid number of replicas per packet");
-
-    return numReplicas;
-  }
-
-private:
-  const std::vector<double> coefficients;
-  Ptr<UniformRandomVariable> rng;
-};
-
 class BusyPeriod;
+class ReplicasDistroPolynomial;
 
 class CrdsaMacModel : public MacModel
 {
