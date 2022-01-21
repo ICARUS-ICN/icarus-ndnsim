@@ -35,7 +35,7 @@ class BusyPeriod : public Object
 {
 public:
   BusyPeriod (const Time &finish_time,
-              std::map<uint64_t, std::function<void (void)>> collided_packets)
+              const std::map<uint64_t, std::function<void (void)>> &collided_packets)
       : finishTime (finish_time), collidedPackets (collided_packets)
   {
   }
@@ -46,7 +46,7 @@ public:
     return finishTime;
   }
 
-  std::map<uint64_t, std::function<void (void)>>
+  const std::map<uint64_t, std::function<void (void)>> &
   GetCollidedPackets (void) const
   {
     return collidedPackets;

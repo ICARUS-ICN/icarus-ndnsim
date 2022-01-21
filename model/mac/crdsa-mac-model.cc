@@ -214,38 +214,36 @@ CrdsaMacModel::MakeInterferenceCancellation (void)
 
   std::map<uint64_t, std::function<void (void)>> recoveredPackets;
 
-  if (!m_activeBusyPeriods.empty ())
+  std::vector<std::vector<Ptr<BusyPeriod>>::const_iterator> periods_remove;
+
+  for (auto it = m_activeBusyPeriods.begin (); it != m_activeBusyPeriods.end (); it++)
     {
-      auto it = m_activeBusyPeriods.begin ();
-      while (it != m_activeBusyPeriods.end ())
+      std::vector<uint64_t> received;
+      for (const auto &collided : (*it)->GetCollidedPackets ())
         {
-          // Remove correctly received packets from busy periods
-          for (auto collided : (*it)->GetCollidedPackets ())
+          if (m_activeReceivedPackets.find (collided.first) != m_activeReceivedPackets.end ())
             {
-              auto received = m_activeReceivedPackets.find (collided.first);
-              if (received != m_activeReceivedPackets.end ())
-                {
-                  (*it)->RemoveCollidedPacket (collided.first);
-                }
-            }
-          auto n = (*it)->GetCollidedPackets ().size ();
-          if (n == 0)
-            {
-              // Remove empty busy periods
-              it = m_activeBusyPeriods.erase (it);
-            }
-          else
-            {
-              if (n == 1)
-                {
-                  // A previously collided packet can be recovered
-                  auto collidedPackets = (*it)->GetCollidedPackets ();
-                  auto recovered = collidedPackets.begin ();
-                  recoveredPackets.insert ({recovered->first, recovered->second});
-                }
-              ++it;
+              received.push_back (collided.first);
             }
         }
+      for (auto colid : received)
+        {
+          (*it)->RemoveCollidedPacket (colid);
+        }
+      if ((*it)->GetCollidedPackets ().empty ())
+        {
+          periods_remove.push_back (it);
+        }
+      else if ((*it)->GetCollidedPackets ().size () == 1)
+        {
+          auto recovered = *(*it)->GetCollidedPackets ().begin ();
+          recoveredPackets.insert ({recovered});
+        }
+    }
+
+  for (auto &period : periods_remove)
+    {
+      m_activeBusyPeriods.erase (period);
     }
 
   return recoveredPackets;
