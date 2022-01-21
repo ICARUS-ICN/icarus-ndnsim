@@ -67,41 +67,7 @@ private:
   Ptr<UniformRandomVariable> rng;
 };
 
-class BusyPeriod : public Object
-{
-public:
-  BusyPeriod (const Time &finish_time,
-              std::map<uint64_t, std::function<void (void)>> collided_packets)
-      : finishTime (finish_time), collidedPackets (collided_packets)
-  {
-  }
-
-  Time
-  GetFinishTime (void) const
-  {
-    return finishTime;
-  }
-
-  std::map<uint64_t, std::function<void (void)>>
-  GetCollidedPackets (void) const
-  {
-    return collidedPackets;
-  }
-
-  bool
-  RemoveCollidedPacket (uint64_t packet_uid)
-  {
-    auto removed = collidedPackets.erase (packet_uid);
-
-    NS_ASSERT_MSG (removed == 1, "Packet to be removed from the busy period not found");
-
-    return true;
-  }
-
-private:
-  const Time finishTime;
-  std::map<uint64_t, std::function<void (void)>> collidedPackets;
-};
+class BusyPeriod;
 
 class CrdsaMacModel : public MacModel
 {

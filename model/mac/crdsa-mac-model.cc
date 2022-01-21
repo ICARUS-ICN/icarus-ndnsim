@@ -19,6 +19,7 @@
  */
 
 #include "crdsa-mac-model.h"
+#include "private/busy-period.h"
 #include "ns3/assert.h"
 #include "ns3/log-macros-disabled.h"
 #include "ns3/log-macros-enabled.h"
