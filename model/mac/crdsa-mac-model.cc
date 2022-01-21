@@ -66,9 +66,9 @@ CrdsaMacModel::GetTypeId (void)
 CrdsaMacModel::CrdsaMacModel ()
     : m_busyPeriodPacketUid (boost::none),
       m_busyPeriodCollision (false),
-      m_busyPeriodCollidedPackets (std::map<uint64_t, std::function<void (void)>> ()),
-      m_activeBusyPeriods (std::vector<Ptr<BusyPeriod>> ()),
-      m_activeReceivedPackets (std::map<uint64_t, Time> ())
+      m_busyPeriodCollidedPackets (),
+      m_activeBusyPeriods (),
+      m_activeReceivedPackets ()
 {
   NS_LOG_FUNCTION (this);
 }
@@ -121,8 +121,8 @@ CrdsaMacModel::GetSelectedSlots (void)
 }
 
 void
-CrdsaMacModel::Send (const Ptr<Packet> &packet, std::function<Time (void)> transmit_callback,
-                     std::function<void (void)> finish_callback)
+CrdsaMacModel::Send (const Ptr<Packet> &packet, txPacketCallback transmit_callback,
+                     rxPacketCallback finish_callback)
 {
   NS_LOG_FUNCTION (this << packet << &transmit_callback << &finish_callback);
 
@@ -149,9 +149,8 @@ CrdsaMacModel::Send (const Ptr<Packet> &packet, std::function<Time (void)> trans
 }
 
 void
-CrdsaMacModel::StartPacketTx (const Ptr<Packet> &packet,
-                              std::function<Time (void)> transmit_callback,
-                              std::function<void (void)> finish_callback) const
+CrdsaMacModel::StartPacketTx (const Ptr<Packet> &packet, txPacketCallback transmit_callback,
+                              rxPacketCallback finish_callback) const
 {
   NS_LOG_FUNCTION (this << packet << &transmit_callback << &finish_callback);
 
@@ -160,7 +159,7 @@ CrdsaMacModel::StartPacketTx (const Ptr<Packet> &packet,
 }
 
 void
-CrdsaMacModel::FinishTransmission (std::function<void (void)> finish_callback) const
+CrdsaMacModel::FinishTransmission (rxPacketCallback finish_callback) const
 {
   NS_LOG_FUNCTION (this << &finish_callback);
 
@@ -172,18 +171,10 @@ CrdsaMacModel::CleanActiveBusyPeriods (Time limit_time)
 {
   NS_LOG_FUNCTION (this << limit_time);
 
-  if (!m_activeBusyPeriods.empty ())
-    {
-      for (auto i = 0u; i < m_activeBusyPeriods.size (); i++)
-        {
-          if (m_activeBusyPeriods[i]->GetFinishTime () > limit_time)
-            {
-              m_activeBusyPeriods.erase (m_activeBusyPeriods.begin (),
-                                         m_activeBusyPeriods.begin () + i);
-              break;
-            }
-        }
-    }
+  m_activeBusyPeriods.erase (
+      m_activeBusyPeriods.begin (),
+      std::find_if (m_activeBusyPeriods.cbegin (), m_activeBusyPeriods.cend (),
+                    [limit_time] (auto busy) { return busy->GetFinishTime () > limit_time; }));
 }
 
 void
@@ -191,28 +182,25 @@ CrdsaMacModel::CleanActiveReceivedPackets (Time limit_time)
 {
   NS_LOG_FUNCTION (this << limit_time);
 
-  if (!m_activeReceivedPackets.empty ())
+  for (auto it = m_activeReceivedPackets.cbegin (); it != m_activeReceivedPackets.cend ();)
     {
-      for (auto it = m_activeReceivedPackets.cbegin (); it != m_activeReceivedPackets.cend ();)
+      if (it->second < limit_time)
         {
-          if (it->second < limit_time)
-            {
-              it = m_activeReceivedPackets.erase (it);
-            }
-          else
-            {
-              ++it;
-            }
+          it = m_activeReceivedPackets.erase (it);
+        }
+      else
+        {
+          ++it;
         }
     }
 }
 
-std::map<uint64_t, std::function<void (void)>>
+std::vector<std::pair<uint64_t, MacModel::rxPacketCallback>>
 CrdsaMacModel::MakeInterferenceCancellation (void)
 {
   NS_LOG_FUNCTION (this);
 
-  std::map<uint64_t, std::function<void (void)>> recoveredPackets;
+  std::vector<std::pair<uint64_t, rxPacketCallback>> recoveredPackets;
 
   std::vector<std::vector<Ptr<BusyPeriod>>::const_iterator> periods_remove;
 
@@ -236,8 +224,8 @@ CrdsaMacModel::MakeInterferenceCancellation (void)
         }
       else if ((*it)->GetCollidedPackets ().size () == 1)
         {
-          auto recovered = *(*it)->GetCollidedPackets ().begin ();
-          recoveredPackets.insert ({recovered});
+          auto recovered = *(*it)->GetCollidedPackets ().cbegin ();
+          recoveredPackets.push_back (recovered);
         }
     }
 
@@ -292,7 +280,7 @@ CrdsaMacModel::PrintActiveReceivedPackets (void) const
 
 void
 CrdsaMacModel::StartPacketRx (const Ptr<Packet> &packet, Time packet_tx_time,
-                              std::function<void (void)> net_device_cb)
+                              rxPacketCallback net_device_cb)
 {
   NS_LOG_FUNCTION (this << packet << packet_tx_time << &net_device_cb);
 
@@ -318,7 +306,7 @@ CrdsaMacModel::StartPacketRx (const Ptr<Packet> &packet, Time packet_tx_time,
 }
 
 void
-CrdsaMacModel::FinishReception (const Ptr<Packet> &packet, std::function<void (void)> net_device_cb)
+CrdsaMacModel::FinishReception (const Ptr<Packet> &packet, rxPacketCallback net_device_cb)
 {
   NS_LOG_FUNCTION (this << packet << &net_device_cb);
 
@@ -357,8 +345,7 @@ CrdsaMacModel::FinishReception (const Ptr<Packet> &packet, std::function<void (v
       PrintActiveReceivedPackets ();
 
       // Check if any previously collided packet can be recovered
-      std::map<uint64_t, std::function<void (void)>> recoveredPackets =
-          MakeInterferenceCancellation ();
+      auto recoveredPackets = MakeInterferenceCancellation ();
       while (!recoveredPackets.empty ())
         {
           for (auto const &recovered : recoveredPackets)

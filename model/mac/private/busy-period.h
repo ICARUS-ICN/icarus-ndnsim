@@ -23,6 +23,7 @@
 #ifndef BUSY_PERIOD_H
 #define BUSY_PERIOD_H
 
+#include "ns3/mac-model.h"
 #include "ns3/nstime.h"
 #include "ns3/object.h"
 #include <functional>
@@ -35,7 +36,7 @@ class BusyPeriod : public Object
 {
 public:
   BusyPeriod (const Time &finish_time,
-              const std::map<uint64_t, std::function<void (void)>> &collided_packets)
+              const std::map<uint64_t, MacModel::rxPacketCallback> &collided_packets)
       : finishTime (finish_time), collidedPackets (collided_packets)
   {
   }
