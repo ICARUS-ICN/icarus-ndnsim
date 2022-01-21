@@ -34,7 +34,40 @@ namespace ns3 {
 namespace icarus {
 
 class BusyPeriod;
-class ReplicasDistroPolynomial;
+
+class ReplicasDistroPolynomial : public Object
+{
+public:
+  ReplicasDistroPolynomial (const std::vector<double> &c)
+      : coefficients (c), rng (CreateObject<UniformRandomVariable> ())
+  {
+  }
+
+  uint16_t
+  NumReplicasPerPacket (void) const
+  {
+    double p = rng->GetValue ();
+    uint16_t numReplicas = 0;
+    double coeffSum = 0;
+    for (auto n = 0u; n < coefficients.size (); n++)
+      {
+        coeffSum += coefficients[n];
+        if (coefficients[n] > 0 && p < coeffSum)
+          {
+            numReplicas = n;
+            break;
+          }
+      }
+
+    NS_ASSERT_MSG (numReplicas > 0, "Invalid number of replicas per packet");
+
+    return numReplicas;
+  }
+
+private:
+  const std::vector<double> coefficients;
+  Ptr<UniformRandomVariable> rng;
+};
 
 class CrdsaMacModel : public MacModel
 {
@@ -66,8 +99,8 @@ private:
   std::vector<uint16_t> GetSelectedSlots (void);
   void StartPacketTx (const Ptr<Packet> &packet, txPacketCallback transmit_callback,
                       rxPacketCallback finish_callback) const;
-  void FinishReception (const Ptr<Packet> &packet, rxPacketCallback cb);
   void FinishTransmission (rxPacketCallback cb) const;
+  void FinishReception (const Ptr<Packet> &packet, rxPacketCallback cb);
 
   void CleanActiveBusyPeriods (Time limit_time);
   void CleanActiveReceivedPackets (Time limit_time);

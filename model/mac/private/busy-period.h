@@ -67,6 +67,7 @@ private:
   const Time finishTime;
   std::map<uint64_t, std::function<void (void)>> collidedPackets;
 };
+
 } // namespace icarus
 } // namespace ns3
 

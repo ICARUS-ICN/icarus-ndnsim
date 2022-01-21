@@ -20,7 +20,6 @@
 
 #include "crdsa-mac-model.h"
 #include "private/busy-period.h"
-#include "private/replicas-distro-polynomial.h"
 #include "ns3/assert.h"
 #include "ns3/log-macros-disabled.h"
 #include "ns3/log-macros-enabled.h"
@@ -94,18 +93,18 @@ CrdsaMacModel::GetSlotsPerFrame () const
 }
 
 void
-CrdsaMacModel::SetSlotsPerFrame (uint16_t nSlots)
+CrdsaMacModel::SetSlotsPerFrame (uint16_t num_slots)
 {
-  NS_LOG_FUNCTION (this << nSlots);
+  NS_LOG_FUNCTION (this << num_slots);
 
   m_slotIds = std::vector<uint16_t> ();
-  m_slotIds.reserve (nSlots);
-  for (auto i = 0u; i < nSlots; i++)
+  m_slotIds.reserve (num_slots);
+  for (auto i = 0u; i < num_slots; i++)
     {
       m_slotIds.push_back (i);
     }
 
-  NS_ASSERT (GetSlotsPerFrame () == nSlots);
+  NS_ASSERT (GetSlotsPerFrame () == num_slots);
 }
 
 std::vector<uint16_t>
@@ -174,7 +173,7 @@ CrdsaMacModel::CleanActiveBusyPeriods (Time limit_time)
   m_activeBusyPeriods.erase (
       m_activeBusyPeriods.begin (),
       std::find_if (m_activeBusyPeriods.cbegin (), m_activeBusyPeriods.cend (),
-                    [limit_time] (auto busy) { return busy->GetFinishTime () > limit_time; }));
+                    [limit_time] (auto period) { return period->GetFinishTime () > limit_time; }));
 }
 
 void
@@ -201,26 +200,25 @@ CrdsaMacModel::MakeInterferenceCancellation (void)
   NS_LOG_FUNCTION (this);
 
   std::vector<std::pair<uint64_t, rxPacketCallback>> recoveredPackets;
-
-  std::vector<std::vector<Ptr<BusyPeriod>>::const_iterator> periods_remove;
+  std::vector<std::vector<Ptr<BusyPeriod>>::const_iterator> emptyPeriods;
 
   for (auto it = m_activeBusyPeriods.begin (); it != m_activeBusyPeriods.end (); it++)
     {
-      std::vector<uint64_t> received;
+      std::vector<uint64_t> receivedPackets;
       for (const auto &collided : (*it)->GetCollidedPackets ())
         {
           if (m_activeReceivedPackets.find (collided.first) != m_activeReceivedPackets.end ())
             {
-              received.push_back (collided.first);
+              receivedPackets.push_back (collided.first);
             }
         }
-      for (auto colid : received)
+      for (auto received : receivedPackets)
         {
-          (*it)->RemoveCollidedPacket (colid);
+          (*it)->RemoveCollidedPacket (received);
         }
       if ((*it)->GetCollidedPackets ().empty ())
         {
-          periods_remove.push_back (it);
+          emptyPeriods.push_back (it);
         }
       else if ((*it)->GetCollidedPackets ().size () == 1)
         {
@@ -229,7 +227,7 @@ CrdsaMacModel::MakeInterferenceCancellation (void)
         }
     }
 
-  for (auto &period : periods_remove)
+  for (auto &period : emptyPeriods)
     {
       m_activeBusyPeriods.erase (period);
     }
@@ -240,8 +238,6 @@ CrdsaMacModel::MakeInterferenceCancellation (void)
 void
 CrdsaMacModel::PrintActiveBusyPeriods (void) const
 {
-  NS_LOG_FUNCTION (this);
-
   std::cout << "\n--> ActiveBusyPeriods (" << m_activeBusyPeriods.size () << ") :\n";
   if (m_activeBusyPeriods.empty ())
     {
@@ -341,8 +337,6 @@ CrdsaMacModel::FinishReception (const Ptr<Packet> &packet, rxPacketCallback net_
       Time limit_time = now - 2 * m_slotDuration * GetSlotsPerFrame ();
       CleanActiveBusyPeriods (limit_time);
       CleanActiveReceivedPackets (limit_time);
-      PrintActiveBusyPeriods ();
-      PrintActiveReceivedPackets ();
 
       // Check if any previously collided packet can be recovered
       auto recoveredPackets = MakeInterferenceCancellation ();
@@ -357,8 +351,6 @@ CrdsaMacModel::FinishReception (const Ptr<Packet> &packet, rxPacketCallback net_
             }
           recoveredPackets = MakeInterferenceCancellation ();
         }
-      PrintActiveBusyPeriods ();
-      PrintActiveReceivedPackets ();
 
       NS_LOG_LOGIC ("Cleaning busy period info");
 
