@@ -70,7 +70,8 @@ private:
 class BusyPeriod : public Object
 {
 public:
-  BusyPeriod (const Time &finish_time, std::map<uint64_t, uint32_t> collided_packets)
+  BusyPeriod (const Time &finish_time,
+              std::map<uint64_t, std::function<void (void)>> collided_packets)
       : finishTime (finish_time), collidedPackets (collided_packets)
   {
   }
@@ -81,7 +82,7 @@ public:
     return finishTime;
   }
 
-  std::map<uint64_t, uint32_t>
+  std::map<uint64_t, std::function<void (void)>>
   GetCollidedPackets (void) const
   {
     return collidedPackets;
@@ -92,14 +93,14 @@ public:
   {
     auto removed = collidedPackets.erase (packet_uid);
 
-    NS_ASSERT_MSG (removed == 1, "Collided packet cannot be removed from the busy period");
+    NS_ASSERT_MSG (removed == 1, "Packet to be removed from the busy period not found");
 
     return true;
   }
 
 private:
   const Time finishTime;
-  std::map<uint64_t, uint32_t> collidedPackets;
+  std::map<uint64_t, std::function<void (void)>> collidedPackets;
 };
 
 class CrdsaMacModel : public MacModel
@@ -123,7 +124,7 @@ private:
   boost::optional<uint64_t> m_busyPeriodPacketUid;
   Time m_busyPeriodFinishTime;
   bool m_busyPeriodCollision;
-  std::map<uint64_t, uint32_t> m_busyPeriodCollidedPackets;
+  std::map<uint64_t, std::function<void (void)>> m_busyPeriodCollidedPackets;
   std::vector<Ptr<BusyPeriod>> m_activeBusyPeriods;
   std::map<uint64_t, Time> m_activeReceivedPackets;
   std::vector<uint16_t> m_slotIds;
@@ -139,7 +140,7 @@ private:
   void CleanActiveReceivedPackets (Time limit_time);
   void PrintActiveBusyPeriods (void) const;
   void PrintActiveReceivedPackets (void) const;
-  std::map<uint64_t, uint32_t> MakeInterferenceCancellation (void);
+  std::map<uint64_t, std::function<void (void)>> MakeInterferenceCancellation (void);
 };
 
 } // namespace icarus
