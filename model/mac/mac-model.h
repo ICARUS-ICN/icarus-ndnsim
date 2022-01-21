@@ -34,14 +34,17 @@ namespace icarus {
 class MacModel : public Object
 {
 public:
+  typedef std::function<void ()> rxPacketCallback;
+  typedef std::function<Time ()> txPacketCallback;
+
   static TypeId GetTypeId (void);
   MacModel ();
   virtual ~MacModel ();
 
-  virtual void Send (const Ptr<Packet> &packet, std::function<Time (void)> transmit_callback,
+  virtual void Send (const Ptr<Packet> &packet, txPacketCallback transmit_callback,
                      std::function<void (void)> finish_callback) = 0;
   virtual void StartPacketRx (const Ptr<Packet> &packet, Time packet_tx_time,
-                              std::function<void (void)>) = 0;
+                              rxPacketCallback cb) = 0;
 };
 
 } // namespace icarus
