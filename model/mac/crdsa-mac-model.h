@@ -41,6 +41,8 @@ public:
   ReplicasDistroPolynomial (const std::vector<double> &c)
       : coefficients (c), rng (CreateObject<UniformRandomVariable> ())
   {
+    NS_ASSERT_MSG (c.size () >= 2, "There needs to be at least two coefficients.");
+    NS_ASSERT_MSG (c[0] == 0.0, "The first coefficient must always be 0.");
   }
 
   uint16_t
