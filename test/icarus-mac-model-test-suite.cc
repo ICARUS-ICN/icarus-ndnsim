@@ -80,7 +80,7 @@ private:
 SlottedAloha::SlottedAloha (double g)
     : TestCase (GetTestName (g)),
       m_g (g),
-      m_nodes (100),
+      m_nodes (250),
       m_payloadSize (100),
       m_transmissionDuration (Seconds (1)),
       m_channelDataRate (DataRate ("100Mbps"))
@@ -206,7 +206,7 @@ private:
 RegularAloha::RegularAloha ()
     : TestCase ("Regular Aloha g=0.5"),
       m_g (0.5),
-      m_nodes (100),
+      m_nodes (250),
       m_payloadSize (100),
       m_transmissionDuration (Seconds (1)),
       m_channelDataRate (DataRate ("100Mbps"))
@@ -331,11 +331,11 @@ private:
 };
 
 CrdsaAloha::CrdsaAloha ()
-    : TestCase ("CRDSA Aloha g=0.5"),
-      m_g (0.5),
-      m_nodes (100),
-      m_payloadSize (100),
-      m_slotsPerFrame (200),
+    : TestCase ("CRDSA Aloha g=0.75"),
+      m_g (0.75),
+      m_nodes (250),
+      m_payloadSize (200),
+      m_slotsPerFrame (100),
       m_replicasPerPacket (2),
       m_transmissionDuration (Seconds (1)),
       m_channelDataRate (DataRate ("100Mbps"))
@@ -437,7 +437,7 @@ CrdsaAloha::DoRun ()
   Simulator::Run ();
 
   NS_TEST_ASSERT_MSG_EQ_TOL (
-      m_g * (totalRx->GetCount () / static_cast<double> (totalTx->GetCount ())), 0.47, 1e-2,
+      m_g * (totalRx->GetCount () / static_cast<double> (totalTx->GetCount ())), 0.5018, 1e-2,
       "Not equal");
 
   Simulator::Destroy ();
@@ -452,7 +452,7 @@ public:
 IcarusMacModelTestSuite::IcarusMacModelTestSuite () : TestSuite ("icarus.mac-model", UNIT)
 {
   AddTestCase (new RegularAloha, TestCase::EXTENSIVE);
-  for (auto g = 0.1; g < 1; g += 0.1)
+  for (auto g = 0.1; g < 1; g += 0.2)
     {
       AddTestCase (new SlottedAloha (g), TestCase::EXTENSIVE);
     }
