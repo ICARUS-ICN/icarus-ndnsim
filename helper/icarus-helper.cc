@@ -1,6 +1,6 @@
 /* -*- Mode:C++; c-file-style:"gnu"; indent-tabs-mode:nil; -*- */
 /*
- * Copyright (c) 2021 Universidade de Vigo
+ * Copyright (c) 2021–2022 Universidade de Vigo
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -82,8 +82,6 @@ IcarusHelper::SetSuccessModel (std::string type, const std::string &n1, const At
                                const std::string &n4, const AttributeValue &v4)
 {
   NS_LOG_FUNCTION (this << type << n1 << n2 << n3 << n4);
-
-  QueueBase::AppendItemTypeIfNotPresent (type, "Packet");
 
   m_successModelFactory.SetTypeId (type);
   m_successModelFactory.Set (n1, v1);
