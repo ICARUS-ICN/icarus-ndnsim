@@ -1,6 +1,6 @@
 /* -*- Mode:C++; c-file-style:"gnu"; indent-tabs-mode:nil; -*- */
 /*
- * Copyright (c) 2021 Universidade de Vigo
+ * Copyright (c) 2021–2022 Universidade de Vigo
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -24,6 +24,7 @@
 #include "ns3/command-line.h"
 #include "ns3/config.h"
 #include "ns3/icarus-module.h"
+#include "ns3/log-macros-disabled.h"
 #include "ns3/log-macros-enabled.h"
 #include "ns3/log.h"
 #include "ns3/mobility-module.h"
@@ -42,21 +43,25 @@
 #include <cstdint>
 #include <memory>
 #include <string>
+#include <tuple>
 
 namespace ns3 {
 using namespace icarus;
 
 NS_LOG_COMPONENT_DEFINE ("icarus.Ground2GroundPingExample");
 
-std::shared_ptr<ndn::lp::GeoTag>
-AddGeoTag ()
+namespace {
+auto
+AddGeoTag () -> auto
 {
-  ndn::lp::GeoTag geoTag;
+  NS_LOG_FUNCTION_NOARGS ();
+
   auto pos = GeographicPositions::GeographicToCartesianCoordinates (40.712742, -74.013382, -17,
                                                                     GeographicPositions::WGS84);
-  geoTag.setPosX ({pos.x, pos.y, pos.z});
-  return std::make_shared<ndn::lp::GeoTag> (geoTag);
+
+  return std::make_shared<ndn::lp::GeoTag> (std::make_tuple (pos.x, pos.y, pos.z));
 }
+} // namespace
 
 auto
 main (int argc, char **argv) -> int
@@ -85,7 +90,7 @@ main (int argc, char **argv) -> int
     }
 
   IcarusHelper icarusHelper;
-  icarusHelper.SetEnableGeoTags (&AddGeoTag);
+  icarusHelper.SetEnableGeoTags (AddGeoTag);
   ISLHelper islHelper;
   ConstellationHelper constellationHelper (quantity<length> (250 * kilo * meters),
                                            quantity<plane_angle> (60 * degree::degree), 6, 20, 1);
@@ -119,7 +124,7 @@ main (int argc, char **argv) -> int
   // Consumer
   ndn::AppHelper consumerHelper ("ns3::ndn::ConsumerCbr");
   consumerHelper.SetPrefix ("/icarus/ground2/vostping");
-  consumerHelper.SetAttribute("Frequency", StringValue("1"));
+  consumerHelper.SetAttribute ("Frequency", StringValue ("1"));
   auto apps = consumerHelper.Install (ground1);
 
   // Producer
