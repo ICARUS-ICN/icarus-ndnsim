@@ -61,6 +61,7 @@ main (int argc, char **argv) -> int
   auto ground = nodes.Get (1);
 
   IcarusHelper icarusHelper;
+  icarusHelper.SetSuccessModel ("ns3::icarus::GroundSatSuccessDistance");
   ConstellationHelper constellationHelper (quantity<length> (250 * kilo * meters),
                                            quantity<plane_angle> (60.0 * degrees), 2, 1, 0);
 
