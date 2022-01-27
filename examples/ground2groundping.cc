@@ -90,6 +90,7 @@ main (int argc, char **argv) -> int
     }
 
   IcarusHelper icarusHelper;
+  icarusHelper.SetSuccessModel ("ns3::icarus::GroundSatSuccessDistance");
   icarusHelper.SetEnableGeoTags (AddGeoTag);
   ISLHelper islHelper;
   ConstellationHelper constellationHelper (quantity<length> (250 * kilo * meters),
