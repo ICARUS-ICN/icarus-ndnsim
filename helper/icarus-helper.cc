@@ -19,6 +19,7 @@
  */
 
 #include "icarus-helper.h"
+#include "model/ndn-net-device-transport.hpp"
 #include "ns3/abort.h"
 #include "ns3/callback.h"
 #include "ns3/circular-orbit.h"
@@ -40,6 +41,7 @@
 #include "ns3/ground-sta-transport.h"
 #include "ns3/ndnSIM/NFD/daemon/face/generic-link-service.hpp"
 #include "ns3/ground-node-sat-tracker.h"
+#include "ns3/sat2ground-net-device.h"
 #include <memory>
 
 namespace ns3 {
@@ -481,13 +483,43 @@ IcarusHelper::GroundStaNetDeviceCallback (Ptr<Node> node, Ptr<ndn::L3Protocol> n
   return face;
 }
 
+std::shared_ptr<nfd::face::Face>
+IcarusHelper::Sat2GroundNetDeviceCallback (Ptr<Node> node, Ptr<ndn::L3Protocol> ndn,
+                                           Ptr<NetDevice> netDevice)
+{
+  NS_LOG_DEBUG ("Creating default Face on node " << node->GetId ());
+
+  // Create an ndnSIM-specific transport instance
+  ::nfd::face::GenericLinkService::Options opts;
+  opts.allowFragmentation = true;
+  opts.allowReassembly = true;
+  opts.allowCongestionMarking = true;
+  /* Enable GeoTags just to prevent GenericLinkService from discarding incoming ones */
+  opts.enableGeoTags = [] () -> std::shared_ptr<ndn::lp::GeoTag> { return nullptr; };
+
+  auto linkService = std::make_unique<::nfd::face::GenericLinkService> (opts);
+
+  auto transport = std::make_unique<ndn::NetDeviceTransport> (
+      node, netDevice, constructFaceUri (netDevice), "netdev://[ff:ff:ff:ff:ff:ff]");
+
+  auto face = std::make_shared<nfd::face::Face> (std::move (linkService), std::move (transport));
+  face->setMetric (1);
+
+  ndn->addFace (face);
+  NS_LOG_LOGIC ("Node " << node->GetId () << ": added Face as face #" << face->getLocalUri ());
+
+  return face;
+}
+
 void
 IcarusHelper::FixNdnStackHelper (ndn::StackHelper &sh)
 {
   NS_LOG_FUNCTION (&sh);
 
   sh.AddFaceCreateCallback (GroundStaNetDevice::GetTypeId (),
-                            MakeCallback (&IcarusHelper::GroundStaNetDeviceCallback,this));
+                            MakeCallback (&IcarusHelper::GroundStaNetDeviceCallback, this));
+  sh.AddFaceCreateCallback (Sat2GroundNetDevice::GetTypeId (),
+                            MakeCallback (&IcarusHelper::Sat2GroundNetDeviceCallback, this));
 }
 
 } // namespace icarus
