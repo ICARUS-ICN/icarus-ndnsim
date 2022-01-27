@@ -272,6 +272,9 @@ private:
   std::shared_ptr<nfd::face::Face>
   GroundStaNetDeviceCallback (Ptr<Node> node, Ptr<ndn::L3Protocol> ndn, Ptr<NetDevice> netDevice);
 
+  std::shared_ptr<nfd::face::Face>
+  Sat2GroundNetDeviceCallback (Ptr<Node> node, Ptr<ndn::L3Protocol> ndn, Ptr<NetDevice> netDevice);
+
   ObjectFactory m_queueFactory; //!< factory for the queues
   ObjectFactory m_sat2GroundFactory; //!< factory for downstream NetDevices
   ObjectFactory m_groundStaFactory; //!< factory for downstream NetDevices
