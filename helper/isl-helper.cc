@@ -19,6 +19,8 @@
  */
 
 #include "isl-helper.h"
+#include "model/ndn-l3-protocol.hpp"
+#include "model/ndn-net-device-transport.hpp"
 #include "ns3/abort.h"
 #include "ns3/circular-orbit.h"
 #include "ns3/sat-net-device.h"
@@ -34,6 +36,8 @@
 #include "ns3/assert.h"
 #include "ns3/sat2sat-success-model.h"
 #include "ns3/sat-address.h"
+#include "ns3/ndnSIM/NFD/daemon/face/generic-link-service.hpp"
+#include <memory>
 
 namespace ns3 {
 namespace icarus {
@@ -370,6 +374,67 @@ ISLHelper::EnableAsciiInternal (Ptr<OutputStreamWrapper> stream, std::string pre
       << "/TxQueue/Drop";
   Config::Connect (oss.str (),
                    MakeBoundCallback (&AsciiTraceHelper::DefaultDropSinkWithContext, stream));
+}
+
+// Adapted from ndn-stack-helper.cpp
+std::string
+ISLHelper::constructFaceUri (Ptr<NetDevice> netDevice)
+{
+  std::string uri = "netdev://";
+  Address address = netDevice->GetAddress ();
+  if (Mac48Address::IsMatchingType (address))
+    {
+      uri += "[" + boost::lexical_cast<std::string> (Mac48Address::ConvertFrom (address)) + "]";
+    }
+
+  return uri;
+}
+
+std::shared_ptr<nfd::face::Face>
+ISLHelper::SatNetDeviceCallback (Ptr<Node> node, Ptr<ndn::L3Protocol> ndn, Ptr<NetDevice> device)
+{
+  NS_LOG_DEBUG ("Creating point-to-point Face on node " << node->GetId ());
+
+  Ptr<SatNetDevice> netDevice = DynamicCast<SatNetDevice> (device);
+  NS_ASSERT (netDevice != nullptr);
+
+  // access the other end of the link
+  Ptr<Sat2SatChannel> channel = DynamicCast<Sat2SatChannel> (netDevice->GetChannel ());
+  NS_ASSERT (channel != nullptr);
+
+  Ptr<NetDevice> remoteNetDevice = channel->GetDevice (0);
+  if (remoteNetDevice->GetNode () == node)
+    remoteNetDevice = channel->GetDevice (1);
+
+  // Create an ndnSIM-specific transport instance
+  ::nfd::face::GenericLinkService::Options opts;
+  opts.allowFragmentation = true;
+  opts.allowReassembly = true;
+  opts.allowCongestionMarking = true;
+  /* Enable GeoTags just to prevent GenericLinkService from discarding incoming ones */
+  opts.enableGeoTags = [] () -> std::shared_ptr<ndn::lp::GeoTag> { return nullptr; };
+
+  auto linkService = std::make_unique<::nfd::face::GenericLinkService> (opts);
+
+  auto transport = std::make_unique<ndn::NetDeviceTransport> (
+      node, netDevice, constructFaceUri (netDevice), constructFaceUri (remoteNetDevice));
+
+  auto face = std::make_shared<nfd::face::Face> (std::move (linkService), std::move (transport));
+  face->setMetric (1);
+
+  ndn->addFace (face);
+  NS_LOG_LOGIC ("Node " << node->GetId () << ": added Face as face #" << face->getLocalUri ());
+
+  return face;
+}
+
+void
+ISLHelper::FixNdnStackHelper (ndn::StackHelper &sh)
+{
+  NS_LOG_FUNCTION (&sh);
+
+  sh.AddFaceCreateCallback (SatNetDevice::GetTypeId (),
+                            MakeCallback (&ISLHelper::SatNetDeviceCallback, this));
 }
 
 } // namespace icarus
