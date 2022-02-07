@@ -77,7 +77,7 @@ main (int argc, char **argv) -> int
   cmd.AddValue ("trackingInterval", "ns3::icarus::GroundNodeSatTracker::TrackingInterval");
   cmd.Parse (argc, argv);
 
-  uint32_t n_nodes = (6 * 20) + 2;
+  uint32_t n_nodes = (14 * 20) + 2;
   NodeContainer nodes;
   nodes.Create (n_nodes);
   auto ground1 = nodes.Get (n_nodes - 1);
@@ -94,7 +94,7 @@ main (int argc, char **argv) -> int
   icarusHelper.SetEnableGeoTags (AddGeoTag);
   ISLHelper islHelper;
   ConstellationHelper constellationHelper (quantity<length> (250 * kilo * meters),
-                                           quantity<plane_angle> (60 * degree::degree), 6, 20, 1);
+                                           quantity<plane_angle> (60 * degree::degree), 14, 20, 1);
 
   ObjectFactory staticPositionsFactory ("ns3::ListPositionAllocator");
   auto staticPositions = staticPositionsFactory.Create<ListPositionAllocator> ();
@@ -114,6 +114,7 @@ main (int argc, char **argv) -> int
   // Install NDN stack on all nodes
   ns3::ndn::StackHelper ndnHelper;
   icarusHelper.FixNdnStackHelper (ndnHelper);
+  islHelper.FixNdnStackHelper(ndnHelper);
   ndnHelper.SetDefaultRoutes (true);
   ndnHelper.InstallAll ();
 
