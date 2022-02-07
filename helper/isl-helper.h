@@ -26,6 +26,7 @@
 #include "ns3/trace-helper.h"
 #include "ns3/sat2sat-channel.h"
 #include "ns3/sat-net-device.h"
+#include "src/ndnSIM/helper/ndn-stack-helper.hpp"
 
 namespace ns3 {
 namespace icarus {
@@ -100,6 +101,8 @@ public:
    */
   void SetChannelAttribute (const std::string &n1, const AttributeValue &v1);
 
+  void FixNdnStackHelper (ndn::StackHelper &sh);
+
   /**
    * This method creates four ns3::Sat2SatChannel for each node with the attributes
    * configured by ISLHelper::SetChannelAttribute. For each Ptr<Node> in the input
@@ -172,6 +175,11 @@ private:
    * attach to the device. \returns A container holding the added net device.
    */
   Ptr<NetDevice> InstallPriv (Ptr<Node> node, Ptr<Sat2SatChannel> channel) const;
+
+  std::string constructFaceUri (Ptr<NetDevice> netDevice);
+
+  std::shared_ptr<nfd::face::Face> SatNetDeviceCallback (Ptr<Node> node, Ptr<ndn::L3Protocol> ndn,
+                                                         Ptr<NetDevice> device);
 
   ObjectFactory m_queueFactory; //!< factory for the queues
   ObjectFactory m_satNetDeviceFactory; //!< factory for NetDevices
