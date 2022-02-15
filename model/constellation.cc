@@ -1,6 +1,6 @@
 /* -*- Mode:C++; c-file-style:"gnu"; indent-tabs-mode:nil; -*- */
 /*
- * Copyright (c) 2021 Universidade de Vigo
+ * Copyright (c) 2021–2022 Universidade de Vigo
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -104,8 +104,9 @@ Constellation::GetClosest (Vector3D cartesianCoordinates) const
               continue;
             }
 
-          const auto sq_distance = getSqDistance (
-              sat_device->GetNode ()->GetObject<MobilityModel> ()->GetPosition (), bestPos);
+          const auto sq_distance =
+              getSqDistance (sat_device->GetNode ()->GetObject<MobilityModel> ()->GetPosition (),
+                             cartesianCoordinates);
           if (sq_distance <= sq_closest_distance)
             {
               sq_closest_distance = sq_distance;
