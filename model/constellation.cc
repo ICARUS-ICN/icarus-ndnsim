@@ -91,7 +91,6 @@ Constellation::GetClosest (Vector3D cartesianCoordinates) const
   NS_LOG_FUNCTION (this << cartesianCoordinates);
 
   Ptr<Sat2GroundNetDevice> closest = nullptr;
-  Vector bestPos;
   auto sq_closest_distance = std::numeric_limits<double>::infinity ();
 
   NS_LOG_WARN ("FIXME: Replace this with a better algorithm.");
@@ -110,7 +109,6 @@ Constellation::GetClosest (Vector3D cartesianCoordinates) const
           if (sq_distance <= sq_closest_distance)
             {
               sq_closest_distance = sq_distance;
-              bestPos = sat_device->GetNode ()->GetObject<MobilityModel> ()->GetPosition ();
               closest = sat_device;
             }
         }
