@@ -140,7 +140,7 @@ main (int argc, char **argv) -> int
   ndnHelper.InstallAll ();
 
   // Choosing forwarding strategy
-  ndn::StrategyChoiceHelper::InstallAll ("/icarus", "/localhost/nfd/strategy/best-route");
+  ndn::StrategyChoiceHelper::InstallAll ("/icarus", "/localhost/nfd/strategy/geo-tag");
 
   // Installing applications
 
