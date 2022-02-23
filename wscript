@@ -32,7 +32,8 @@ def build(bld):
         'model/sat2sat-channel.cc',
         'model/sat2sat-success-model.cc',
         'model/sat-net-device.cc',
-        'utils/sat-address.cc'
+        'utils/sat-address.cc',
+        'fw/geotag-strategy.cpp'
     ]
 
     module_test = bld.create_ns3_module_test_library('icarus')
@@ -68,6 +69,7 @@ def build(bld):
         'model/sat2sat-success-model.h',
         'model/sat-net-device.h',
         'utils/sat-address.h',
+        'fw/geotag-strategy.hpp'
     ]
 
     if bld.env.ENABLE_EXAMPLES:
