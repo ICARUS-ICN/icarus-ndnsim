@@ -123,6 +123,7 @@ Sat2SatChannel::TransmitStart (const Ptr<Packet> &packet, const Ptr<SatNetDevice
   if (m_txSuccessModel != nullptr &&
       m_txSuccessModel->TramsmitSuccess (src->GetNode (), dst->GetNode (), packet) != true)
     {
+      NS_LOG_ERROR ("DROP PACKET, DISTANCE: " << distanceMeters);
       m_phyTxDropTrace (packet);
     }
   else
