@@ -26,7 +26,7 @@
 #include "ns3/trace-helper.h"
 #include "ns3/sat2sat-channel.h"
 #include "ns3/sat-net-device.h"
-#include "src/ndnSIM/helper/ndn-stack-helper.hpp"
+#include "ns3/ndnSIM/helper/ndn-stack-helper.hpp"
 
 namespace ns3 {
 namespace icarus {
