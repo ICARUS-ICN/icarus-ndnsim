@@ -67,14 +67,6 @@ AddGeoTag () -> auto
   auto netDevice = ground_node->GetDevice (0)->GetObject<GroundStaNetDevice> ();
   NS_ASSERT (netDevice != nullptr);
   auto remote_address = SatAddress::ConvertFrom (netDevice->GetRemoteAddress ());
-  /* auto constellation =
-      DynamicCast<GroundSatChannel> (netDevice->GetChannel ())->GetConstellation ();
-  auto pos = ground_node->GetObject<MobilityModel> ()->GetPosition ();
-  auto remote_address = SatAddress::ConvertFrom (constellation->GetClosest (pos)->GetAddress ()); */
-
-  /* auto pos = GeographicPositions::GeographicToCartesianCoordinates (40.712742, -74.013382, -17,
-                                                                    GeographicPositions::WGS84); */
-
   auto coid = double (remote_address.getConstellationId ());
   auto plane = double (remote_address.getOrbitalPlane ());
   auto pindex = double (remote_address.getPlaneIndex ());
