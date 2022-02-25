@@ -19,6 +19,8 @@
  */
 
 #include "geotag-strategy.hpp"
+#include "common/logger.hpp"
+#include "ns3/ground-sta-net-device.h"
 #include "ns3/ndnSIM/NFD/daemon/fw/algorithm.hpp"
 #include "ns3/ndnSIM/NFD/daemon/common/logger.hpp"
 #include "ns3/ndnSIM/NFD/daemon/face/face-common.hpp"
@@ -28,6 +30,8 @@
 #include "ns3/log.h"
 #include "ns3/mobility-model.h"
 #include "ns3/net-device.h"
+#include "ns3/node-container.h"
+#include "ns3/node-list.h"
 #include "ns3/sat-address.h"
 #include "ns3/sat-net-device.h"
 #include "ns3/sat2ground-net-device.h"
@@ -35,6 +39,7 @@
 #include "ns3/ndnSIM/model/ndn-net-device-transport.hpp"
 #include "ns3/ndnSIM/NFD/daemon/table/fib-nexthop.hpp"
 #include "ns3/ndnSIM/NFD/daemon/face/transport.hpp"
+#include "src/icarus/model/ground-sat-channel.h"
 #include <boost/tuple/detail/tuple_basic.hpp>
 #include <cstdint>
 #include <string>
@@ -42,6 +47,7 @@
 
 namespace nfd {
 namespace fw {
+using ns3::DynamicCast;
 
 NFD_LOG_INIT (GeoTagStrategy);
 NFD_REGISTER_STRATEGY (GeoTagStrategy);
@@ -66,6 +72,14 @@ GeoTagStrategy::GeoTagStrategy (Forwarder &forwarder, const Name &name)
                                         to_string (*parsed.version)));
     }
   this->setInstanceName (makeInstanceName (name, getStrategyName ()));
+
+  auto node = ns3::NodeList::GetNode (ns3::NodeList::GetNNodes () - 1);
+  auto constellation =
+      DynamicCast<ns3::icarus::GroundSatChannel> (
+          node->GetDevice (0)->GetObject<ns3::icarus::GroundStaNetDevice> ()->GetChannel ())
+          ->GetConstellation ();
+  this->m_nPlanes = constellation->GetNPlanes ();
+  this->m_planeSize = constellation->GetPlaneSize ();
 }
 
 const Name &
@@ -108,11 +122,9 @@ GeoTagStrategy::afterReceiveInterest (const FaceEndpoint &ingress, const Interes
       auto coid_this = this_address.getConstellationId ();
       auto plane_this = this_address.getOrbitalPlane ();
       auto pindex_this = this_address.getPlaneIndex ();
-      auto target = getTarget (plane, pindex, plane_this, pindex_this);
       NFD_LOG_INFO ("INTEREST WITH GEOTAG (" << coid << ", " << plane << ", " << pindex
                                              << "), received in node (" << coid_this << ", "
-                                             << plane_this << ", " << pindex_this
-                                             << "), will be sent to " << target);
+                                             << plane_this << ", " << pindex_this << ")");
 
       // Get all eligible next-hops
       fib::NextHopList nhs;
@@ -121,73 +133,44 @@ GeoTagStrategy::afterReceiveInterest (const FaceEndpoint &ingress, const Interes
                       return isNextHopEligible (ingress.face, interest, nh, pitEntry);
                     });
 
+      // Get target
+      auto target = getTarget (plane, pindex, plane_this, pindex_this);
+      NFD_LOG_DEBUG ("Target = " << target);
+
       // Send to target
       switch (target)
         {
-        case 0:
-          // SEND TO GROUND
+        case SEND_TO_GROUND:
           it = std::find_if (nhs.begin (), nhs.end (), [&] (const fib::NextHop &nexthop) {
             auto sataddress = getSatAddress (nexthop);
             return sataddress.getOrbitalPlane () == plane_this &&
                    sataddress.getPlaneIndex () == pindex_this;
           });
           break;
-        case 1:
-          // SEND TO NEXT PLANE
+        case NEXT_PLANE:
           it = std::find_if (nhs.begin (), nhs.end (), [&] (const fib::NextHop &nexthop) {
             auto sataddress = getSatAddress (nexthop);
-            return sataddress.getOrbitalPlane () == plane_this + 1;
+            return sataddress.getOrbitalPlane () == ((plane_this + 1) % m_nPlanes);
           });
           break;
-        case 2:
-          // SEND TO PREVIOUS PLANE
+        case PREVIOUS_PLANE:
           it = std::find_if (nhs.begin (), nhs.end (), [&] (const fib::NextHop &nexthop) {
             auto sataddress = getSatAddress (nexthop);
-            return sataddress.getOrbitalPlane () == plane_this - 1;
+            return sataddress.getOrbitalPlane () == ((m_nPlanes + plane_this - 1) % m_nPlanes);
           });
           break;
-        case 3:
-          // SEND TO THE FIRST PLANE
-          it = std::find_if (nhs.begin (), nhs.end (), [&] (const fib::NextHop &nexthop) {
-            auto sataddress = getSatAddress (nexthop);
-            return sataddress.getOrbitalPlane () == 1;
-          });
-          break;
-        case 4:
-          // SEND TO THE LAST PLANE
-          it = std::find_if (nhs.begin (), nhs.end (), [&] (const fib::NextHop &nexthop) {
-            auto sataddress = getSatAddress (nexthop);
-            return sataddress.getOrbitalPlane () == 14;
-          });
-          break;
-        case 5:
-          // SEND TO THE NEXT SAT OF THE PLANE
+        case NEXT_SAT:
           it = std::find_if (nhs.begin (), nhs.end (), [&] (const fib::NextHop &nexthop) {
             auto sataddress = getSatAddress (nexthop);
             return sataddress.getOrbitalPlane () == plane_this &&
-                   sataddress.getPlaneIndex () == pindex_this + 1;
+                   sataddress.getPlaneIndex () == ((pindex_this + 1) % m_planeSize);
           });
           break;
-        case 6:
-          // SEND TO THE PREVIOUS SAT OF THE PLANE
+        case PREVIOUS_SAT:
           it = std::find_if (nhs.begin (), nhs.end (), [&] (const fib::NextHop &nexthop) {
             auto sataddress = getSatAddress (nexthop);
             return sataddress.getOrbitalPlane () == plane_this &&
-                   sataddress.getPlaneIndex () == pindex_this - 1;
-          });
-          break;
-        case 7:
-          // SEND TO THE FIRST SAT OF THE PLANE
-          it = std::find_if (nhs.begin (), nhs.end (), [&] (const fib::NextHop &nexthop) {
-            auto sataddress = getSatAddress (nexthop);
-            return sataddress.getOrbitalPlane () == plane_this && sataddress.getPlaneIndex () == 1;
-          });
-          break;
-        case 8:
-          // SEND TO THE LAST SAT OF THE PLANE
-          it = std::find_if (nhs.begin (), nhs.end (), [&] (const fib::NextHop &nexthop) {
-            auto sataddress = getSatAddress (nexthop);
-            return sataddress.getOrbitalPlane () == plane_this && sataddress.getPlaneIndex () == 20;
+                   sataddress.getPlaneIndex () == ((m_planeSize + pindex_this - 1) % m_planeSize);
           });
           break;
         }
@@ -313,54 +296,30 @@ GeoTagStrategy::getSatAddress (const fib::NextHop &nexthop)
   return ns3::icarus::SatAddress::ConvertFrom (remote_sat2groundnd->GetAddress ());
 }
 
-int
+GeoTagStrategy::Target
 GeoTagStrategy::getTarget (uint16_t plane, uint16_t pindex, uint16_t this_plane,
                            uint16_t this_pindex)
 {
-  // RETURNS:
-  // 0 to send to ground
-  // 1 to send to the next plane
-  // 2 to send to the previous plane
-  // 3 to send to the first plane
-  // 4 to send to the last plane
-  // 5 to send to the next sat of the plane
-  // 6 to send to the previous sat of the plane
-  // 7 to send to the first sat of the plane
-  // 8 to send to the last sat of the plane
   if (plane == this_plane)
     {
       if (pindex == this_pindex)
-        {
-          return 0; // SEND TO GROUND
-        }
+        return SEND_TO_GROUND;
       else
         {
           auto difPindex = pindex - this_pindex;
           if (difPindex > 0)
             {
-              if (difPindex <= 10)
-                return 5; // SEND TO THE NEXT SAT OF THE PLANE
+              if (difPindex <= m_planeSize / 2)
+                return NEXT_SAT;
               else
-                {
-                  if (this_pindex == 1)
-                    {
-                      return 8; // SEND TO THE LAST SAT
-                    }
-                  return 6; // SEND TO THE PREVIOUS SAT OF THE PLANE
-                }
+                return PREVIOUS_SAT;
             }
           else
             {
-              if (difPindex >= -10)
-                return 6; // SEND TO THE PREVIOUS SAT OF THE PLANE
+              if (difPindex >= -m_planeSize / 2)
+                return PREVIOUS_SAT;
               else
-                {
-                  if (this_pindex == 20)
-                    {
-                      return 7; // SEND TO THE FIRST SAT OF THE PLANE
-                    }
-                  return 5; // SEND TO THE NEXT SAT OF THE PLANE
-                }
+                return NEXT_SAT;
             }
         }
     }
@@ -369,29 +328,17 @@ GeoTagStrategy::getTarget (uint16_t plane, uint16_t pindex, uint16_t this_plane,
       auto difPlane = plane - this_plane;
       if (difPlane > 0)
         {
-          if (difPlane <= 7)
-            return 1; // SEND TO THE NEXT PLANE
+          if (difPlane <= m_nPlanes / 2)
+            return NEXT_PLANE;
           else
-            {
-              if (this_plane == 1)
-                {
-                  return 4; // SEND TO THE LAST PLANE
-                }
-              return 2; // SEND TO THE PREVIOUS PLANE
-            }
+            return PREVIOUS_PLANE;
         }
       else
         {
-          if (difPlane >= -7)
-            return 2; // SEND TO THE PREVIOUS PLANE
+          if (difPlane >= -m_nPlanes / 2)
+            return PREVIOUS_PLANE;
           else
-            {
-              if (this_plane == 14)
-                {
-                  return 3; // SEND TO THE FIRST PLANE
-                }
-              return 1; // SEND TO THE NEXT PLANE
-            }
+            return NEXT_PLANE;
         }
     }
 }

@@ -30,6 +30,7 @@
 #include "ns3/ndnSIM/NFD/daemon/fw/retx-suppression-exponential.hpp"
 #include "ns3/ndnSIM/NFD/daemon/fw/strategy.hpp"
 #include <boost/tuple/detail/tuple_basic.hpp>
+#include <cstddef>
 #include <cstdint>
 #include <tuple>
 
@@ -63,6 +64,10 @@ namespace fw {
  */
 class GeoTagStrategy : public Strategy, public ProcessNackTraits<GeoTagStrategy>
 {
+private:
+  enum Target { SEND_TO_GROUND, NEXT_PLANE, PREVIOUS_PLANE, NEXT_SAT, PREVIOUS_SAT };
+  std::size_t m_nPlanes, m_planeSize;
+
 public:
   explicit GeoTagStrategy (Forwarder &forwarder, const Name &name = getStrategyName ());
 
@@ -80,7 +85,7 @@ public:
 
   ns3::icarus::SatAddress getSatAddress (const fib::NextHop &nexthop);
 
-  int getTarget (uint16_t plane, uint16_t pindex, uint16_t this_plane, uint16_t this_pindex);
+  Target getTarget (uint16_t plane, uint16_t pindex, uint16_t this_plane, uint16_t this_pindex);
 
   PUBLIC_WITH_TESTS_ELSE_PRIVATE : static const time::milliseconds RETX_SUPPRESSION_INITIAL;
   static const time::milliseconds RETX_SUPPRESSION_MAX;
