@@ -80,8 +80,8 @@ public:
 
   /** \brief signals when remote address changes
    */
-  ndn::util::signal::Signal<GroundStaNetDevice, const SatAddress & /*old*/,
-                            const SatAddress & /*new*/>
+  ::ndn::util::signal::Signal<GroundStaNetDevice, const SatAddress & /*old*/,
+                              const SatAddress & /*new*/>
       remoteAddressChange;
 
 private:
