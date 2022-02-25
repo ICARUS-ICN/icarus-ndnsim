@@ -135,7 +135,6 @@ GeoTagStrategy::afterReceiveInterest (const FaceEndpoint &ingress, const Interes
 
       // Get target
       auto target = getTarget (plane, pindex, plane_this, pindex_this);
-      NFD_LOG_DEBUG ("Target = " << target);
 
       // Send to target
       switch (target)
