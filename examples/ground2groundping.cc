@@ -23,16 +23,23 @@
 #include "ns3/assert.h"
 #include "ns3/command-line.h"
 #include "ns3/config.h"
+#include "ns3/ground-sat-channel.h"
+#include "ns3/ground-sta-net-device.h"
 #include "ns3/icarus-module.h"
 #include "ns3/log-macros-disabled.h"
 #include "ns3/log-macros-enabled.h"
 #include "ns3/log.h"
+#include "ns3/mobility-model.h"
 #include "ns3/mobility-module.h"
 #include "ns3/node-container.h"
+#include "ns3/node-list.h"
+#include "ns3/ptr.h"
+#include "ns3/sat-address.h"
 #include "ns3/simulator.h"
 #include "ns3/geographic-positions.h"
 #include "ns3/isl-helper.h"
 #include "ns3/string.h"
+#include "table/name-tree-hashtable.hpp"
 
 #include <boost/units/io.hpp>
 #include <boost/units/systems/angle/degrees.hpp>
@@ -55,13 +62,27 @@ auto
 AddGeoTag () -> auto
 {
   NS_LOG_FUNCTION_NOARGS ();
+  auto ground_node = NodeList::GetNode (NodeList::GetNNodes () - 2);
 
-  auto pos = GeographicPositions::GeographicToCartesianCoordinates (40.712742, -74.013382, -17,
-                                                                    GeographicPositions::WGS84);
+  auto netDevice = ground_node->GetDevice (0)->GetObject<GroundStaNetDevice> ();
+  NS_ASSERT (netDevice != nullptr);
+  auto remote_address = SatAddress::ConvertFrom (netDevice->GetRemoteAddress ());
+  /* auto constellation =
+      DynamicCast<GroundSatChannel> (netDevice->GetChannel ())->GetConstellation ();
+  auto pos = ground_node->GetObject<MobilityModel> ()->GetPosition ();
+  auto remote_address = SatAddress::ConvertFrom (constellation->GetClosest (pos)->GetAddress ()); */
 
-  return std::make_shared<ndn::lp::GeoTag> (std::make_tuple (pos.x, pos.y, pos.z));
+  /* auto pos = GeographicPositions::GeographicToCartesianCoordinates (40.712742, -74.013382, -17,
+                                                                    GeographicPositions::WGS84); */
+
+  auto coid = double (remote_address.getConstellationId ());
+  auto plane = double (remote_address.getOrbitalPlane ());
+  auto pindex = double (remote_address.getPlaneIndex ());
+
+  return std::make_shared<ndn::lp::GeoTag> (
+      std::make_tuple (double (coid), double (plane), double (pindex)));
 }
-} // namespace
+} // namespace */
 
 auto
 main (int argc, char **argv) -> int
@@ -71,7 +92,7 @@ main (int argc, char **argv) -> int
 
   // Track best satellite every minute
   Config::SetDefault ("ns3::icarus::GroundNodeSatTracker::TrackingInterval",
-                      TimeValue (Minutes (1)));
+                      TimeValue (Seconds (10)));
 
   CommandLine cmd;
   cmd.AddValue ("trackingInterval", "ns3::icarus::GroundNodeSatTracker::TrackingInterval");
@@ -114,7 +135,7 @@ main (int argc, char **argv) -> int
   // Install NDN stack on all nodes
   ns3::ndn::StackHelper ndnHelper;
   icarusHelper.FixNdnStackHelper (ndnHelper);
-  islHelper.FixNdnStackHelper(ndnHelper);
+  islHelper.FixNdnStackHelper (ndnHelper);
   ndnHelper.SetDefaultRoutes (true);
   ndnHelper.InstallAll ();
 
