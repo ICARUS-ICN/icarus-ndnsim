@@ -42,6 +42,7 @@
 #include "ns3/ndnSIM/NFD/daemon/face/generic-link-service.hpp"
 #include "ns3/ground-node-sat-tracker.h"
 #include "ns3/sat2ground-net-device.h"
+#include "ns3/sat2ground-transport.h"
 #include <memory>
 
 namespace ns3 {
@@ -499,7 +500,7 @@ IcarusHelper::Sat2GroundNetDeviceCallback (Ptr<Node> node, Ptr<ndn::L3Protocol> 
 
   auto linkService = std::make_unique<::nfd::face::GenericLinkService> (opts);
 
-  auto transport = std::make_unique<ndn::NetDeviceTransport> (
+  auto transport = std::make_unique<ndn::icarus::Sat2GroundTransport> (
       node, netDevice, constructFaceUri (netDevice), "netdev://[ff:ff:ff:ff:ff:ff]");
 
   auto face = std::make_shared<nfd::face::Face> (std::move (linkService), std::move (transport));
