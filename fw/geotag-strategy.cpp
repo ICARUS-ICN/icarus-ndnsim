@@ -40,6 +40,7 @@
 #include "ns3/ndnSIM/NFD/daemon/table/fib-nexthop.hpp"
 #include "ns3/ndnSIM/NFD/daemon/face/transport.hpp"
 #include "src/icarus/model/ground-sat-channel.h"
+#include "src/icarus/model/ndn/sat2ground-transport.h"
 #include <boost/tuple/detail/tuple_basic.hpp>
 #include <cstdint>
 #include <string>
@@ -260,7 +261,14 @@ GeoTagStrategy::getNetDevice (face::Face &face)
     }
   // Ground nodes' faces have no NetDeviceTransport
   else
-    return nullptr;
+    {
+      auto ndtransport2 = dynamic_cast<ns3::ndn::icarus::Sat2GroundTransport *> (transport);
+      if (ndtransport2 != nullptr)
+        {
+          return ndtransport2->GetNetDevice ();
+        }
+      return nullptr;
+    }
 }
 
 ns3::Ptr<ns3::NetDevice>
