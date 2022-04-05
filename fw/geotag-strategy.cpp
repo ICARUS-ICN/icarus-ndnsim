@@ -316,14 +316,14 @@ GeoTagStrategy::getTarget (uint16_t plane, uint16_t pindex, uint16_t this_plane,
           auto difPindex = pindex - this_pindex;
           if (difPindex > 0)
             {
-              if (difPindex <= m_planeSize / 2)
+              if (difPindex <= (int) m_planeSize / 2)
                 return NEXT_SAT;
               else
                 return PREVIOUS_SAT;
             }
           else
             {
-              if (difPindex >= -m_planeSize / 2)
+              if (difPindex >= -(int) m_planeSize / 2)
                 return PREVIOUS_SAT;
               else
                 return NEXT_SAT;
@@ -335,14 +335,14 @@ GeoTagStrategy::getTarget (uint16_t plane, uint16_t pindex, uint16_t this_plane,
       auto difPlane = plane - this_plane;
       if (difPlane > 0)
         {
-          if (difPlane <= m_nPlanes / 2)
+          if (difPlane <= (int) m_nPlanes / 2)
             return NEXT_PLANE;
           else
             return PREVIOUS_PLANE;
         }
       else
         {
-          if (difPlane >= -m_nPlanes / 2)
+          if (difPlane >= -(int) m_nPlanes / 2)
             return PREVIOUS_PLANE;
           else
             return NEXT_PLANE;
