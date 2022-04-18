@@ -34,11 +34,13 @@
 #include "ns3/node-container.h"
 #include "ns3/node-list.h"
 #include "ns3/ptr.h"
+#include "ns3/rng-seed-manager.h"
 #include "ns3/sat-address.h"
 #include "ns3/simulator.h"
 #include "ns3/geographic-positions.h"
 #include "ns3/isl-helper.h"
 #include "ns3/string.h"
+#include "src/ndnSIM/utils/tracers/ndn-l3-rate-tracer.hpp"
 #include "table/name-tree-hashtable.hpp"
 
 #include <boost/units/io.hpp>
@@ -84,13 +86,22 @@ main (int argc, char **argv) -> int
 
   // Track best satellite every minute
   Config::SetDefault ("ns3::icarus::GroundNodeSatTracker::TrackingInterval",
-                      TimeValue (Seconds (10)));
+                      TimeValue (Seconds (1)));
+  std::string fileTrace = "/tmp/rate-trace.txt";
+  double lat = 0;
 
   CommandLine cmd;
   cmd.AddValue ("trackingInterval", "ns3::icarus::GroundNodeSatTracker::TrackingInterval");
+  cmd.AddValue ("fileTrace", "File for the trace", fileTrace);
+  cmd.AddValue ("latitude", "Latitude of the Consumer", lat);
   cmd.Parse (argc, argv);
 
-  uint32_t n_nodes = (14 * 20) + 2;
+  auto n_planes = 20;
+  auto plane_size = 20;
+  Ptr<UniformRandomVariable> m_uniformRandomVariable = CreateObject<UniformRandomVariable> ();
+  auto random_var = m_uniformRandomVariable->GetValue (-0.1, 0.1);
+
+  uint32_t n_nodes = (n_planes * plane_size) + 2;
   NodeContainer nodes;
   nodes.Create (n_nodes);
   auto ground1 = nodes.Get (n_nodes - 1);
@@ -107,12 +118,22 @@ main (int argc, char **argv) -> int
   icarusHelper.SetEnableGeoTags (AddGeoTag);
   ISLHelper islHelper;
   ConstellationHelper constellationHelper (quantity<length> (250 * kilo * meters),
-                                           quantity<plane_angle> (60 * degree::degree), 14, 20, 1);
+                                           quantity<plane_angle> (60 * degree::degree), n_planes,
+                                           plane_size, 1);
 
   ObjectFactory staticPositionsFactory ("ns3::ListPositionAllocator");
   auto staticPositions = staticPositionsFactory.Create<ListPositionAllocator> ();
+  /* staticPositions->Add (GeographicPositions::GeographicToCartesianCoordinates (
+      0.5709895206068359, 25.204342819331025, 447, GeographicPositions::WGS84)); // Kisangani, Congo
+
   staticPositions->Add (GeographicPositions::GeographicToCartesianCoordinates (
-      42.1704632, -8.6877909, 450, GeographicPositions::WGS84)); // Our School
+      -0.17904073031620213, -78.47517894655105, 2850,
+      GeographicPositions::WGS84)); // Quito, Ecuador */
+
+  /* staticPositions->Add (GeographicPositions::GeographicToCartesianCoordinates (
+      42.1704632, -8.6877909, 450, GeographicPositions::WGS84)); // Our School */
+  staticPositions->Add (GeographicPositions::GeographicToCartesianCoordinates (
+      lat, -8.6877909 + random_var, 450, GeographicPositions::WGS84));
   staticPositions->Add (GeographicPositions::GeographicToCartesianCoordinates (
       40.712742, -74.013382, -17, GeographicPositions::WGS84)); // World Trade Center, NYC
   MobilityHelper staticHelper;
@@ -139,7 +160,7 @@ main (int argc, char **argv) -> int
   // Consumer
   ndn::AppHelper consumerHelper ("ns3::ndn::ConsumerCbr");
   consumerHelper.SetPrefix ("/icarus/ground2/vostping");
-  consumerHelper.SetAttribute ("Frequency", StringValue ("1"));
+  consumerHelper.SetAttribute ("Frequency", StringValue ("10"));
   auto apps = consumerHelper.Install (ground1);
 
   // Producer
@@ -149,17 +170,19 @@ main (int argc, char **argv) -> int
   producerHelper.SetAttribute ("PayloadSize", StringValue ("1024"));
   producerHelper.Install (ground2); // Satellite node
 
-  AsciiTraceHelper ascii;
-  auto stream = ascii.CreateFileStream ("/tmp/out.tr");
-  stream->GetStream ()->precision (9);
-  icarusHelper.EnableAsciiAll (stream);
-  icarusHelper.EnablePcapAll ("/tmp/pcap-sputping");
+  //AsciiTraceHelper ascii;
+  //auto stream = ascii.CreateFileStream ("/home/pablo/tmp/out.tr");
+  //stream->GetStream ()->precision (9);
+  //icarusHelper.EnableAsciiAll (stream);
+  //icarusHelper.EnablePcapAll ("/home/pablo/tmp/pcap-sputping");
 
   // Add channel drops to the ASCII trace
-  Config::Connect ("/NodeList/0/DeviceList/0/$ns3::icarus::IcarusNetDevice/Channel/PhyTxDrop",
-                   MakeBoundCallback (&AsciiTraceHelper::DefaultDropSinkWithContext, stream));
+  //Config::Connect ("/NodeList/0/DeviceList/0/$ns3::icarus::IcarusNetDevice/Channel/PhyTxDrop",
+  //                 MakeBoundCallback (&AsciiTraceHelper::DefaultDropSinkWithContext, stream));
 
-  ns3::Simulator::Stop (Days (7));
+  ns3::Simulator::Stop (Seconds (3601));
+
+  ndn::L3RateTracer::Install (ground1, fileTrace, Seconds (60));
 
   ns3::Simulator::Run ();
   ns3::Simulator::Destroy ();
