@@ -88,16 +88,18 @@ main (int argc, char **argv) -> int
   Config::SetDefault ("ns3::icarus::GroundNodeSatTracker::TrackingInterval",
                       TimeValue (Seconds (1)));
   std::string fileTrace = "/tmp/rate-trace.txt";
-  double lat = 0;
+  double lat = 42;
+  int altitude = 400;
 
   CommandLine cmd;
   cmd.AddValue ("trackingInterval", "ns3::icarus::GroundNodeSatTracker::TrackingInterval");
   cmd.AddValue ("fileTrace", "File for the trace", fileTrace);
   cmd.AddValue ("latitude", "Latitude of the Consumer", lat);
+  cmd.AddValue ("altitude", "Altitude of the constellation", altitude);
   cmd.Parse (argc, argv);
 
-  auto n_planes = 20;
-  auto plane_size = 20;
+  auto n_planes = 30;
+  auto plane_size = 30;
   Ptr<UniformRandomVariable> m_uniformRandomVariable = CreateObject<UniformRandomVariable> ();
   auto random_var = m_uniformRandomVariable->GetValue (-0.1, 0.1);
 
@@ -114,10 +116,11 @@ main (int argc, char **argv) -> int
     }
 
   IcarusHelper icarusHelper;
-  icarusHelper.SetSuccessModel ("ns3::icarus::GroundSatSuccessDistance");
+  icarusHelper.SetSuccessModel ("ns3::icarus::GroundSatSuccessElevation", "MinElevation",
+                                DoubleValue (25.0));
   icarusHelper.SetEnableGeoTags (AddGeoTag);
   ISLHelper islHelper;
-  ConstellationHelper constellationHelper (quantity<length> (250 * kilo * meters),
+  ConstellationHelper constellationHelper (quantity<length> (altitude * kilo * meters),
                                            quantity<plane_angle> (60 * degree::degree), n_planes,
                                            plane_size, 1);
 
@@ -135,7 +138,7 @@ main (int argc, char **argv) -> int
   staticPositions->Add (GeographicPositions::GeographicToCartesianCoordinates (
       lat, -8.6877909 + random_var, 450, GeographicPositions::WGS84));
   staticPositions->Add (GeographicPositions::GeographicToCartesianCoordinates (
-      40.712742, -74.013382, -17, GeographicPositions::WGS84)); // World Trade Center, NYC
+      lat, -74.013382, -17, GeographicPositions::WGS84)); // World Trade Center, NYC
   MobilityHelper staticHelper;
   staticHelper.SetPositionAllocator (staticPositions);
   staticHelper.SetMobilityModel ("ns3::ConstantPositionMobilityModel");
