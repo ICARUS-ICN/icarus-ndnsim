@@ -27,3 +27,6 @@ def build(bld):
 
     obj = bld.create_ns3_program('ground2groundping', ['icarus'])
     obj.source = 'ground2groundping.cc'
+
+    obj = bld.create_ns3_program('ground2groundpcon', ['icarus'])
+    obj.source = 'ground2groundpcon.cc'
