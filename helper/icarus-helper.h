@@ -27,7 +27,7 @@
 #include "ns3/trace-helper.h"
 #include "ns3/ground-sat-channel.h"
 #include "ns3/icarus-net-device.h"
-#include "src/ndnSIM/helper/ndn-stack-helper.hpp"
+#include "ns3/ndnSIM/helper/ndn-stack-helper.hpp"
 #include <functional>
 #include <memory>
 

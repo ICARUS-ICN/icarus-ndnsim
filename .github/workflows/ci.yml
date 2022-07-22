@@ -28,7 +28,7 @@ jobs:
     # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
       - name: Checkout pybindgen
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
         with:
           repository: gjcarneiro/pybindgen
           path: pybindgen
@@ -37,19 +37,21 @@ jobs:
         run: sudo apt install -y build-essential libsqlite3-dev libboost-all-dev libssl-dev git python3-setuptools castxml
       - name: Checkout ns3 version of ndnSIM
         if: steps.cache.outputs.cache-hit != 'true'
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
         with:
           repository: named-data-ndnSIM/ns-3-dev
           path: ns-3
+          ref: ndnSIM-ns-3.30.1
       - name: Checkout ndnSIM
         if: steps.cache.outputs.cache-hit != 'true'
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
         with:
           repository: named-data-ndnSIM/ndnSIM
           path: ns-3/src/ndnSIM
           submodules: recursive
+          ref: ndnSIM-2.8
       - name: Checkout ICARUS
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
         with:
           path: ns-3/src/icarus
       - name: Configure

@@ -22,9 +22,9 @@
 
 #include "sat2ground-transport.h"
 
-#include "../helper/ndn-stack-helper.hpp"
+#include "ns3/ndnSIM/helper/ndn-stack-helper.hpp"
 #include "model/ndn-block-header.hpp"
-#include "../utils/ndn-ns3-packet-tag.hpp"
+#include "ns3/ndnSIM/utils/ndn-ns3-packet-tag.hpp"
 
 #include <ndn-cxx/encoding/block.hpp>
 #include <ndn-cxx/interest.hpp>
