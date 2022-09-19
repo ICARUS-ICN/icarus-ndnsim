@@ -39,17 +39,16 @@ jobs:
         if: steps.cache.outputs.cache-hit != 'true'
         uses: actions/checkout@v3
         with:
-          repository: named-data-ndnSIM/ns-3-dev
+          repository: ICARUS-ICN/ns-3-dev
           path: ns-3
           ref: ndnSIM-ns-3.30.1
       - name: Checkout ndnSIM
         if: steps.cache.outputs.cache-hit != 'true'
         uses: actions/checkout@v3
         with:
-          repository: named-data-ndnSIM/ndnSIM
+          repository: ICARUS-ICN/ndnSIM
           path: ns-3/src/ndnSIM
           submodules: recursive
-          ref: ndnSIM-2.8
       - name: Checkout ICARUS
         uses: actions/checkout@v3
         with:
