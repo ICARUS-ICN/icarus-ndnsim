@@ -32,7 +32,7 @@ jobs:
         with:
           repository: gjcarneiro/pybindgen
           path: pybindgen
-          ref: '0.22.0'
+          ref: '0.22.1'
       - name: Install dependencies
         run: sudo apt install -y build-essential libsqlite3-dev libboost-all-dev libssl-dev git python3-setuptools castxml
       - name: Checkout ns3 version of ndnSIM
