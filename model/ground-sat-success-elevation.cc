@@ -131,7 +131,7 @@ GroundSatSuccessElevation::TramsmitSuccess (const Ptr<Node> &src, const Ptr<Node
   const auto cosZenith =
       GetDotProduct (posGround, vectorD) / (posGround.GetLength () * vectorD.GetLength ());
 
-  const double elevation = half_pi / static_cast<double> (2.0) - acos (cosZenith);
+  const double elevation = half_pi - acos (cosZenith);
   NS_LOG_DEBUG ("Elevation: " << elevation * radian << " at distance: " << vectorD.GetLength ());
 
   return elevation >= m_minimumElevation;
