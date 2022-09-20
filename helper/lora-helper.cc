@@ -86,7 +86,7 @@ LoraHelper::GetLoraPayloadSize () const
 }
 
 DataRate
-LoraHelper::GetLoraRate (uint8_t spreadingFactor, uint8_t codingRate, uint8_t bandwidth)
+LoraHelper::GetLoraLinkRate (uint8_t spreadingFactor, uint8_t codingRate, uint8_t bandwidth)
 {
   return DataRate (spreadingFactor * bandwidth * 4000 / pow (2, spreadingFactor) / codingRate);
 }
