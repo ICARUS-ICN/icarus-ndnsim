@@ -121,13 +121,13 @@ public:
   uint32_t GetLoraPayloadSize () const;
 
   /**
-   * Return the data rate of a Lora link with given parameters.
+   * Returns the data rate of a Lora link with given parameters.
    *
    * \param spreadingFactor The LoRa spreading factor (7..12).
    * \param codingRate The LoRa coding rate (5..8).
    * \param bandwith The LoRa bandwidth (in kHz).
    */
-  static DataRate GetLoraRate (uint8_t spreadingFactor, uint8_t codingRate, uint8_t bandwidth);
+  static DataRate GetLoraLinkRate (uint8_t spreadingFactor, uint8_t codingRate, uint8_t bandwidth);
 
 private:
   std::unique_ptr<OnOffHelper> m_impl;
