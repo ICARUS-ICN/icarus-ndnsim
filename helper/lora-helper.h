@@ -116,6 +116,11 @@ public:
   int64_t AssignStreams (const NodeContainer &c, int64_t stream);
 
   /**
+   * Returns the actual payload size of Lora frames.
+   */
+  uint32_t GetLoraPayloadSize () const;
+
+  /**
    * Return the data rate of a Lora link with given parameters.
    *
    * \param spreadingFactor The LoRa spreading factor (7..12).
@@ -126,6 +131,7 @@ public:
 
 private:
   std::unique_ptr<OnOffHelper> m_impl;
+  uint32_t loraPayloadSize;
 };
 
 } // namespace icarus
