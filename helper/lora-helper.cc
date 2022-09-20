@@ -19,6 +19,7 @@
  */
 
 #include "lora-helper.h"
+#include "ns3/uinteger.h"
 
 namespace ns3 {
 namespace icarus {
@@ -26,7 +27,7 @@ namespace icarus {
 LoraHelper::LoraHelper (const std::string &protocol, const Address &address,
                         uint8_t spreadingFactor, uint8_t codingRate, uint8_t bandwidth,
                         DataRate sendingRate, uint16_t preambleSize, uint16_t headerSize,
-                        uint32_t payloadSize) noexcept
+                        uint32_t payloadSize, uint64_t maxFrames) noexcept
 
     : m_impl (std::make_unique<OnOffHelper> (protocol, address))
 {
@@ -45,6 +46,7 @@ LoraHelper::LoraHelper (const std::string &protocol, const Address &address,
       DataRate (sendingRate.GetBitRate () * loraPayloadSize / (loraPayloadSize + headerSize));
 
   m_impl->SetConstantRate (loraSendingRate, loraPayloadSize);
+  m_impl->SetAttribute ("MaxBytes", UintegerValue (loraPayloadSize * maxFrames));
 }
 
 void

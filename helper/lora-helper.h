@@ -57,11 +57,13 @@ public:
    * \param preambleSize Size in symbols of the LoRa preamble. 
    * \param headerSize Size in bytes of the protocol header.
    * \param payloadSize Size in bytes of the payload.
+   * \param maxFrames Total number of LoRa frames to send (0 = no limit).
    */
   LoraHelper (const std::string &protocol, const Address &address, uint8_t spreadingFactor = 10u,
               uint8_t codingRate = 5u, uint8_t bandwidth = 125,
               DataRate sendingRate = DataRate (500), uint16_t preambleSize = 8u,
-              uint16_t headerSize = 20u, uint32_t payloadSize = 51u) noexcept;
+              uint16_t headerSize = 20u, uint32_t payloadSize = 51u,
+              uint64_t maxFrames = 0u) noexcept;
 
   /**
    * Helper function used to set the underlying application attributes.
