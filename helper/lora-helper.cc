@@ -41,7 +41,7 @@ LoraHelper::LoraHelper (const std::string &protocol, const Address &address,
   uint32_t phySize = 8 + codingRate * ceil ((44 + 8 * payloadSize - 4 * spreadingFactor) / 4.0 /
                                             (spreadingFactor - 2 * de));
   double toa = t_sym * (preambleSize + phySize + 4.25);
-  uint32_t loraPayloadSize = round (spreadingFactor * toa / codingRate / t_sym / 2) - headerSize;
+  loraPayloadSize = round (spreadingFactor * toa / codingRate / t_sym / 2) - headerSize;
   DataRate loraSendingRate =
       DataRate (sendingRate.GetBitRate () * loraPayloadSize / (loraPayloadSize + headerSize));
 
@@ -77,6 +77,12 @@ int64_t
 LoraHelper::AssignStreams (const NodeContainer &c, int64_t stream)
 {
   return m_impl->AssignStreams (c, stream);
+}
+
+uint32_t
+LoraHelper::GetLoraPayloadSize () const
+{
+  return loraPayloadSize;
 }
 
 DataRate
