@@ -33,7 +33,7 @@ LoraHelper::LoraHelper (const std::string &protocol, const Address &address,
 {
   NS_ASSERT_MSG (spreadingFactor >= 7 && spreadingFactor <= 12, "Invalid LoRa spreading factor");
   NS_ASSERT_MSG (codingRate >= 5 && codingRate <= 8, "Invalid LoRa coding rate");
-  NS_ASSERT_MSG (bandwidth >= 8 && bandwidth <= 500, "Invalid LoRa bandwith");
+  NS_ASSERT_MSG (bandwidth >= 8 && bandwidth <= 500, "Invalid LoRa bandwidth");
   NS_ASSERT_MSG (preambleSize >= 6 && preambleSize <= 65532, "Invalid LoRa preamble size");
 
   double t_sym = pow (2, spreadingFactor) / bandwidth / 1000;
