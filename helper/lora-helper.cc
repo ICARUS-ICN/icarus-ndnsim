@@ -42,7 +42,7 @@ LoraHelper::LoraHelper (const std::string &protocol, const Address &address,
                                             (spreadingFactor - 2 * de));
   double toa = t_sym * (preambleSize + phySize + 4.25);
   loraPayloadSize = round (spreadingFactor * toa / codingRate / t_sym / 2) - headerSize;
-  DataRate loraSendingRate =
+  loraSendingRate =
       DataRate (sendingRate.GetBitRate () * loraPayloadSize / (loraPayloadSize + headerSize));
 
   m_impl->SetConstantRate (loraSendingRate, loraPayloadSize);
@@ -83,6 +83,12 @@ uint32_t
 LoraHelper::GetLoraPayloadSize () const
 {
   return loraPayloadSize;
+}
+
+DataRate
+LoraHelper::GetLoraSendingRate () const
+{
+  return loraSendingRate;
 }
 
 DataRate
