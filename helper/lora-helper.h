@@ -52,9 +52,9 @@ public:
    * \param address The address of the remote node to send traffic to.
    * \param spreadingFactor The LoRa spreading factor (7..12).
    * \param codingRate The LoRa coding rate (5..8).
-   * \param bandwith The LoRa bandwidth (in kHz).
+   * \param bandwidth The LoRa bandwidth (in kHz).
    * \param sendingRate DataRate object for the LoRa sending rate.
-   * \param preambleSize Size in symbols of the LoRa preamble. 
+   * \param preambleSize Size in symbols of the LoRa preamble.
    * \param headerSize Size in bytes of the protocol header.
    * \param payloadSize Size in bytes of the payload.
    * \param maxFrames Total number of LoRa frames to send (0 = no limit).
@@ -68,8 +68,8 @@ public:
   /**
    * Helper function used to set the underlying application attributes.
    *
-   * \param name The name of the application attribute to set
-   * \param value The value of the application attribute to set
+   * \param name The name of the application attribute to set.
+   * \param value The value of the application attribute to set.
    */
   void SetAttribute (const std::string &name, const AttributeValue &value) noexcept;
 
@@ -79,17 +79,17 @@ public:
    * with SetAttribute.
    *
    * \param c NodeContainer of the set of nodes on which an OnOffApplication 
-   * will be installed.
-   * \returns Container of Ptr to the applications installed.
+   *        will be installed.
+   * \return Container of Ptr to the applications installed.
    */
   ApplicationContainer Install (const NodeContainer &c) const;
 
   /**
-   * Install an ns3::OnOffApplication simulating Poisson traffic on the node 
+   * Install an ns3::OnOffApplication simulating LoRa traffic on the node 
    * configured with all the attributes set with SetAttribute.
    *
    * \param node The node on which an OnOffApplication will be installed.
-   * \returns Container of Ptr to the applications installed.
+   * \return Container of Ptr to the applications installed.
    */
   ApplicationContainer Install (Ptr<Node> node) const;
 
@@ -98,7 +98,7 @@ public:
    * configured with all the attributes set with SetAttribute.
    *
    * \param nodeName The node on which an OnOffApplication will be installed.
-   * \returns Container of Ptr to the applications installed.
+   * \return Container of Ptr to the applications installed.
    */
   ApplicationContainer Install (const std::string &nodeName) const;
 
@@ -108,30 +108,41 @@ public:
   * have been assigned. The Install() method should have previously been
   * called by the user.
   *
-  * \param stream First stream index to use
+  * \param stream First stream index to use.
   * \param c NodeContainer of the set of nodes for which the OnOffApplication
-  *          should be modified to use a fixed stream
-  * \return the number of stream indices assigned by this helper
+  *        should be modified to use a fixed stream.
+  * \return The number of stream indices assigned by this helper.
   */
   int64_t AssignStreams (const NodeContainer &c, int64_t stream);
 
   /**
-   * Returns the actual payload size of Lora frames.
+   * Returns the actual payload size of LoRa frames.
+   *
+   * \return The actual payload size of LoRa frames.
    */
   uint32_t GetLoraPayloadSize () const;
 
   /**
-   * Returns the data rate of a Lora link with given parameters.
+   * Returns the actual sending rate of LoRa frames.
+   *
+   * \return The actual sending rate of LoRa frames.
+   */
+  DataRate GetLoraSendingRate () const;
+
+  /**
+   * Returns the data rate of a LoRa link with given parameters.
    *
    * \param spreadingFactor The LoRa spreading factor (7..12).
    * \param codingRate The LoRa coding rate (5..8).
    * \param bandwith The LoRa bandwidth (in kHz).
+   * \return The data rate of the corresponding LoRa link.
    */
   static DataRate GetLoraLinkRate (uint8_t spreadingFactor, uint8_t codingRate, uint8_t bandwidth);
 
 private:
   std::unique_ptr<OnOffHelper> m_impl;
   uint32_t loraPayloadSize;
+  DataRate loraSendingRate;
 };
 
 } // namespace icarus
