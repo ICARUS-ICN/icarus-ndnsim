@@ -1,6 +1,6 @@
 /* -*- Mode:C++; c-file-style:"gnu"; indent-tabs-mode:nil; -*- */
 /*
- * Copyright (c) 2021 Universidade de Vigo
+ * Copyright (c) 2021–2022 Universidade de Vigo
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -15,7 +15,8 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
- * Author: Pablo Iglesias Sanuy <pabliglesias@alumnos.uvigo.es>
+ * Authors: Pablo Iglesias Sanuy <pabliglesias@alumnos.uvigo.es>
+ * Authors: Miguel Rodríguez Pérez <miguel@det.uvigo.gal>
  */
 #ifndef ISL_HELPER_H
 #define ISL_HELPER_H
@@ -82,6 +83,29 @@ public:
                    const AttributeValue &v2 = EmptyAttributeValue (), const std::string &n3 = "",
                    const AttributeValue &v3 = EmptyAttributeValue (), const std::string &n4 = "",
                    const AttributeValue &v4 = EmptyAttributeValue ());
+
+  /**
+   * \param type the type of propagation delay model
+   * \param n1 the name of the attribute to set on the queue
+   * \param v1 the value of the attribute to set on the queue
+   * \param n2 the name of the attribute to set on the queue
+   * \param v2 the value of the attribute to set on the queue
+   * \param n3 the name of the attribute to set on the queue
+   * \param v3 the value of the attribute to set on the queue
+   * \param n4 the name of the attribute to set on the queue
+   * \param v4 the value of the attribute to set on the queue
+   *
+   * Set the type of success model to create and associated to each
+   * ns3::icarus::GroundSatChannel created through IcarusHelper::Install.
+   */
+  void SetPropagationDelayModel (std::string type, const std::string &n1 = "",
+                                 const AttributeValue &v1 = EmptyAttributeValue (),
+                                 const std::string &n2 = "",
+                                 const AttributeValue &v2 = EmptyAttributeValue (),
+                                 const std::string &n3 = "",
+                                 const AttributeValue &v3 = EmptyAttributeValue (),
+                                 const std::string &n4 = "",
+                                 const AttributeValue &v4 = EmptyAttributeValue ());
 
   /**
    * \param n1 the name of the attribute to set \param v1 the value of the
@@ -185,6 +209,7 @@ private:
   ObjectFactory m_satNetDeviceFactory; //!< factory for NetDevices
   ObjectFactory m_channelFactory; //!< factory for the channel
   ObjectFactory m_successModelFactory; //!> factory for the success models
+  ObjectFactory m_propDelayModelFactory; //!> factory for the propagation delay models
 };
 
 } // namespace icarus

@@ -17,6 +17,7 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  * Authors: Pablo Iglesias Sanuy <pabliglesias@alumnos.uvigo.es>
+ * Authors: Miguel Rodríguez Pérez <miguel@det.uvigo.gal>
  *
  */
 
@@ -35,6 +36,7 @@
 #include "ns3/simulator.h"
 #include "sat-net-device.h"
 #include "ns3/assert.h"
+#include "ns3/propagation-delay-model.h"
 
 namespace ns3 {
 namespace icarus {
@@ -55,6 +57,9 @@ Sat2SatChannel::GetTypeId (void)
                          "visibility for a successful transmission",
                          PointerValue (), MakePointerAccessor (&Sat2SatChannel::m_txSuccessModel),
                          MakePointerChecker<Sat2SatSuccessModel> ())
+          .AddAttribute ("PropDelayModel", "Object used to calculate the propagation delay",
+                         PointerValue (), MakePointerAccessor (&Sat2SatChannel::m_propDelayModel),
+                         MakePointerChecker<PropagationDelayModel> ())
           .AddTraceSource ("PhyTxDrop",
                            "Trace source indicating a packet has been "
                            "completely received by the device",
@@ -114,16 +119,15 @@ Sat2SatChannel::TransmitStart (const Ptr<Packet> &packet, const Ptr<SatNetDevice
   auto dst = m_link[wire].m_dst;
 
   Time endTx = bps.CalculateBytesTxTime (packet->GetSize ());
-  auto posSrc = src->GetNode ()->GetObject<MobilityModel> ();
-  auto posDst = dst->GetNode ()->GetObject<MobilityModel> ();
-  auto distanceMeters = posSrc->GetDistanceFrom (posDst);
+  const auto posSrc = src->GetNode ()->GetObject<MobilityModel> ();
+  const auto posDst = dst->GetNode ()->GetObject<MobilityModel> ();
 
-  Time delay (Seconds (distanceMeters / 3e8));
+  const Time delay (m_propDelayModel->GetDelay (posSrc, posDst));
 
   if (m_txSuccessModel != nullptr &&
       m_txSuccessModel->TramsmitSuccess (src->GetNode (), dst->GetNode (), packet) != true)
     {
-      NS_LOG_ERROR ("DROP PACKET, DISTANCE: " << distanceMeters);
+      NS_LOG_ERROR ("DROP PACKET, DISTANCE: " << posSrc->GetDistanceFrom (posDst));
       m_phyTxDropTrace (packet);
     }
   else
