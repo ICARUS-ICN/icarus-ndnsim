@@ -1,7 +1,7 @@
 /* -*- Mode:C++; c-file-style:"gnu"; indent-tabs-mode:nil; -*- */
 /*
  *
- * Copyright (c) 2021 Universidade de Vigo
+ * Copyright (c) 2021–2022 Universidade de Vigo
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 2 as
@@ -32,6 +32,7 @@
 #include "ns3/pointer.h"
 #include "ns3/simulator.h"
 #include "ns3/sat2ground-net-device.h"
+#include "ns3/propagation-delay-model.h"
 
 namespace ns3 {
 
@@ -110,11 +111,10 @@ GroundSatChannel::Transmit2Sat (const Ptr<Packet> &packet, DataRate bps,
       m_phyTxDropTrace (packet);
     }
 
-  auto posGround = src->GetNode ()->GetObject<MobilityModel> ();
-  auto posSat = sat_device->GetNode ()->GetObject<MobilityModel> ();
-  auto distanceMeters = posGround->GetDistanceFrom (posSat);
+  const auto posGround = src->GetNode ()->GetObject<MobilityModel> ();
+  const auto posSat = sat_device->GetNode ()->GetObject<MobilityModel> ();
 
-  Time delay (Seconds (distanceMeters / 3e8));
+  const Time delay = m_propDelayModel->GetDelay (posGround, posSat);
 
   if (m_txSuccessModel != nullptr &&
       m_txSuccessModel->TramsmitSuccess (src->GetNode (), sat_device->GetNode (), packet) != true)
@@ -140,11 +140,10 @@ GroundSatChannel::Transmit2Ground (const Ptr<Packet> &packet, DataRate bps,
 
   for (const auto &ground_device : m_ground)
     {
-      auto posGround = ground_device->GetNode ()->GetObject<MobilityModel> ();
-      auto posSat = src->GetNode ()->GetObject<MobilityModel> ();
-      auto distanceMeters = posGround->GetDistanceFrom (posSat);
+      const auto posGround = ground_device->GetNode ()->GetObject<MobilityModel> ();
+      const auto posSat = src->GetNode ()->GetObject<MobilityModel> ();
 
-      Time delay (Seconds (distanceMeters / 3e8));
+      const Time delay = m_propDelayModel->GetDelay (posGround, posSat);
 
       if (m_txSuccessModel != nullptr &&
           m_txSuccessModel->TramsmitSuccess (ground_device->GetNode (), src->GetNode (), packet) !=
