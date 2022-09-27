@@ -53,6 +53,9 @@ GroundSatChannel::GetTypeId (void)
                          "visibility for a successful transmission",
                          PointerValue (), MakePointerAccessor (&GroundSatChannel::m_txSuccessModel),
                          MakePointerChecker<GroundSatSuccessModel> ())
+          .AddAttribute ("PropDelayModel", "Object used to calculate the propagation delay",
+                         PointerValue (), MakePointerAccessor (&GroundSatChannel::m_propDelayModel),
+                         MakePointerChecker<PropagationDelayModel> ())
           .AddTraceSource ("PhyTxDrop",
                            "Trace source indicating a packet has been "
                            "dropped by the channel",

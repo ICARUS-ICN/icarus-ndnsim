@@ -43,6 +43,7 @@
 #include "ns3/ground-node-sat-tracker.h"
 #include "ns3/sat2ground-net-device.h"
 #include "ns3/sat2ground-transport.h"
+#include "ns3/propagation-delay-model.h"
 #include <memory>
 
 namespace ns3 {
@@ -61,6 +62,7 @@ IcarusHelper::IcarusHelper () : m_enableGeoTags (nullptr)
   m_successModelFactory.SetTypeId ("ns3::icarus::GroundSatSuccessElevation");
   m_macModelFactory.SetTypeId ("ns3::icarus::NoneMacModel");
   m_trackerModelFactory.SetTypeId ("ns3::icarus::GroundNodeSatTracker");
+  m_propDelayModelFactory.SetTypeId ("ns3::ConstantSpeedPropagationDelayModel");
 }
 
 void
@@ -92,6 +94,22 @@ IcarusHelper::SetSuccessModel (std::string type, const std::string &n1, const At
   m_successModelFactory.Set (n2, v2);
   m_successModelFactory.Set (n3, v3);
   m_successModelFactory.Set (n4, v4);
+}
+
+void
+IcarusHelper::SetPropagationDelayModel (std::string type, const std::string &n1,
+                                        const AttributeValue &v1, const std::string &n2,
+                                        const AttributeValue &v2, const std::string &n3,
+                                        const AttributeValue &v3, const std::string &n4,
+                                        const AttributeValue &v4)
+{
+  NS_LOG_FUNCTION (this << type << n1 << n2 << n3 << n4);
+
+  m_propDelayModelFactory.SetTypeId (type);
+  m_propDelayModelFactory.Set (n1, v1);
+  m_propDelayModelFactory.Set (n2, v2);
+  m_propDelayModelFactory.Set (n3, v3);
+  m_propDelayModelFactory.Set (n4, v4);
 }
 
 void
@@ -190,6 +208,9 @@ IcarusHelper::Install (const NodeContainer &c, ConstellationHelper &chelper) con
   channel->SetAttribute (
       "TxSuccess",
       PointerValue (m_successModelFactory.Create ()->GetObject<GroundSatSuccessModel> ()));
+  channel->SetAttribute (
+      "PropDelayModel",
+      PointerValue (m_propDelayModelFactory.Create ()->GetObject<PropagationDelayModel> ()));
 
   return Install (c, channel, chelper);
 }

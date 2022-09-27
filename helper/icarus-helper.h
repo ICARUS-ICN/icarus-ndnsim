@@ -1,6 +1,6 @@
 /* -*- Mode:C++; c-file-style:"gnu"; indent-tabs-mode:nil; -*- */
 /*
- * Copyright (c) 2021 Universidade de Vigo
+ * Copyright (c) 2021–2022 Universidade de Vigo
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -23,6 +23,7 @@
 #include "ndn-cxx/lp/geo-tag.hpp"
 #include "ns3/icarus-module.h"
 
+#include "ns3/object-factory.h"
 #include "ns3/simple-ref-count.h"
 #include "ns3/trace-helper.h"
 #include "ns3/ground-sat-channel.h"
@@ -88,6 +89,29 @@ public:
                    const AttributeValue &v2 = EmptyAttributeValue (), const std::string &n3 = "",
                    const AttributeValue &v3 = EmptyAttributeValue (), const std::string &n4 = "",
                    const AttributeValue &v4 = EmptyAttributeValue ());
+
+  /**
+   * \param type the type of propagation delay model
+   * \param n1 the name of the attribute to set on the queue
+   * \param v1 the value of the attribute to set on the queue
+   * \param n2 the name of the attribute to set on the queue
+   * \param v2 the value of the attribute to set on the queue
+   * \param n3 the name of the attribute to set on the queue
+   * \param v3 the value of the attribute to set on the queue
+   * \param n4 the name of the attribute to set on the queue
+   * \param v4 the value of the attribute to set on the queue
+   *
+   * Set the type of success model to create and associated to each
+   * ns3::icarus::GroundSatChannel created through IcarusHelper::Install.
+   */
+  void SetPropagationDelayModel (std::string type, const std::string &n1 = "",
+                                 const AttributeValue &v1 = EmptyAttributeValue (),
+                                 const std::string &n2 = "",
+                                 const AttributeValue &v2 = EmptyAttributeValue (),
+                                 const std::string &n3 = "",
+                                 const AttributeValue &v3 = EmptyAttributeValue (),
+                                 const std::string &n4 = "",
+                                 const AttributeValue &v4 = EmptyAttributeValue ());
 
   /**
    * \param type the type of MAC model
@@ -282,6 +306,7 @@ private:
   ObjectFactory m_successModelFactory; //!> factory for the success models
   ObjectFactory m_macModelFactory; //!> factory for the MAC models
   ObjectFactory m_trackerModelFactory; //!> factory for the Tracker models
+  ObjectFactory m_propDelayModelFactory; //!> factory for the propagation delay models
 
   std::function<std::shared_ptr<ndn::lp::GeoTag> ()> m_enableGeoTags;
 };
