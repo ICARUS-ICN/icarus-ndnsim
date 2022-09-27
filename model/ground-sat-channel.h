@@ -33,6 +33,7 @@
 namespace ns3 {
 
 class Packet;
+class PropagationDelayModel;
 
 namespace icarus {
 
@@ -69,6 +70,7 @@ public:
 private:
   std::vector<Ptr<GroundStaNetDevice>> m_ground;
   Ptr<GroundSatSuccessModel> m_txSuccessModel;
+  Ptr<PropagationDelayModel> m_propDelayModel;
   Ptr<Constellation> m_constellation;
 
   TracedCallback<Ptr<const Packet>> m_phyTxDropTrace;
