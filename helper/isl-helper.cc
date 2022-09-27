@@ -1,6 +1,6 @@
 /* -*- Mode:C++; c-file-style:"gnu"; indent-tabs-mode:nil; -*- */
 /*
- * Copyright (c) 2021 Universidade de Vigo
+ * Copyright (c) 2021–2022 Universidade de Vigo
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,6 +16,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
  * Author: Pablo Iglesias Sanuy <pabliglesias@alumnos.uvigo.es>
+ * Authors: Miguel Rodríguez Pérez <miguel@det.uvigo.gal>
  */
 
 #include "isl-helper.h"
@@ -37,6 +38,7 @@
 #include "ns3/sat2sat-success-model.h"
 #include "ns3/sat-address.h"
 #include "ns3/ndnSIM/NFD/daemon/face/generic-link-service.hpp"
+#include "ns3/propagation-delay-model.h"
 #include <memory>
 
 namespace ns3 {
@@ -52,6 +54,7 @@ ISLHelper::ISLHelper ()
   m_channelFactory.SetTypeId ("ns3::icarus::Sat2SatChannel");
   m_satNetDeviceFactory.SetTypeId ("ns3::icarus::SatNetDevice");
   m_successModelFactory.SetTypeId ("ns3::icarus::Sat2SatSuccessModel");
+  m_propDelayModelFactory.SetTypeId ("ns3::ConstantSpeedPropagationDelayModel");
 }
 
 void
@@ -85,6 +88,22 @@ ISLHelper::SetSuccessModel (std::string type, const std::string &n1, const Attri
   m_successModelFactory.Set (n2, v2);
   m_successModelFactory.Set (n3, v3);
   m_successModelFactory.Set (n4, v4);
+}
+
+void
+ISLHelper::SetPropagationDelayModel (std::string type, const std::string &n1,
+                                     const AttributeValue &v1, const std::string &n2,
+                                     const AttributeValue &v2, const std::string &n3,
+                                     const AttributeValue &v3, const std::string &n4,
+                                     const AttributeValue &v4)
+{
+  NS_LOG_FUNCTION (this << type << n1 << n2 << n3 << n4);
+
+  m_propDelayModelFactory.SetTypeId (type);
+  m_propDelayModelFactory.Set (n1, v1);
+  m_propDelayModelFactory.Set (n2, v2);
+  m_propDelayModelFactory.Set (n3, v3);
+  m_propDelayModelFactory.Set (n4, v4);
 }
 
 void
@@ -192,6 +211,9 @@ ISLHelper::Install (Ptr<Node> a, Ptr<Node> b) const
   Ptr<Sat2SatChannel> channel = m_channelFactory.Create<Sat2SatChannel> ();
   channel->SetAttribute ("TxSuccess",
                          PointerValue (m_successModelFactory.Create<Sat2SatSuccessModel> ()));
+  channel->SetAttribute (
+      "PropDelayModel",
+      PointerValue (m_propDelayModelFactory.Create ()->GetObject<PropagationDelayModel> ()));
   devices.Add (InstallPriv (a, channel));
   devices.Add (InstallPriv (b, channel));
   return devices;

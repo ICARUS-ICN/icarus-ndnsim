@@ -1,7 +1,7 @@
 /* -*- Mode:C++; c-file-style:"gnu"; indent-tabs-mode:nil; -*- */
 /*
  *
- * Copyright (c) 2021 Universidade de Vigo
+ * Copyright (c) 2021–2022 Universidade de Vigo
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 2 as
@@ -16,7 +16,8 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
- * Author: Pablo Iglesias Sanuy <pabliglesias@alumnos.uvigo.es>
+ * Authors: Pablo Iglesias Sanuy <pabliglesias@alumnos.uvigo.es>
+ * Authors: Miguel Rodríguez Pérez <miguel@det.uvigo.gal>
  *
  */
 
@@ -32,6 +33,9 @@
 #include "ns3/traced-callback.h"
 
 namespace ns3 {
+
+class PropagationDelayModel;
+
 namespace icarus {
 class SatNetDevice;
 class Sat2SatSuccessModel;
@@ -60,6 +64,7 @@ private:
 
   std::size_t m_nSatellites;
   Ptr<Sat2SatSuccessModel> m_txSuccessModel = nullptr;
+  Ptr<PropagationDelayModel> m_propDelayModel;
 
   TracedCallback<Ptr<const Packet>> m_phyTxDropTrace;
 
