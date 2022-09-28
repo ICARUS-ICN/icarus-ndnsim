@@ -87,6 +87,9 @@ public:
   virtual void SetPromiscReceiveCallback (PromiscReceiveCallback cb) override;
   virtual bool SupportsSendFrom (void) const override = 0;
 
+  virtual void SetTxPower (const double txPower);
+  virtual double GetTxPower (void) const;
+
 protected:
   TracedCallback<> m_linkChangeCallbacks;
   TracedCallback<Ptr<const Packet>> m_macTxTrace, m_macTxDropTrace, m_macRxTrace, m_phyTxBeginTrace,
@@ -104,8 +107,10 @@ private:
   Ptr<GroundSatChannel> m_channel;
   Ptr<Node> m_node;
   uint16_t m_mtu;
+  double m_txPower;
   static constexpr uint16_t DEFAULT_MTU = 1500;
 };
+
 } // namespace icarus
 } // namespace ns3
 

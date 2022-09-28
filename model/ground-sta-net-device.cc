@@ -95,11 +95,31 @@ public:
     return m_protocolNumber;
   }
 
+  /**
+   * Set the transmission power
+   * \param power transmission power
+   */
+  void
+  SetTxPower (double power)
+  {
+    m_txPower = power;
+  }
+  /**
+   * Get the transmission power
+   * \return the transmission power
+   */
+  double
+  GetTxPower (void) const
+  {
+    return m_txPower;
+  }
+
   void Print (std::ostream &os) const override;
 
 private:
   SatAddress m_dst; //!< destination address
   uint16_t m_protocolNumber; //!< protocol number
+  double m_txPower; //!< transmission power
 };
 
 NS_OBJECT_ENSURE_REGISTERED (GroundSatTag);
@@ -122,7 +142,7 @@ GroundSatTag::GetInstanceTypeId (void) const
 uint32_t
 GroundSatTag::GetSerializedSize (void) const
 {
-  return 8 + 8 + 2;
+  return 8 + 8 + 2 + 8;
 }
 void
 GroundSatTag::Serialize (TagBuffer i) const
@@ -131,6 +151,7 @@ GroundSatTag::Serialize (TagBuffer i) const
   m_dst.CopyTo (mac);
   i.Write (mac, 6);
   i.WriteU16 (m_protocolNumber);
+  i.WriteDouble (m_txPower);
 }
 void
 GroundSatTag::Deserialize (TagBuffer i)
@@ -140,12 +161,13 @@ GroundSatTag::Deserialize (TagBuffer i)
   i.Read (mac, 6);
   m_dst.CopyFrom (mac);
   m_protocolNumber = i.ReadU16 ();
+  m_txPower = i.ReadDouble ();
 }
 
 void
 GroundSatTag::Print (std::ostream &os) const
 {
-  os << " dst=" << m_dst << " proto=" << m_protocolNumber;
+  os << " dst=" << m_dst << " proto=" << m_protocolNumber << " power=" << m_txPower;
 }
 } // namespace
 
@@ -157,17 +179,21 @@ GroundStaNetDevice::GetTypeId (void)
           .SetParent<IcarusNetDevice> ()
           .SetGroupName ("ICARUS")
           .AddConstructor<GroundStaNetDevice> ()
-          .AddAttribute ("Address", "The link-layer address of this device.",
+          .AddAttribute ("Address", "The link-layer address of this device",
                          Mac48AddressValue (Mac48Address ("00:00:00:00:00:00")),
                          MakeMac48AddressAccessor (&GroundStaNetDevice::m_localAddress),
                          MakeMac48AddressChecker ())
-          .AddAttribute ("RemoteAddress", "The link-layer address of the remote satellite.",
+          .AddAttribute ("RemoteAddress", "The link-layer address of the remote satellite",
                          SatAddressValue (SatAddress (0, 0, 0)),
                          MakeSatAddressAccessor (&GroundStaNetDevice::m_remoteAddress),
                          MakeSatAddressChecker ())
           .AddAttribute ("MacModelTx", "The MAC protocol for transmitted frames", PointerValue (),
                          MakePointerAccessor (&GroundStaNetDevice::m_macModel),
-                         MakePointerChecker<MacModel> ());
+                         MakePointerChecker<MacModel> ())
+          .AddAttribute (
+              "TxPower", "The transmission power for this device (in dBm)", DoubleValue (0),
+              MakeDoubleAccessor (&IcarusNetDevice::SetTxPower, &IcarusNetDevice::GetTxPower),
+              MakeDoubleChecker<double> ());
 
   return tid;
 }
@@ -341,6 +367,7 @@ GroundStaNetDevice::Send (Ptr<Packet> packet, const Address &, uint16_t protocol
   GroundSatTag tag;
   tag.SetDst (m_remoteAddress);
   tag.SetProto (protocolNumber);
+  tag.SetTxPower (GetTxPower ());
   packet->AddPacketTag (tag);
 
   m_macTxTrace (packet);
@@ -427,5 +454,6 @@ GroundStaNetDevice::SupportsSendFrom (void) const
 
   return false;
 }
+
 } // namespace icarus
 } // namespace ns3
