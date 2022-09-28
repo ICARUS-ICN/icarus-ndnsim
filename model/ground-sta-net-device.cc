@@ -217,9 +217,9 @@ GroundStaNetDevice::Attach (const Ptr<GroundSatChannel> &channel)
 
 void
 GroundStaNetDevice::ReceiveFromSat (const Ptr<Packet> &packet, DataRate bps, const Address &src,
-                                    uint16_t protocolNumber)
+                                    uint16_t protocolNumber, double rxPower)
 {
-  NS_LOG_FUNCTION (this << packet << bps << src << protocolNumber);
+  NS_LOG_FUNCTION (this << packet << bps << src << protocolNumber << rxPower);
 
   if (SatAddress::ConvertFrom (src) != m_remoteAddress)
     {
@@ -399,14 +399,15 @@ GroundStaNetDevice::TransmitStart ()
   packet->PeekPacketTag (tag);
   const auto dst = tag.GetDst ();
   const auto proto = tag.GetProto ();
+  const auto power = tag.GetTxPower ();
 
   m_macModel->Send (
       packet,
       [=] (void) -> Time {
         m_snifferTrace (packet);
         m_phyTxBeginTrace (packet);
-        return GetInternalChannel ()->Transmit2Sat (packet, GetDataRate (),
-                                                    GetObject<GroundStaNetDevice> (), dst, proto);
+        return GetInternalChannel ()->Transmit2Sat (
+            packet, GetDataRate (), GetObject<GroundStaNetDevice> (), dst, proto, power);
       },
       [=] (void) {
         m_phyTxEndTrace (packet);

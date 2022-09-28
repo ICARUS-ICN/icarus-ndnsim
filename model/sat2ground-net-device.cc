@@ -192,10 +192,15 @@ Sat2GroundNetDevice::Attach (const Ptr<GroundSatChannel> &channel)
 
 void
 Sat2GroundNetDevice::ReceiveFromGround (const Ptr<Packet> &packet, DataRate bps, const Address &src,
-                                        uint16_t protocolNumber)
+                                        uint16_t protocolNumber, double rxPower)
 {
-  NS_LOG_FUNCTION (this << packet << bps << src << protocolNumber);
+  NS_LOG_FUNCTION (this << packet << bps << src << protocolNumber << rxPower);
   NS_ASSERT_MSG (m_macModel != nullptr, "Need a MacModel to receive packets.");
+
+  SatGroundTag tag;
+  packet->PeekPacketTag (tag);
+  tag.SetTxPower (rxPower);
+  packet->AddPacketTag (tag);
 
   m_phyRxBeginTrace (packet);
   Time packet_tx_time = bps.CalculateBytesTxTime (packet->GetSize ());
@@ -340,10 +345,11 @@ Sat2GroundNetDevice::TransmitStart ()
   SatGroundTag tag;
   packet->PeekPacketTag (tag);
   const auto proto = tag.GetProto ();
+  const auto power = tag.GetTxPower ();
 
   m_phyTxBeginTrace (packet);
   GetInternalChannel ()->Transmit2Ground (packet, GetDataRate (), GetObject<Sat2GroundNetDevice> (),
-                                          proto);
+                                          proto, power);
   Simulator::Schedule (GetDataRate ().CalculateBytesTxTime (packet->GetSize ()),
                        &Sat2GroundNetDevice::TransmitComplete, this, packet);
 }
