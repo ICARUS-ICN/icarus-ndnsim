@@ -76,11 +76,31 @@ public:
     return m_protocolNumber;
   }
 
+  /**
+   * Set the transmission power
+   * \param power transmission power
+   */
+  void
+  SetTxPower (double power)
+  {
+    m_txPower = power;
+  }
+  /**
+   * Get the transmission power
+   * \return the transmission power
+   */
+  double
+  GetTxPower (void) const
+  {
+    return m_txPower;
+  }
+
   void Print (std::ostream &os) const override;
 
 private:
   Mac48Address m_dst; //!< destination address
   uint16_t m_protocolNumber; //!< protocol number
+  double m_txPower; //!< transmission power
 };
 
 NS_OBJECT_ENSURE_REGISTERED (SatGroundTag);
@@ -103,7 +123,7 @@ SatGroundTag::GetInstanceTypeId (void) const
 uint32_t
 SatGroundTag::GetSerializedSize (void) const
 {
-  return 8 + 8 + 2;
+  return 8 + 8 + 2 + 8;
 }
 void
 SatGroundTag::Serialize (TagBuffer i) const
@@ -112,6 +132,7 @@ SatGroundTag::Serialize (TagBuffer i) const
   m_dst.CopyTo (mac);
   i.Write (mac, 6);
   i.WriteU16 (m_protocolNumber);
+  i.WriteDouble (m_txPower);
 }
 void
 SatGroundTag::Deserialize (TagBuffer i)
@@ -121,12 +142,13 @@ SatGroundTag::Deserialize (TagBuffer i)
   i.Read (mac, 6);
   m_dst.CopyFrom (mac);
   m_protocolNumber = i.ReadU16 ();
+  m_txPower = i.ReadDouble ();
 }
 
 void
 SatGroundTag::Print (std::ostream &os) const
 {
-  os << " dst=" << m_dst << " proto=" << m_protocolNumber;
+  os << " dst=" << m_dst << " proto=" << m_protocolNumber << " power=" << m_txPower;
 }
 } // namespace
 
@@ -139,11 +161,15 @@ Sat2GroundNetDevice::GetTypeId (void)
           .SetGroupName ("ICARUS")
           .AddConstructor<Sat2GroundNetDevice> ()
           .AddAttribute (
-              "Address", "The link-layer address of this device.", SatAddressValue (SatAddress ()),
+              "Address", "The link-layer address of this device", SatAddressValue (SatAddress ()),
               MakeSatAddressAccessor (&Sat2GroundNetDevice::m_address), MakeSatAddressChecker ())
           .AddAttribute ("MacModelRx", "The MAC protocol for received frames", PointerValue (),
                          MakePointerAccessor (&Sat2GroundNetDevice::m_macModel),
-                         MakePointerChecker<MacModel> ());
+                         MakePointerChecker<MacModel> ())
+          .AddAttribute (
+              "TxPower", "The transmission power for this device (in dBm)", DoubleValue (0),
+              MakeDoubleAccessor (&IcarusNetDevice::SetTxPower, &IcarusNetDevice::GetTxPower),
+              MakeDoubleChecker<double> ());
 
   return tid;
 }
@@ -280,6 +306,7 @@ Sat2GroundNetDevice::Send (Ptr<Packet> packet, const Address &dest, uint16_t pro
 
   SatGroundTag tag;
   tag.SetProto (protocolNumber);
+  tag.SetTxPower (GetTxPower ());
   packet->AddPacketTag (tag);
 
   m_macTxTrace (packet);

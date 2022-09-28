@@ -133,6 +133,7 @@ void
 IcarusNetDevice::SetDataRate (DataRate rate)
 {
   NS_LOG_FUNCTION (this << rate);
+
   m_bps = rate;
 }
 
@@ -252,6 +253,22 @@ Ptr<GroundSatChannel>
 IcarusNetDevice::GetInternalChannel (void) const
 {
   return m_channel;
+}
+
+void
+IcarusNetDevice::SetTxPower (const double txPower)
+{
+  NS_LOG_FUNCTION (this << txPower);
+
+  m_txPower = txPower;
+}
+
+double
+IcarusNetDevice::GetTxPower (void) const
+{
+  NS_LOG_FUNCTION (this);
+
+  return m_txPower;
 }
 
 } // namespace icarus
