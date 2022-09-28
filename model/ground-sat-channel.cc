@@ -33,6 +33,7 @@
 #include "ns3/simulator.h"
 #include "ns3/sat2ground-net-device.h"
 #include "ns3/propagation-delay-model.h"
+#include "ns3/propagation-loss-model.h"
 
 namespace ns3 {
 
@@ -57,6 +58,9 @@ GroundSatChannel::GetTypeId (void)
           .AddAttribute ("PropDelayModel", "Object used to calculate the propagation delay",
                          PointerValue (), MakePointerAccessor (&GroundSatChannel::m_propDelayModel),
                          MakePointerChecker<PropagationDelayModel> ())
+          .AddAttribute ("PropLossModel", "Object used to model the propagation loss",
+                         PointerValue (), MakePointerAccessor (&GroundSatChannel::m_propLossModel),
+                         MakePointerChecker<PropagationLossModel> ())
           .AddTraceSource ("PhyTxDrop",
                            "Trace source indicating a packet has been "
                            "dropped by the channel",
@@ -90,9 +94,9 @@ GroundSatChannel::~GroundSatChannel ()
 Time
 GroundSatChannel::Transmit2Sat (const Ptr<Packet> &packet, DataRate bps,
                                 const Ptr<GroundStaNetDevice> &src, const SatAddress &dst,
-                                uint16_t protocolNumber) const
+                                uint16_t protocolNumber, double txPower) const
 {
-  NS_LOG_FUNCTION (this << packet << bps << dst << protocolNumber);
+  NS_LOG_FUNCTION (this << packet << bps << dst << protocolNumber << txPower);
 
   Time endTx = bps.CalculateBytesTxTime (packet->GetSize ());
 
@@ -115,6 +119,7 @@ GroundSatChannel::Transmit2Sat (const Ptr<Packet> &packet, DataRate bps,
   const auto posSat = sat_device->GetNode ()->GetObject<MobilityModel> ();
 
   const Time delay = m_propDelayModel->GetDelay (posGround, posSat);
+  const double rxPower = m_propLossModel->CalcRxPower (txPower, posGround, posSat);
 
   if (m_txSuccessModel != nullptr &&
       m_txSuccessModel->TramsmitSuccess (src->GetNode (), sat_device->GetNode (), packet) != true)
@@ -125,7 +130,7 @@ GroundSatChannel::Transmit2Sat (const Ptr<Packet> &packet, DataRate bps,
     {
       Simulator::ScheduleWithContext (sat_device->GetNode ()->GetId (), delay,
                                       &Sat2GroundNetDevice::ReceiveFromGround, sat_device, packet,
-                                      bps, src->GetAddress (), protocolNumber);
+                                      bps, src->GetAddress (), protocolNumber, rxPower);
     }
 
   return endTx;
@@ -133,8 +138,8 @@ GroundSatChannel::Transmit2Sat (const Ptr<Packet> &packet, DataRate bps,
 
 void
 GroundSatChannel::Transmit2Ground (const Ptr<Packet> &packet, DataRate bps,
-                                   const Ptr<Sat2GroundNetDevice> &src,
-                                   uint16_t protocolNumber) const
+                                   const Ptr<Sat2GroundNetDevice> &src, uint16_t protocolNumber,
+                                   double txPower) const
 {
   NS_LOG_FUNCTION (this << packet << bps << &src << protocolNumber);
 
@@ -144,6 +149,7 @@ GroundSatChannel::Transmit2Ground (const Ptr<Packet> &packet, DataRate bps,
       const auto posSat = src->GetNode ()->GetObject<MobilityModel> ();
 
       const Time delay = m_propDelayModel->GetDelay (posGround, posSat);
+      const double rxPower = m_propLossModel->CalcRxPower (txPower, posGround, posSat);
 
       if (m_txSuccessModel != nullptr &&
           m_txSuccessModel->TramsmitSuccess (ground_device->GetNode (), src->GetNode (), packet) !=
@@ -156,7 +162,7 @@ GroundSatChannel::Transmit2Ground (const Ptr<Packet> &packet, DataRate bps,
         {
           Simulator::ScheduleWithContext (ground_device->GetNode ()->GetId (), delay,
                                           &GroundStaNetDevice::ReceiveFromSat, ground_device,
-                                          packet, bps, src->GetAddress (), protocolNumber);
+                                          packet, bps, src->GetAddress (), protocolNumber, rxPower);
         }
     }
 }

@@ -48,7 +48,7 @@ public:
   bool Attach (const Ptr<GroundSatChannel> &channel) override;
 
   void ReceiveFromSat (const Ptr<Packet> &packet, DataRate bps, const Address &src,
-                       uint16_t protocolNumber);
+                       uint16_t protocolNumber, double rxPower);
 
   Address GetAddress () const override;
   void SetAddress (Address address) override;

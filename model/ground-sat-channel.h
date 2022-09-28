@@ -34,6 +34,7 @@ namespace ns3 {
 
 class Packet;
 class PropagationDelayModel;
+class PropagationLossModel;
 
 namespace icarus {
 
@@ -57,9 +58,10 @@ public:
   void AddGroundDevice (const Ptr<GroundStaNetDevice> &device);
 
   void Transmit2Ground (const Ptr<Packet> &packet, DataRate bps,
-                        const Ptr<Sat2GroundNetDevice> &src, uint16_t protocolNumber) const;
+                        const Ptr<Sat2GroundNetDevice> &src, uint16_t protocolNumber,
+                        double txPower) const;
   Time Transmit2Sat (const Ptr<Packet> &packet, DataRate bps, const Ptr<GroundStaNetDevice> &src,
-                     const SatAddress &dst, uint16_t protocolNumber) const;
+                     const SatAddress &dst, uint16_t protocolNumber, double txPower) const;
 
   virtual std::size_t GetNDevices (void) const override;
   virtual Ptr<NetDevice> GetDevice (std::size_t i) const override;
@@ -71,6 +73,7 @@ private:
   std::vector<Ptr<GroundStaNetDevice>> m_ground;
   Ptr<GroundSatSuccessModel> m_txSuccessModel;
   Ptr<PropagationDelayModel> m_propDelayModel;
+  Ptr<PropagationLossModel> m_propLossModel;
   Ptr<Constellation> m_constellation;
 
   TracedCallback<Ptr<const Packet>> m_phyTxDropTrace;
