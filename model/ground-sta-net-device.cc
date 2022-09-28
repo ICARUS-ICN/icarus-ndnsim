@@ -96,22 +96,22 @@ public:
   }
 
   /**
-   * Set the transmission power
-   * \param power transmission power
+   * Set the packet power
+   * \param power packet power
    */
   void
-  SetTxPower (double power)
+  SetPower (double power)
   {
-    m_txPower = power;
+    m_power = power;
   }
   /**
-   * Get the transmission power
-   * \return the transmission power
+   * Get the packet power
+   * \return the packet power
    */
   double
-  GetTxPower (void) const
+  GetPower (void) const
   {
-    return m_txPower;
+    return m_power;
   }
 
   void Print (std::ostream &os) const override;
@@ -119,7 +119,7 @@ public:
 private:
   SatAddress m_dst; //!< destination address
   uint16_t m_protocolNumber; //!< protocol number
-  double m_txPower; //!< transmission power
+  double m_power; //!< packet power
 };
 
 NS_OBJECT_ENSURE_REGISTERED (GroundSatTag);
@@ -151,7 +151,7 @@ GroundSatTag::Serialize (TagBuffer i) const
   m_dst.CopyTo (mac);
   i.Write (mac, 6);
   i.WriteU16 (m_protocolNumber);
-  i.WriteDouble (m_txPower);
+  i.WriteDouble (m_power);
 }
 void
 GroundSatTag::Deserialize (TagBuffer i)
@@ -161,13 +161,13 @@ GroundSatTag::Deserialize (TagBuffer i)
   i.Read (mac, 6);
   m_dst.CopyFrom (mac);
   m_protocolNumber = i.ReadU16 ();
-  m_txPower = i.ReadDouble ();
+  m_power = i.ReadDouble ();
 }
 
 void
 GroundSatTag::Print (std::ostream &os) const
 {
-  os << " dst=" << m_dst << " proto=" << m_protocolNumber << " power=" << m_txPower;
+  os << " dst=" << m_dst << " proto=" << m_protocolNumber << " power=" << m_power;
 }
 } // namespace
 
@@ -367,7 +367,7 @@ GroundStaNetDevice::Send (Ptr<Packet> packet, const Address &, uint16_t protocol
   GroundSatTag tag;
   tag.SetDst (m_remoteAddress);
   tag.SetProto (protocolNumber);
-  tag.SetTxPower (GetTxPower ());
+  tag.SetPower (GetTxPower ());
   packet->AddPacketTag (tag);
 
   m_macTxTrace (packet);
@@ -399,7 +399,7 @@ GroundStaNetDevice::TransmitStart ()
   packet->PeekPacketTag (tag);
   const auto dst = tag.GetDst ();
   const auto proto = tag.GetProto ();
-  const auto power = tag.GetTxPower ();
+  const auto power = tag.GetPower ();
 
   m_macModel->Send (
       packet,
