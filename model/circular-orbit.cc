@@ -80,7 +80,7 @@ public:
   }
 
   std::tuple<meters, meters, meters>
-  getCartesianPosition (quantity<si::time> t) const noexcept
+  getCartesianPositionRightAscensionDeclination (quantity<si::time> t) const noexcept
   {
     using namespace boost::math::double_constants;
     using namespace boost::units;
@@ -185,7 +185,8 @@ CircularOrbitMobilityModel::getRawPosition () const
   NS_ABORT_IF (sat == nullptr);
 
   meters x, y, z;
-  std::tie (x, y, z) = sat->getCartesianPosition (Simulator::Now ().GetSeconds () * seconds);
+  std::tie (x, y, z) = sat->getCartesianPositionRightAscensionDeclination (
+      Simulator::Now ().GetSeconds () * seconds);
 
   return Vector (x.value (), y.value (), z.value ());
 }
