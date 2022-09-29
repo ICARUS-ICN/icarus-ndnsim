@@ -1,6 +1,6 @@
 /* -*- Mode:C++; c-file-style:"gnu"; indent-tabs-mode:nil; -*- */
 /*
- * Copyright (c) 2021 Universidade de Vigo
+ * Copyright (c) 2021–22 Universidade de Vigo
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -28,6 +28,8 @@
 
 namespace ns3 {
 namespace icarus {
+
+class CircularOrbitMobilityModelImpl;
 /**
  * \ingroup icarus
  *
@@ -57,10 +59,7 @@ private:
   virtual void DoSetPosition (const Vector &position);
   virtual Vector DoGetVelocity (void) const;
 
-  radians inclination;
-  radians ascending_node;
-  meters radius;
-  radians phase;
+  std::unique_ptr<CircularOrbitMobilityModelImpl> sat;
 };
 } // namespace icarus
 } // namespace ns3
