@@ -24,7 +24,6 @@
 #define ALOHA_MAC_MODEL_H
 
 #include "mac-model.h"
-#include "../ground-sta-net-device.h"
 #include "ns3/nstime.h"
 
 #include <boost/optional.hpp>
@@ -53,8 +52,8 @@ private:
 
   void DoSend (const Ptr<Packet> &packet, std::function<Time (void)> transmit_callback,
                std::function<void (void)> finish_callback) const;
-  void FinishReception (const Ptr<Packet> &packet, double rx_power, std::function<void (void)>);
   void FinishTransmission (std::function<void (void)>) const;
+  void FinishReception (const Ptr<Packet> &packet, double rx_power, std::function<void (void)>);
 };
 
 } // namespace icarus

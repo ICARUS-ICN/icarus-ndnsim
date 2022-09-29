@@ -1,6 +1,6 @@
 /* -*- Mode:C++; c-file-style:"gnu"; indent-tabs-mode:nil; -*- */
 /*
- * Copyright (c) 2021 Universidade de Vigo
+ * Copyright (c) 2021-2022 Universidade de Vigo
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -52,6 +52,14 @@ NoneMacModel::Send (const Ptr<Packet> &packet, std::function<Time (void)> transm
 }
 
 void
+NoneMacModel::FinishTransmission (std::function<void (void)> finish_callback) const
+{
+  NS_LOG_FUNCTION (this << &finish_callback);
+
+  return finish_callback ();
+}
+
+void
 NoneMacModel::StartPacketRx (const Ptr<Packet> &packet, Time packet_tx_time, double rx_power,
                              std::function<void (void)> net_device_cb)
 {
@@ -66,14 +74,6 @@ NoneMacModel::FinishReception (std::function<void (void)> net_device_cb) const
   NS_LOG_FUNCTION (this << &net_device_cb);
 
   return net_device_cb ();
-}
-
-void
-NoneMacModel::FinishTransmission (std::function<void (void)> finish_callback) const
-{
-  NS_LOG_FUNCTION (this << &finish_callback);
-
-  return finish_callback ();
 }
 
 } // namespace icarus
