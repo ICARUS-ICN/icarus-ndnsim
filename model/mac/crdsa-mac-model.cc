@@ -1,6 +1,6 @@
 /* -*- Mode:C++; c-file-style:"gnu"; indent-tabs-mode:nil; -*- */
 /*
- * Copyright (c) 2021 Universidade de Vigo
+ * Copyright (c) 2021-2022 Universidade de Vigo
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -44,18 +44,18 @@ CrdsaMacModel::GetTypeId (void)
           .SetParent<MacModel> ()
           .SetGroupName ("ICARUS")
           .AddConstructor<CrdsaMacModel> ()
-          .AddAttribute ("SlotDuration", "The duration of a slot.", TimeValue (Seconds (0)),
+          .AddAttribute ("SlotDuration", "The duration of a slot", TimeValue (Seconds (0)),
                          MakeTimeAccessor (&CrdsaMacModel::m_slotDuration), MakeTimeChecker ())
-          .AddAttribute ("SlotsPerFrame", "The number of slots in a frame.", UintegerValue (1),
+          .AddAttribute ("SlotsPerFrame", "The number of slots in a frame", UintegerValue (1),
                          MakeUintegerAccessor (&CrdsaMacModel::SetSlotsPerFrame,
                                                &CrdsaMacModel::GetSlotsPerFrame),
                          MakeUintegerChecker<uint16_t> ())
-          .AddAttribute ("ReplicasPerPacket", "The number of replicas per packet.",
+          .AddAttribute ("ReplicasPerPacket", "The number of replicas per packet",
                          UintegerValue (1),
                          MakeUintegerAccessor (&CrdsaMacModel::m_replicasPerPacket),
                          MakeUintegerChecker<uint16_t> ())
           .AddAttribute ("ReplicasDistribution",
-                         "The distribution of the number of replicas per packet.", PointerValue (),
+                         "The distribution of the number of replicas per packet", PointerValue (),
                          MakePointerAccessor (&CrdsaMacModel::m_replicasDistribution),
                          MakePointerChecker<ReplicasDistroPolynomial> ());
 
