@@ -275,10 +275,10 @@ CrdsaMacModel::PrintActiveReceivedPackets (void) const
 }
 
 void
-CrdsaMacModel::StartPacketRx (const Ptr<Packet> &packet, Time packet_tx_time,
+CrdsaMacModel::StartPacketRx (const Ptr<Packet> &packet, Time packet_tx_time, double rx_power,
                               rxPacketCallback net_device_cb)
 {
-  NS_LOG_FUNCTION (this << packet << packet_tx_time << &net_device_cb);
+  NS_LOG_FUNCTION (this << packet << packet_tx_time << rx_power << &net_device_cb);
 
   Time now = Simulator::Now ();
   if (m_busyPeriodPacketUid && now < m_busyPeriodFinishTime)

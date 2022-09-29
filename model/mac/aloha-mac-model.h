@@ -1,7 +1,7 @@
 /* -*- Mode:C++; c-file-style:"gnu"; indent-tabs-mode:nil; -*- */
 /*
  *
- * Copyright (c) 2021 Universidade de Vigo
+ * Copyright (c) 2021-2022 Universidade de Vigo
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 2 as
@@ -24,6 +24,7 @@
 #define ALOHA_MAC_MODEL_H
 
 #include "mac-model.h"
+#include "../ground-sta-net-device.h"
 #include "ns3/nstime.h"
 
 #include <boost/optional.hpp>
@@ -39,18 +40,20 @@ public:
 
   virtual void Send (const Ptr<Packet> &packet, std::function<Time (void)> transmit_callback,
                      std::function<void (void)> finish_callback) override;
-  virtual void StartPacketRx (const Ptr<Packet> &packet, Time packet_tx_time,
+  virtual void StartPacketRx (const Ptr<Packet> &packet, Time packet_tx_time, double rx_power,
                               std::function<void (void)>) override;
 
 private:
   Time m_slotDuration;
+  double m_sirThreshold;
   boost::optional<uint64_t> m_busyPeriodPacketUid;
   Time m_busyPeriodFinishTime;
   bool m_busyPeriodCollision;
+  double m_busyPeriodInterferencePower;
 
   void DoSend (const Ptr<Packet> &packet, std::function<Time (void)> transmit_callback,
                std::function<void (void)> finish_callback) const;
-  void FinishReception (const Ptr<Packet> &packet, std::function<void (void)>);
+  void FinishReception (const Ptr<Packet> &packet, double rx_power, std::function<void (void)>);
   void FinishTransmission (std::function<void (void)>) const;
 };
 

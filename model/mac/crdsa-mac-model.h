@@ -76,7 +76,7 @@ public:
 
   virtual void Send (const Ptr<Packet> &packet, txPacketCallback transmit_callback,
                      rxPacketCallback finish_callback) override;
-  virtual void StartPacketRx (const Ptr<Packet> &packet, Time packet_tx_time,
+  virtual void StartPacketRx (const Ptr<Packet> &packet, Time packet_tx_time, double rx_power,
                               rxPacketCallback cb) override;
 
   uint16_t GetSlotsPerFrame () const;

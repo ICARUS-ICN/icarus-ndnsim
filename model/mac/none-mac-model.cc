@@ -52,10 +52,10 @@ NoneMacModel::Send (const Ptr<Packet> &packet, std::function<Time (void)> transm
 }
 
 void
-NoneMacModel::StartPacketRx (const Ptr<Packet> &packet, Time packet_tx_time,
+NoneMacModel::StartPacketRx (const Ptr<Packet> &packet, Time packet_tx_time, double rx_power,
                              std::function<void (void)> net_device_cb)
 {
-  NS_LOG_FUNCTION (this << packet << packet_tx_time << &net_device_cb);
+  NS_LOG_FUNCTION (this << packet << packet_tx_time << rx_power << &net_device_cb);
 
   Simulator::Schedule (packet_tx_time, &NoneMacModel::FinishReception, this, net_device_cb);
 }

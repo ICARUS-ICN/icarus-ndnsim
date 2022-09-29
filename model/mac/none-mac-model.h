@@ -35,7 +35,7 @@ public:
 
   virtual void Send (const Ptr<Packet> &packet, std::function<Time (void)> transmit_callback,
                      std::function<void (void)> finish_callback) override;
-  virtual void StartPacketRx (const Ptr<Packet> &packet, Time packet_tx_time,
+  virtual void StartPacketRx (const Ptr<Packet> &packet, Time packet_tx_time, double rx_power,
                               std::function<void (void)>) override;
 
 private:
