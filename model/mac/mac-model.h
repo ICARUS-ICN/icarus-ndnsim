@@ -43,7 +43,7 @@ public:
 
   virtual void Send (const Ptr<Packet> &packet, txPacketCallback transmit_callback,
                      std::function<void (void)> finish_callback) = 0;
-  virtual void StartPacketRx (const Ptr<Packet> &packet, Time packet_tx_time,
+  virtual void StartPacketRx (const Ptr<Packet> &packet, Time packet_tx_time, double rx_power,
                               rxPacketCallback cb) = 0;
 };
 

@@ -41,7 +41,7 @@ NS_OBJECT_ENSURE_REGISTERED (Sat2GroundNetDevice);
 
 namespace {
 /**
- * \brief Tag to store source, destination and protocol of each packet.
+ * \brief Tag to store source, destination, protocol and power of each packet.
  */
 class SatGroundTag : public Tag
 {
@@ -197,15 +197,10 @@ Sat2GroundNetDevice::ReceiveFromGround (const Ptr<Packet> &packet, DataRate bps,
   NS_LOG_FUNCTION (this << packet << bps << src << protocolNumber << rxPower);
   NS_ASSERT_MSG (m_macModel != nullptr, "Need a MacModel to receive packets.");
 
-  SatGroundTag tag;
-  packet->PeekPacketTag (tag);
-  tag.SetPower (rxPower);
-  packet->AddPacketTag (tag);
-
   m_phyRxBeginTrace (packet);
   Time packet_tx_time = bps.CalculateBytesTxTime (packet->GetSize ());
 
-  m_macModel->StartPacketRx (packet, packet_tx_time,
+  m_macModel->StartPacketRx (packet, packet_tx_time, rxPower,
                              [=] { ReceiveFromGroundFinish (packet, src, protocolNumber); });
 }
 
