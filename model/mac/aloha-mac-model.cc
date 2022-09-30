@@ -101,26 +101,30 @@ AlohaMacModel::StartPacketRx (const Ptr<Packet> &packet, Time packet_tx_time, do
 {
   NS_LOG_FUNCTION (this << packet << packet_tx_time << rx_power << &net_device_cb);
 
+  double rx_power_mw = pow (10, rx_power / 10.0);
   Time now = Simulator::Now ();
   if (m_busyPeriodPacketUid && now < m_busyPeriodFinishTime)
     {
       m_busyPeriodCollision = true;
-      m_busyPeriodInterferencePower += rx_power;
+      m_busyPeriodInterferencePower += rx_power_mw;
       NS_LOG_LOGIC ("Packet " << packet->GetUid () << " causes collision");
     }
 
   Time finish_tx_time = now + packet_tx_time;
   if (!m_busyPeriodPacketUid || finish_tx_time >= m_busyPeriodFinishTime)
     {
+      if (!m_busyPeriodPacketUid)
+        {
+          m_busyPeriodInterferencePower = rx_power_mw;
+        }
       m_busyPeriodPacketUid = packet->GetUid ();
       m_busyPeriodFinishTime = finish_tx_time;
-      m_busyPeriodInterferencePower = rx_power;
       NS_LOG_LOGIC ("Updating busy period info: " << m_busyPeriodPacketUid.value () << " "
                                                   << m_busyPeriodFinishTime << " "
                                                   << m_busyPeriodInterferencePower);
     }
 
-  Simulator::Schedule (packet_tx_time, &AlohaMacModel::FinishReception, this, packet, rx_power,
+  Simulator::Schedule (packet_tx_time, &AlohaMacModel::FinishReception, this, packet, rx_power_mw,
                        net_device_cb);
 }
 
@@ -133,7 +137,7 @@ AlohaMacModel::FinishReception (const Ptr<Packet> &packet, double rx_power,
   bool has_collided = false;
   if (m_busyPeriodCollision)
     {
-      double sir = 2.0 * rx_power - m_busyPeriodInterferencePower;
+      double sir = 10.0 * log10 (rx_power / (m_busyPeriodInterferencePower - rx_power));
       if (sir < m_sirThreshold)
         {
           has_collided = true;
