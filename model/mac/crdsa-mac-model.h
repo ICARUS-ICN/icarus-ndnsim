@@ -86,9 +86,11 @@ private:
   Time m_slotDuration;
   uint16_t m_replicasPerPacket;
   Ptr<ReplicasDistroPolynomial> m_replicasDistribution;
+  double m_sirThreshold;
   boost::optional<uint64_t> m_busyPeriodPacketUid;
   Time m_busyPeriodFinishTime;
   bool m_busyPeriodCollision;
+  double m_busyPeriodInterferencePower;
   std::map<uint64_t, rxPacketCallback> m_busyPeriodCollidedPackets;
   std::vector<Ptr<BusyPeriod>> m_activeBusyPeriods;
   std::map<uint64_t, Time> m_activeReceivedPackets;
@@ -99,7 +101,7 @@ private:
   void StartPacketTx (const Ptr<Packet> &packet, txPacketCallback transmit_callback,
                       rxPacketCallback finish_callback) const;
   void FinishTransmission (rxPacketCallback cb) const;
-  void FinishReception (const Ptr<Packet> &packet, rxPacketCallback cb);
+  void FinishReception (const Ptr<Packet> &packet, double rx_power, rxPacketCallback cb);
 
   void CleanActiveBusyPeriods (Time limit_time);
   void CleanActiveReceivedPackets (Time limit_time);

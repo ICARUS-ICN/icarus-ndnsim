@@ -26,6 +26,7 @@
 #include "ns3/log.h"
 #include "ns3/simulator.h"
 #include "ns3/uinteger.h"
+#include "ns3/double.h"
 #include "ns3/pointer.h"
 #include <algorithm>
 
@@ -57,7 +58,11 @@ CrdsaMacModel::GetTypeId (void)
           .AddAttribute ("ReplicasDistribution",
                          "The distribution of the number of replicas per packet", PointerValue (),
                          MakePointerAccessor (&CrdsaMacModel::m_replicasDistribution),
-                         MakePointerChecker<ReplicasDistroPolynomial> ());
+                         MakePointerChecker<ReplicasDistroPolynomial> ())
+          .AddAttribute ("SirThreshold", "The SIR threshold in dB (no capture effect by default)",
+                         DoubleValue (std::numeric_limits<double>::max ()),
+                         MakeDoubleAccessor (&CrdsaMacModel::m_sirThreshold),
+                         MakeDoubleChecker<double> ());
 
   return tid;
 }
@@ -280,36 +285,52 @@ CrdsaMacModel::StartPacketRx (const Ptr<Packet> &packet, Time packet_tx_time, do
 {
   NS_LOG_FUNCTION (this << packet << packet_tx_time << rx_power << &net_device_cb);
 
+  double rx_power_mw = pow (10, rx_power / 10.0);
   Time now = Simulator::Now ();
   if (m_busyPeriodPacketUid && now < m_busyPeriodFinishTime)
     {
       m_busyPeriodCollision = true;
+      m_busyPeriodInterferencePower += rx_power_mw;
       NS_LOG_LOGIC ("Packet " << packet->GetUid () << " causes collision");
     }
 
   Time finish_tx_time = now + packet_tx_time;
   if (!m_busyPeriodPacketUid || finish_tx_time >= m_busyPeriodFinishTime)
     {
+      if (!m_busyPeriodPacketUid)
+        {
+          m_busyPeriodInterferencePower = rx_power_mw;
+        }
       m_busyPeriodPacketUid = packet->GetUid ();
       m_busyPeriodFinishTime = finish_tx_time;
       NS_LOG_LOGIC ("Updating busy period info: " << m_busyPeriodPacketUid.value () << " "
-                                                  << m_busyPeriodFinishTime);
+                                                  << m_busyPeriodFinishTime << " "
+                                                  << m_busyPeriodInterferencePower);
     }
 
   m_busyPeriodCollidedPackets.insert ({packet->GetUid (), net_device_cb});
-  Simulator::Schedule (packet_tx_time, &CrdsaMacModel::FinishReception, this, packet,
+  Simulator::Schedule (packet_tx_time, &CrdsaMacModel::FinishReception, this, packet, rx_power_mw,
                        net_device_cb);
 }
 
 void
-CrdsaMacModel::FinishReception (const Ptr<Packet> &packet, rxPacketCallback net_device_cb)
+CrdsaMacModel::FinishReception (const Ptr<Packet> &packet, double rx_power,
+                                rxPacketCallback net_device_cb)
 {
-  NS_LOG_FUNCTION (this << packet << &net_device_cb);
+  NS_LOG_FUNCTION (this << packet << rx_power << &net_device_cb);
 
-  bool has_collided = m_busyPeriodCollision;
-  uint64_t packet_uid = packet->GetUid ();
+  bool has_collided = false;
+  if (m_busyPeriodCollision)
+    {
+      double sir = 10.0 * log10 (rx_power / (m_busyPeriodInterferencePower - rx_power));
+      if (sir < m_sirThreshold)
+        {
+          has_collided = true;
+        }
+    }
+
   Time now = Simulator::Now ();
-
+  uint64_t packet_uid = packet->GetUid ();
   if (has_collided)
     {
       NS_LOG_LOGIC ("Packet " << packet_uid << " discarded due to collision");
@@ -357,6 +378,7 @@ CrdsaMacModel::FinishReception (const Ptr<Packet> &packet, rxPacketCallback net_
       m_busyPeriodPacketUid = boost::none;
       m_busyPeriodFinishTime = now;
       m_busyPeriodCollision = false;
+      m_busyPeriodInterferencePower = 0;
       m_busyPeriodCollidedPackets.clear ();
     }
 }
