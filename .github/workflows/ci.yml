@@ -34,7 +34,7 @@ jobs:
           path: pybindgen
           ref: '0.22.1'
       - name: Install dependencies
-        run: sudo apt install -y build-essential libsqlite3-dev libboost-all-dev libssl-dev git python3-setuptools castxml
+        run: sudo apt install -y build-essential libsqlite3-dev libboost-all-dev libssl-dev libgsl-dev git python3-setuptools castxml
       - name: Checkout ns3 version of ndnSIM
         if: steps.cache.outputs.cache-hit != 'true'
         uses: actions/checkout@v3
