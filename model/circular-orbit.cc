@@ -28,6 +28,7 @@
 #include "ns3/geographic-positions.h"
 
 #include <boost/math/constants/constants.hpp>
+#include <boost/units/quantity.hpp>
 #include <boost/units/systems/si/length.hpp>
 #include <boost/units/systems/si/plane_angle.hpp>
 #include <boost/units/systems/angle/degrees.hpp>
@@ -134,6 +135,25 @@ public:
     return radius;
   }
 
+  meters
+  getGroundAltitude () const noexcept
+  {
+    return getRadius () - Earth.getRadius ();
+  }
+
+  meters
+  getGroundDistanceAtElevation (radians elevation) const noexcept
+  {
+    const quantity<length> alt_ground = getGroundAltitude ();
+    const quantity<length> earth_radius = Earth.getRadius ();
+
+    return root<2> (2.0 * pow<2> (earth_radius * sin (elevation)) -
+                    2.0 * earth_radius * sin (elevation) *
+                        root<2> (pow<2> (earth_radius * sin (elevation)) +
+                                 2.0 * earth_radius * alt_ground + pow<2> (alt_ground)) +
+                    2.0 * earth_radius * alt_ground + pow<2> (alt_ground));
+  }
+
 private:
   const radians inclination;
   const radians ascending_node;
@@ -210,12 +230,21 @@ CircularOrbitMobilityModel::DoGetPosition () const
 }
 
 double
-CircularOrbitMobilityModel::getRadius () const
+CircularOrbitMobilityModel::getRadius () const noexcept
 {
   NS_LOG_FUNCTION (this);
   NS_ABORT_IF (sat == nullptr);
 
   return sat->getRadius ().value ();
+}
+
+double
+CircularOrbitMobilityModel::getGroundDistanceAtElevation (radians elevation) const noexcept
+{
+  NS_LOG_FUNCTION (this << elevation.value ());
+  NS_ABORT_IF (sat == nullptr);
+
+  return sat->getGroundDistanceAtElevation (elevation).value ();
 }
 
 } // namespace icarus
