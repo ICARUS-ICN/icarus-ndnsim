@@ -19,28 +19,26 @@
  */
 #include "circular-orbit.h"
 
+#include "orbit/circular-orbit-impl.h"
+#include "orbit/satpos/planet.h"
 #include "ns3/abort.h"
 #include "ns3/log-macros-enabled.h"
-#include "satpos/planet.h"
 #include "ns3/log.h"
 #include "ns3/simulator.h"
 #include "ns3/mobility-model.h"
 #include "ns3/geographic-positions.h"
 
-#include <boost/math/constants/constants.hpp>
 #include <boost/units/quantity.hpp>
 #include <boost/units/systems/si/length.hpp>
 #include <boost/units/systems/si/plane_angle.hpp>
 #include <boost/units/systems/angle/degrees.hpp>
-#include <memory>
-#include <tuple>
+
+using namespace icarus::satpos::planet;
+using icarus::satpos::planet::constants::Earth;
 
 namespace ns3 {
 namespace icarus {
 NS_LOG_COMPONENT_DEFINE ("icarus.CircularOrbitMobilityModel");
-
-using namespace ::icarus::satpos::planet;
-using constants::Earth;
 
 NS_OBJECT_ENSURE_REGISTERED (CircularOrbitMobilityModel);
 
@@ -54,112 +52,6 @@ CircularOrbitMobilityModel::GetTypeId (void)
 
   return tid;
 }
-
-constexpr auto G = 6.67430e-11 * newton * square_meter / pow<2> (kilogram);
-
-namespace {
-using namespace boost::units;
-using namespace boost::units::si;
-
-constexpr quantity<angular_velocity>
-getN (CircularOrbitMobilityModel::meters radius, const Planet &planet)
-{
-  return radians * root<2> (G * planet.getMass () / pow<3> (radius));
-}
-} // namespace
-
-class CircularOrbitMobilityModelImpl
-{
-public:
-  typedef boost::units::quantity<boost::units::si::plane_angle> radians;
-  typedef boost::units::quantity<boost::units::si::length> meters;
-
-  CircularOrbitMobilityModelImpl (radians inclination, radians ascending_node, meters radius,
-                                  radians phase) noexcept
-      : inclination (inclination), ascending_node (ascending_node), radius (radius), phase (phase)
-  {
-  }
-
-  std::tuple<meters, meters, meters>
-  getCartesianPositionRightAscensionDeclination (quantity<si::time> t) const noexcept
-  {
-    using namespace boost::math::double_constants;
-    using namespace boost::units;
-    using namespace boost::units::si;
-
-    const quantity<si::time> now{Simulator::Now ().GetSeconds () * seconds};
-
-    const radians E{getN (radius, Earth) * now + phase};
-    const double cos_theta{(cos (E) - 0.0) / (1 - 0.0 * cos (E))}; // Eccentricity is 0
-    auto theta{2.0 * atan2 (sin (E / 2.0), cos (E / 2.0))};
-    if (E > theta)
-      {
-        double n{round ((E - theta) / (two_pi * si::radians))};
-        theta += n * two_pi * si::radians;
-      }
-    else
-      {
-        double n{round ((theta - E) / (two_pi * si::radians))};
-        theta -= n * two_pi * si::radians;
-      }
-    NS_ASSERT (abs (E - theta) < pi * si::radians);
-
-    const double sin_theta{sin (theta)};
-
-    // First step: Perigee angle correction is not needed for circular orbit
-    // x = x * cos (0) - y * sin (0);
-    // y = x * sin (0) + y * cos (0);
-    // z = z;
-
-    meters x, y, z;
-    x = radius * cos_theta;
-    y = radius * sin_theta;
-    z = 0.0 * meter;
-
-    // Second step: Inclination correction
-    std::tie (x, y, z) = std::make_tuple (x, //
-                                          y * cos (inclination) - z * sin (inclination), //
-                                          y * sin (inclination) + z * cos (inclination));
-
-    // Third step: Ascending node correction
-    std::tie (x, y, z) = std::make_tuple (x * cos (ascending_node) - y * sin (ascending_node),
-                                          x * sin (ascending_node) + y * cos (ascending_node),
-                                          z); // z
-
-    return std::make_tuple (x, y, z);
-  }
-
-  meters
-  getRadius () const noexcept
-  {
-    return radius;
-  }
-
-  meters
-  getGroundAltitude () const noexcept
-  {
-    return getRadius () - Earth.getRadius ();
-  }
-
-  meters
-  getGroundDistanceAtElevation (radians elevation) const noexcept
-  {
-    const quantity<length> alt_ground = getGroundAltitude ();
-    const quantity<length> earth_radius = Earth.getRadius ();
-
-    return root<2> (2.0 * pow<2> (earth_radius * sin (elevation)) -
-                    2.0 * earth_radius * sin (elevation) *
-                        root<2> (pow<2> (earth_radius * sin (elevation)) +
-                                 2.0 * earth_radius * alt_ground + pow<2> (alt_ground)) +
-                    2.0 * earth_radius * alt_ground + pow<2> (alt_ground));
-  }
-
-private:
-  const radians inclination;
-  const radians ascending_node;
-  const meters radius;
-  const radians phase;
-};
 
 CircularOrbitMobilityModel::CircularOrbitMobilityModel () : MobilityModel (), sat (nullptr)
 {
