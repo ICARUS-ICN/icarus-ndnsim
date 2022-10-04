@@ -1,6 +1,6 @@
 /* -*- Mode:C++; c-file-style:"gnu"; indent-tabs-mode:nil; -*- */
 /*
- * Copyright (c) 2021 Universidade de Vigo
+ * Copyright (c) 2021–2022 Universidade de Vigo
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -19,6 +19,7 @@
  */
 
 // Include a header file from your module to test.
+#include "model/circular-orbit.h"
 #include "ns3/circular-orbit.h"
 
 // An essential include is test.h
@@ -41,7 +42,6 @@
 // to use the using directive to access the ns3 namespace directly
 using namespace ns3;
 using namespace icarus;
-// This is an example TestCase.
 class CircularOrbitTestCase1 : public TestCase
 {
 public:
@@ -102,6 +102,38 @@ CircularOrbitTestCase1::DoRun (void)
                              6621000., 1, "Final altitude is wrong!");
   NS_TEST_ASSERT_MSG_EQ_TOL (mmodel->GetPosition ().x, -2.09605e6, 1000, "Position is wrong");
 }
+
+class CircularOrbitElevationTest : public TestCase
+{
+public:
+  CircularOrbitElevationTest (boost::units::quantity<boost::units::si::length> altitude,
+                              boost::units::quantity<boost::units::si::plane_angle> elevation,
+                              boost::units::quantity<boost::units::si::length> expected_distance)
+      : TestCase ("Circular Orbit Elevation Test"),
+        elevation (elevation),
+        distance (expected_distance)
+  {
+    ObjectFactory m_circularOrbit;
+
+    m_circularOrbit.SetTypeId ("ns3::icarus::CircularOrbitMobilityModel");
+    mmodel = m_circularOrbit.Create<CircularOrbitMobilityModel> ();
+    mmodel->LaunchSat (0 * boost::units::si::radians, 0 * boost::units::si::radians, altitude,
+                       0 * boost::units::si::radians);
+  }
+  virtual ~CircularOrbitElevationTest () = default;
+
+private:
+  const boost::units::quantity<boost::units::si::plane_angle> elevation;
+  const boost::units::quantity<boost::units::si::length> distance;
+  virtual void
+  DoRun (void)
+  {
+    NS_TEST_ASSERT_MSG_EQ_TOL (mmodel->getGroundDistanceAtElevation (elevation), distance.value (),
+                               1000, "Distance is way off");
+  }
+
+  Ptr<CircularOrbitMobilityModel> mmodel;
+};
 
 class ISLGridTestCase1 : public TestCase
 {
@@ -185,8 +217,34 @@ public:
 
 IcarusTestSuite::IcarusTestSuite () : TestSuite ("icarus", UNIT)
 {
+  using boost::units::quantity;
+  using boost::units::degree::degrees;
+  using boost::units::si::kilo;
+  using boost::units::si::length;
+  using boost::units::si::meter;
+  using boost::units::si::plane_angle;
   // TestDuration for TestCase can be QUICK, EXTENSIVE or TAKES_FOREVER
   AddTestCase (new CircularOrbitTestCase1, TestCase::QUICK);
+  AddTestCase (new CircularOrbitElevationTest (quantity<length> (400 * kilo * meter),
+                                               quantity<plane_angle> (10 * degrees),
+                                               1439415 * meter),
+               TestCase::QUICK);
+  AddTestCase (new CircularOrbitElevationTest (quantity<length> (400 * kilo * meter),
+                                               quantity<plane_angle> (25 * degrees),
+                                               843933 * meter),
+               TestCase::QUICK);
+  AddTestCase (new CircularOrbitElevationTest (quantity<length> (400 * kilo * meter),
+                                               quantity<plane_angle> (45 * degrees),
+                                               549884 * meter),
+               TestCase::QUICK);
+  AddTestCase (new CircularOrbitElevationTest (quantity<length> (400 * kilo * meter),
+                                               quantity<plane_angle> (60 * degrees),
+                                               457419 * meter),
+               TestCase::QUICK);
+  AddTestCase (new CircularOrbitElevationTest (quantity<length> (400 * kilo * meter),
+                                               quantity<plane_angle> (90 * degrees),
+                                               400000 * meter),
+               TestCase::QUICK);
   AddTestCase (new ISLGridTestCase1 (6, 20, 5), TestCase::QUICK);
   AddTestCase (new ISLGridTestCase1 (1, 1, 1), TestCase::QUICK);
   AddTestCase (new ISLGridTestCase1 (1, 2, 2), TestCase::QUICK);
