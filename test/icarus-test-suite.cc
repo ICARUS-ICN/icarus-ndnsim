@@ -23,6 +23,8 @@
 #include "ns3/circular-orbit.h"
 
 // An essential include is test.h
+#include "ns3/constant-position-mobility-model.h"
+#include "ns3/geographic-positions.h"
 #include "ns3/icarus-helper.h"
 #include "ns3/mobility-model.h"
 #include "ns3/object-factory.h"
@@ -32,6 +34,7 @@
 
 #include "ns3/node.h"
 #include <boost/units/systems/si/length.hpp>
+#include <boost/units/systems/si/time.hpp>
 #include <boost/units/systems/si/plane_angle.hpp>
 #include <boost/units/systems/angle/degrees.hpp>
 #include <boost/units/systems/si/prefixes.hpp>
@@ -205,6 +208,50 @@ ISLGridTestCase1::DoRun (void)
   ns3::Simulator::Run ();
 }
 
+class FindNextPassTest : public TestCase
+{
+  using length = boost::units::quantity<boost::units::si::length>;
+  using plane_angle = boost::units::quantity<boost::units::si::plane_angle>;
+  using time = boost::units::quantity<boost::units::si::time>;
+
+public:
+  FindNextPassTest (length altitude, plane_angle elevation, plane_angle inclination,
+                    plane_angle ascending_node, plane_angle latitude, plane_angle longitude,
+                    time expected_time)
+      : TestCase ("Next Pass Test"), expected_time (expected_time), elevation (elevation)
+  {
+    ObjectFactory circularOrbit, staticPosition;
+
+    circularOrbit.SetTypeId ("ns3::icarus::CircularOrbitMobilityModel");
+    staticPosition.SetTypeId ("ns3::ConstantPositionMobilityModel");
+    sat = circularOrbit.Create<CircularOrbitMobilityModel> ();
+    sat->LaunchSat (inclination, ascending_node, altitude, 0 * boost::units::si::radians);
+    auto static_pos = staticPosition.Create<ConstantPositionMobilityModel> ();
+    static_pos->SetPosition (GeographicPositions::GeographicToCartesianCoordinates (
+        boost::units::quantity<boost::units::degree::plane_angle> (latitude).value (),
+        boost::units::quantity<boost::units::degree::plane_angle> (longitude).value (), 0,
+        GeographicPositions::WGS84));
+
+    ground = CreateObject<Node> ();
+    ground->AggregateObject (static_pos);
+  }
+  virtual ~FindNextPassTest () = default;
+
+private:
+  Ptr<CircularOrbitMobilityModel> sat;
+  Ptr<Node> ground;
+  const time expected_time;
+  const plane_angle elevation;
+
+  virtual void
+  DoRun (void)
+  {
+    auto encounter = sat->getNextTimeAtElevation (elevation, ground);
+    NS_TEST_ASSERT_MSG_EQ_TOL (encounter.GetSeconds (), expected_time.value (), 10,
+                               "Time is way off");
+  }
+};
+
 // The TestSuite class names the TestSuite, identifies what type of TestSuite,
 // and enables the TestCases to be run.  Typically, only the constructor for
 // this class must be defined
@@ -223,7 +270,16 @@ IcarusTestSuite::IcarusTestSuite () : TestSuite ("icarus", UNIT)
   using boost::units::si::length;
   using boost::units::si::meter;
   using boost::units::si::plane_angle;
+
   // TestDuration for TestCase can be QUICK, EXTENSIVE or TAKES_FOREVER
+
+  AddTestCase (new FindNextPassTest (
+                   quantity<length> (400 * kilo * meter), quantity<plane_angle> (25 * degrees),
+                   quantity<plane_angle> (45 * degrees), 0 * boost::units::si::radians,
+                   quantity<plane_angle> (30 * degrees), quantity<plane_angle> (0 * degrees),
+                   6075.39 * boost::units::si::seconds),
+               TestCase::QUICK);
+
   AddTestCase (new CircularOrbitTestCase1, TestCase::QUICK);
   AddTestCase (new CircularOrbitElevationTest (quantity<length> (400 * kilo * meter),
                                                quantity<plane_angle> (10 * degrees),

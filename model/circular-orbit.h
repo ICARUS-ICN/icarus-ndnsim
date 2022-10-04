@@ -27,6 +27,9 @@
 #include <boost/units/systems/si/length.hpp>
 
 namespace ns3 {
+
+class Node;
+class Time;
 namespace icarus {
 
 class CircularOrbitMobilityModelImpl;
@@ -54,6 +57,8 @@ public:
   Vector getRawPosition () const;
   double getRadius () const noexcept;
   double getGroundDistanceAtElevation (radians elevation) const noexcept;
+  ns3::Time getNextTimeAtDistance (meters distance, Ptr<Node> ground) const noexcept;
+  ns3::Time getNextTimeAtElevation (radians elevation, Ptr<Node> ground) const noexcept;
 
 private:
   virtual Vector DoGetPosition (void) const;

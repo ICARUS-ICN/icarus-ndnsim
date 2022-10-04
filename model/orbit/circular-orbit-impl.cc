@@ -19,6 +19,7 @@
  */
 #include "circular-orbit-impl.h"
 
+#include "search/distancesolver.h"
 #include "satpos/planet.h"
 
 #include <ns3/simulator.h>
@@ -133,6 +134,22 @@ CircularOrbitMobilityModelImpl::getGroundDistanceAtElevation (
                       root<2> (pow<2> (earth_radius * sin (elevation)) +
                                2.0 * earth_radius * alt_ground + pow<2> (alt_ground)) +
                   2.0 * earth_radius * alt_ground + pow<2> (alt_ground));
+}
+
+quantity<si::time>
+CircularOrbitMobilityModelImpl::getNextTimeAtDistance (
+    time now, meters distance, quantity<plane_angle> latitude,
+    quantity<plane_angle> longitude) const noexcept
+{
+  return orbit::findNextCross (now, *this, distance, latitude, longitude);
+}
+
+quantity<si::time>
+CircularOrbitMobilityModelImpl::getOrbitalPeriod () const noexcept
+{
+  using namespace boost::math::double_constants;
+
+  return two_pi * si::radians / getN (radius, Earth);
 }
 
 } // namespace icarus
