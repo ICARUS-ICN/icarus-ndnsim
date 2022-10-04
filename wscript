@@ -30,7 +30,6 @@ def build(bld):
         'model/ndn/ground-sta-transport.cc',
         'model/ndn/sat2ground-transport.cc',
         'model/orbit/circular-orbit-impl.cc',
-        'model/orbit/satpos/planet.cc',
         'model/orbit/search/distancesolver.cc',
         'model/sat2ground-net-device.cc',
         'model/sat2sat-channel.cc',
