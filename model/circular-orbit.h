@@ -1,6 +1,6 @@
 /* -*- Mode:C++; c-file-style:"gnu"; indent-tabs-mode:nil; -*- */
 /*
- * Copyright (c) 2021–22 Universidade de Vigo
+ * Copyright (c) 2021–2022 Universidade de Vigo
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -52,7 +52,8 @@ public:
   void LaunchSat (radians inclination, radians ascending_node, meters altitude, radians phase);
   // Get the position without planet rotation correction
   Vector getRawPosition () const;
-  double getRadius () const;
+  double getRadius () const noexcept;
+  double getGroundDistanceAtElevation (radians elevation) const noexcept;
 
 private:
   virtual Vector DoGetPosition (void) const;
