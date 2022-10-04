@@ -3,8 +3,8 @@
 # def options(opt):
 #     pass
 
-# def configure(conf):
-#     conf.check_nonfatal(header_name='stdint.h', define_name='HAVE_STDINT_H')
+def configure(conf):
+    conf.check_cfg(package='gsl', uselib_store='GSL', args='--cflags --libs', mandatory=True)
 
 def build(bld):
     module = bld.create_ns3_module('icarus', ['mobility', 'ndnSIM'])
