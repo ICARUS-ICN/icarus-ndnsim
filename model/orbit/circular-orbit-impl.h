@@ -46,6 +46,9 @@ public:
   meters getGroundAltitude () const noexcept;
 
   meters getGroundDistanceAtElevation (radians elevation) const noexcept;
+  time getOrbitalPeriod () const noexcept;
+  time getNextTimeAtDistance (time now, meters distance, radians latitude,
+                              radians longitude) const noexcept;
 
 private:
   const radians inclination;
