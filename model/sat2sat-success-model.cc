@@ -21,7 +21,7 @@
  */
 
 #include "sat2sat-success-model.h"
-#include "satpos/planet.h"
+#include "orbit/satpos/planet.h"
 #include "ns3/log.h"
 #include "ns3/abort.h"
 #include "ns3/core-module.h"
