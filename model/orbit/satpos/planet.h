@@ -1,6 +1,6 @@
 /* -*- Mode:C++; c-file-style:"gnu"; indent-tabs-mode:nil; -*- */
 /*
- * Copyright (c) 2021 Universidade de Vigo
+ * Copyright (c) 2021–2022 Universidade de Vigo
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -26,6 +26,7 @@
 #include <boost/units/systems/si/io.hpp>
 #include <boost/units/systems/si/length.hpp>
 #include <boost/units/systems/si/mass.hpp>
+#include <boost/units/systems/si/prefixes.hpp>
 
 namespace icarus {
 namespace satpos {
@@ -65,7 +66,8 @@ public:
 };
 
 namespace constants {
-extern const Planet Earth;
+constexpr Planet Earth (5.97e24 * kilogram, quantity<length> (6371.009 * kilo * meter),
+                        7.292115922e-5 * radian / second);
 } // namespace constants
 
 } // namespace planet
