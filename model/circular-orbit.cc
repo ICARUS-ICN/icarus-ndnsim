@@ -57,17 +57,17 @@ CircularOrbitMobilityModel::GetTypeId (void)
 
 namespace {
 
-constexpr double EARTH_RADIUS = 6371.009e3;
-constexpr double EARTH_SEMIMAJOR_AXIS = 6378137;
+constexpr quantity<length> EARTH_RADIUS = Earth.getRadius ();
+constexpr quantity<length> EARTH_SEMIMAJOR_AXIS = 6378137 * meters;
 constexpr double EARTH_GRS80_ECCENTRICITY = 0.0818191910428158;
 constexpr double EARTH_WGS84_ECCENTRICITY = 0.0818191908426215;
-constexpr double DEG2RAD = M_PI / 180.0;
-constexpr double RAD2DEG = 180.0 * M_1_PI;
 // ndnSIM-29 version of ns-3 lacks this method. Copy it here.
-Vector
+std::pair<quantity<plane_angle>, quantity<plane_angle>>
 CartesianToGeographicCoordinates (Vector pos, GeographicPositions::EarthSpheroidType sphType)
 {
-  double a; // semi-major axis of earth
+  using boost::units::degree::degrees;
+
+  quantity<length> a; // semi-major axis of earth
   double e; // first eccentricity of earth
   if (sphType == GeographicPositions::SPHERE)
     {
@@ -85,50 +85,51 @@ CartesianToGeographicCoordinates (Vector pos, GeographicPositions::EarthSpheroid
       e = EARTH_WGS84_ECCENTRICITY;
     }
 
-  Vector lla, tmp;
-  lla.y = atan2 (pos.y, pos.x); // longitude (rad), in +/- pi
+  quantity<plane_angle> longitude, latitude, tmp_latitude;
+  longitude = atan2 (pos.y * meters, pos.x * meters); // longitude (rad), in +/- pi
 
   double e2 = e * e;
   // sqrt (pos.x^2 + pos.y^2)
-  double p = CalculateDistance (pos, {0, 0, pos.z});
-  lla.x = atan2 (pos.z, p * (1 - e2)); // init latitude (rad), in +/- pi
+  quantity<length> p = CalculateDistance (pos, {0, 0, pos.z}) * meters;
+  latitude = atan2 (pos.z * meters, p * (1 - e2)); // init latitude (rad), in +/- pi
 
   do
     {
-      tmp = lla;
-      double N = a / sqrt (1 - e2 * sin (tmp.x) * sin (tmp.x));
-      double v = p / cos (tmp.x);
-      lla.z = v - N; // altitude
-      lla.x = atan2 (pos.z, p * (1 - e2 * N / v));
+      tmp_latitude = latitude;
+      quantity<length> N = a / sqrt (1 - e2 * sin (tmp_latitude) * sin (tmp_latitude));
+      quantity<length> v = p / cos (tmp_latitude);
+      // quantity<length> altitude = v - N; // altitude
+      latitude = atan2 (pos.z * meters, p * (1 - e2 * N / v));
   }
   // 1 m difference is approx 1 / 30 arc seconds = 9.26e-6 deg
-  while (fabs (lla.x - tmp.x) > 0.00000926 * DEG2RAD);
+  while (abs (latitude - tmp_latitude) > quantity<plane_angle> (9.26e-6 * degree::degrees));
 
-  lla.x *= RAD2DEG;
-  lla.y *= RAD2DEG;
+  quantity<degree::plane_angle> longitude_deg = (quantity<degree::plane_angle> (longitude));
+  quantity<degree::plane_angle> latitude_deg = (quantity<degree::plane_angle> (latitude));
 
   // canonicalize (latitude) x in [-90, 90] and (longitude) y in [-180, 180)
-  if (lla.x > 90.0)
+  if (latitude_deg > 90.0 * degrees)
     {
-      lla.x = 180 - lla.x;
-      lla.y += lla.y < 0 ? 180 : -180;
+      latitude_deg = 180 * degrees - latitude_deg;
+      longitude_deg += longitude_deg < 0 * degrees ? 180 * degrees : -180 * degrees;
     }
-  else if (lla.x < -90.0)
+  else if (latitude_deg < -90.0 * degrees)
     {
-      lla.x = -180 - lla.x;
-      lla.y += lla.y < 0 ? 180 : -180;
+      latitude_deg = -180 * degrees - latitude_deg;
+      longitude_deg += longitude_deg < 0 * degrees ? 180 * degrees : -180 * degrees;
     }
-  if (lla.y == 180.0)
-    lla.y = -180;
+  if (longitude_deg == 180.0 * degrees)
+    longitude_deg = -180 * degrees;
 
   // make sure lat/lon in the right range to double check canonicalization
   // and conversion routine
-  NS_ASSERT_MSG (-180.0 <= lla.y, "Conversion error: longitude too negative");
-  NS_ASSERT_MSG (180.0 > lla.y, "Conversion error: longitude too positive");
-  NS_ASSERT_MSG (-90.0 <= lla.x, "Conversion error: latitude too negative");
-  NS_ASSERT_MSG (90.0 >= lla.x, "Conversion error: latitude too positive");
+  NS_ASSERT_MSG (-180.0 * degrees <= longitude_deg, "Conversion error: longitude too negative");
+  NS_ASSERT_MSG (180.0 * degrees > longitude_deg, "Conversion error: longitude too positive");
+  NS_ASSERT_MSG (-90.0 * degrees <= latitude_deg, "Conversion error: latitude too negative");
+  NS_ASSERT_MSG (90.0 * degrees >= latitude_deg, "Conversion error: latitude too positive");
 
-  return lla;
+  return std::make_pair (quantity<plane_angle> (latitude_deg),
+                         quantity<plane_angle> (longitude_deg));
 }
 } // namespace
 
@@ -227,13 +228,11 @@ CircularOrbitMobilityModel::getNextTimeAtDistance (meters distance, Ptr<Node> gr
   const Ptr<MobilityModel> groundmodel = ground->GetObject<ConstantPositionMobilityModel> ();
   NS_ASSERT_MSG (groundmodel, "We only support static ground nodes!");
 
-  const Vector pos =
+  const auto pos =
       CartesianToGeographicCoordinates (groundmodel->GetPosition (), GeographicPositions::WGS84);
 
   return Seconds (sat->getNextTimeAtDistance (Simulator::Now ().GetSeconds () * si::seconds,
-                                              distance,
-                                              quantity<plane_angle> (pos.x * degree::degrees),
-                                              quantity<plane_angle> (pos.y * degree::degrees))
+                                              distance, pos.first, pos.second)
                       .value ());
 }
 
