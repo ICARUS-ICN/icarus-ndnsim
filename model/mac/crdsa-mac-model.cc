@@ -19,6 +19,8 @@
  */
 
 #include "crdsa-mac-model.h"
+#include "ns3/object.h"
+#include "ns3/random-variable-stream.h"
 #include "private/busy-period.h"
 #include "ns3/assert.h"
 #include "ns3/log-macros-disabled.h"
@@ -29,9 +31,43 @@
 #include "ns3/double.h"
 #include "ns3/pointer.h"
 #include <algorithm>
+#include <limits>
 
 namespace ns3 {
 namespace icarus {
+
+namespace {
+class UniformRandomGeneratorAdaptor
+{
+public:
+  typedef uint32_t result_type;
+
+  UniformRandomGeneratorAdaptor (Ptr<UniformRandomVariable> rng) noexcept : m_rng (rng)
+  {
+  }
+
+  static constexpr result_type
+  min () noexcept
+  {
+    return std::numeric_limits<result_type>::min ();
+  }
+
+  static constexpr result_type
+  max () noexcept
+  {
+    return std::numeric_limits<result_type>::max ();
+  }
+
+  result_type
+  operator() () noexcept
+  {
+    return m_rng->GetInteger (min (), max ());
+  }
+
+private:
+  Ptr<UniformRandomVariable> m_rng;
+};
+} // namespace
 
 NS_LOG_COMPONENT_DEFINE ("icarus.CrdsaMacModel");
 
@@ -72,7 +108,8 @@ CrdsaMacModel::CrdsaMacModel ()
       m_busyPeriodCollision (false),
       m_busyPeriodCollidedPackets (),
       m_activeBusyPeriods (),
-      m_activeReceivedPackets ()
+      m_activeReceivedPackets (),
+      m_rng (CreateObject<UniformRandomVariable> ())
 {
   NS_LOG_FUNCTION (this);
 }
@@ -117,7 +154,7 @@ CrdsaMacModel::GetSelectedSlots (void)
 {
   NS_LOG_FUNCTION (this);
 
-  std::random_shuffle (m_slotIds.begin (), m_slotIds.end ());
+  std::shuffle (m_slotIds.begin (), m_slotIds.end (), UniformRandomGeneratorAdaptor (m_rng));
   std::vector<uint16_t> selectedSlots (m_slotIds.begin (),
                                        m_slotIds.begin () + NumReplicasPerPacket ());
 

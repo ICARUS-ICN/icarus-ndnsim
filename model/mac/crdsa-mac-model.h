@@ -95,6 +95,7 @@ private:
   std::vector<Ptr<BusyPeriod>> m_activeBusyPeriods;
   std::map<uint64_t, Time> m_activeReceivedPackets;
   std::vector<uint16_t> m_slotIds;
+  Ptr<UniformRandomVariable> m_rng;
 
   uint16_t NumReplicasPerPacket (void);
   std::vector<uint16_t> GetSelectedSlots (void);
