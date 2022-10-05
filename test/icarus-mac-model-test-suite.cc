@@ -337,7 +337,7 @@ CrdsaAloha::CrdsaAloha ()
       m_payloadSize (200),
       m_slotsPerFrame (100),
       m_replicasPerPacket (2),
-      m_transmissionDuration (Seconds (1)),
+      m_transmissionDuration (Seconds (10)),
       m_channelDataRate (DataRate ("100Mbps"))
 {
   NS_LOG_FUNCTION (this);
