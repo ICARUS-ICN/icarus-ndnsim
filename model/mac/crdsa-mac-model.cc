@@ -402,10 +402,13 @@ CrdsaMacModel::FinishReception (const Ptr<Packet> &packet, double rx_power,
         {
           for (auto const &recovered : recoveredPackets)
             {
-              NS_LOG_LOGIC ("Packet " << recovered.first << " correctly recovered");
+              if (m_activeReceivedPackets.find (recovered.first) == m_activeReceivedPackets.end ())
+                {
+                  NS_LOG_LOGIC ("Packet " << recovered.first << " correctly recovered");
 
-              m_activeReceivedPackets[recovered.first] = now;
-              recovered.second ();
+                  m_activeReceivedPackets[recovered.first] = now;
+                  recovered.second ();
+                }
             }
           recoveredPackets = MakeInterferenceCancellation ();
         }
