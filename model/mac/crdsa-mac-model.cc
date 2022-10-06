@@ -42,7 +42,7 @@ class UniformRandomGeneratorAdaptor
 public:
   typedef uint32_t result_type;
 
-  UniformRandomGeneratorAdaptor (Ptr<UniformRandomVariable> rng) noexcept : m_rng (rng)
+  UniformRandomGeneratorAdaptor (UniformRandomVariable &rng) noexcept : m_rng (rng)
   {
   }
 
@@ -61,11 +61,11 @@ public:
   result_type
   operator() () noexcept
   {
-    return m_rng->GetInteger (min (), max ());
+    return m_rng.GetInteger (min (), max ());
   }
 
 private:
-  Ptr<UniformRandomVariable> m_rng;
+  UniformRandomVariable &m_rng;
 };
 } // namespace
 
@@ -154,7 +154,7 @@ CrdsaMacModel::GetSelectedSlots (void)
 {
   NS_LOG_FUNCTION (this);
 
-  std::shuffle (m_slotIds.begin (), m_slotIds.end (), UniformRandomGeneratorAdaptor (m_rng));
+  std::shuffle (m_slotIds.begin (), m_slotIds.end (), UniformRandomGeneratorAdaptor (*m_rng));
   std::vector<uint16_t> selectedSlots (m_slotIds.begin (),
                                        m_slotIds.begin () + NumReplicasPerPacket ());
 
