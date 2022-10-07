@@ -158,21 +158,28 @@ private:
     int iter = 0;
     const int max_iter = 1000;
     int status;
-    double r;
+
     do
       {
         iter++;
         status = gsl_root_fsolver_iterate (s);
-        r = gsl_root_fsolver_root (s);
+        double r = gsl_root_fsolver_root (s);
         x_lower = gsl_root_fsolver_x_lower (s);
         x_upper = gsl_root_fsolver_x_upper (s);
         status = gsl_root_test_interval (x_lower, x_upper, 0, 0.000001);
 
         if (status == GSL_SUCCESS)
           {
-            if (sq_distance (sat.getCartesianPositionRightAscensionDeclination (r * second),
-                             obs (r * second)) < // 10% error margin
-                boost::units::pow<2> (1.1) * target_sq)
+            const auto sat_distance = [this](auto t) -> auto
+            {
+              return sq_distance (sat.getCartesianPositionRightAscensionDeclination (t), obs (t));
+            };
+            /* We simply check that the distance drops below target near the
+            found root. This is to ensure that the result is not just a point
+            where the distance gets close to 0, but without even crossing the
+            target threshold. */
+            if (std::min (sat_distance ((r - 1) * second), sat_distance ((r + 1) * second)) <
+                target_sq)
               {
                 solution = r * second;
               }
