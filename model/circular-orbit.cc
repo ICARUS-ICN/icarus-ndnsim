@@ -30,10 +30,12 @@
 #include "ns3/mobility-model.h"
 #include "ns3/geographic-positions.h"
 
+#include <boost/optional/optional.hpp>
 #include <boost/units/quantity.hpp>
 #include <boost/units/systems/si/length.hpp>
 #include <boost/units/systems/si/plane_angle.hpp>
 #include <boost/units/systems/angle/degrees.hpp>
+#include <boost/units/systems/si/time.hpp>
 
 using namespace icarus::satpos::planet;
 using icarus::satpos::planet::constants::Earth;
@@ -220,7 +222,8 @@ CircularOrbitMobilityModel::getGroundDistanceAtElevation (radians elevation) con
 }
 
 ns3::Time
-CircularOrbitMobilityModel::getNextTimeAtDistance (meters distance, Ptr<Node> ground) const noexcept
+CircularOrbitMobilityModel::getNextTimeAtDistance (meters distance, Ptr<Node> ground,
+                                                   boost::optional<Time> t0) const noexcept
 {
   NS_LOG_FUNCTION (this << distance.value ());
   NS_ABORT_IF (sat == nullptr);
@@ -228,22 +231,22 @@ CircularOrbitMobilityModel::getNextTimeAtDistance (meters distance, Ptr<Node> gr
   const Ptr<MobilityModel> groundmodel = ground->GetObject<ConstantPositionMobilityModel> ();
   NS_ASSERT_MSG (groundmodel, "We only support static ground nodes!");
 
+  const quantity<si::time> init_time = (t0 ? *t0 : Simulator::Now ()).GetSeconds () * si::seconds;
+
   const auto pos =
       CartesianToGeographicCoordinates (groundmodel->GetPosition (), GeographicPositions::WGS84);
 
-  return Seconds (sat->getNextTimeAtDistance (Simulator::Now ().GetSeconds () * si::seconds,
-                                              distance, pos.first, pos.second)
-                      .value ());
+  return Seconds (sat->getNextTimeAtDistance (init_time, distance, pos.first, pos.second).value ());
 }
 
 ns3::Time
-CircularOrbitMobilityModel::getNextTimeAtElevation (radians elevation,
-                                                    Ptr<Node> ground) const noexcept
+CircularOrbitMobilityModel::getNextTimeAtElevation (radians elevation, Ptr<Node> ground,
+                                                    boost::optional<Time> t0) const noexcept
 {
   NS_LOG_FUNCTION (this << elevation.value ());
   NS_ABORT_IF (sat == nullptr);
 
-  return getNextTimeAtDistance (sat->getGroundDistanceAtElevation (elevation), ground);
+  return getNextTimeAtDistance (sat->getGroundDistanceAtElevation (elevation), ground, t0);
 }
 
 } // namespace icarus
