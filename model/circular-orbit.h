@@ -22,6 +22,9 @@
 
 #include "ns3/mobility-model.h"
 
+#include "ns3/simulator.h"
+
+#include <boost/optional/optional.hpp>
 #include <boost/units/cmath.hpp>
 #include <boost/units/systems/si/plane_angle.hpp>
 #include <boost/units/systems/si/length.hpp>
@@ -29,7 +32,6 @@
 namespace ns3 {
 
 class Node;
-class Time;
 namespace icarus {
 
 class CircularOrbitMobilityModelImpl;
@@ -57,8 +59,10 @@ public:
   Vector getRawPosition () const;
   double getRadius () const noexcept;
   double getGroundDistanceAtElevation (radians elevation) const noexcept;
-  ns3::Time getNextTimeAtDistance (meters distance, Ptr<Node> ground) const noexcept;
-  ns3::Time getNextTimeAtElevation (radians elevation, Ptr<Node> ground) const noexcept;
+  ns3::Time getNextTimeAtDistance (meters distance, Ptr<Node> ground,
+                                   boost::optional<ns3::Time> t0 = {}) const noexcept;
+  ns3::Time getNextTimeAtElevation (radians elevation, Ptr<Node> ground,
+                                    boost::optional<ns3::Time> t0 = {}) const noexcept;
 
 private:
   virtual Vector DoGetPosition (void) const;
