@@ -211,9 +211,12 @@ findNextCross (quantity<boost::units::si::time> now, CircularOrbitMobilityModelI
       // If there is a solution, check whether there is a previous one
       if (sol)
         {
-          const auto previous =
-              DistanceSolver (now, *sol - 1 * second, observer, satellite, distance) ();
-          sol = previous ? previous : sol;
+          if (now < *sol - 1 * second)
+            {
+              const auto previous =
+                  DistanceSolver (now, *sol - 1 * second, observer, satellite, distance) ();
+              sol = previous ? previous : sol;
+            }
         }
       now += orbitalPeriod / 2.0;
   } while (!sol);
