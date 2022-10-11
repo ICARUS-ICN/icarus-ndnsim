@@ -11,7 +11,7 @@ Copy the code inside the `src` subdirectory of [ndnSIM](https://ndnsim.net) and 
 
 ---
 ### Legal:
-Copyright ⓒ 2021–2022 Universidade de Vigo<br>
+Copyright © 2021–2022 Universidade de Vigo<br>
 Authors: Miguel Rodríguez Pérez <miguel@det.uvigo.gal>, Sergio Herrería Alonso <sha@det.uvigo.es> and Pablo Iglesias Sanuy <pablo12oficial@gmail.com>.<br>
 This software is licensed under the GNU General Public License, version 3 (GPL-3.0) or later. For information see LICENSE.
 
