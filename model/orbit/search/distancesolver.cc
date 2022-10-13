@@ -170,16 +170,11 @@ private:
 
         if (status == GSL_SUCCESS)
           {
-            const auto sat_distance = [this](auto t) -> auto
-            {
-              return sq_distance (sat.getCartesianPositionRightAscensionDeclination (t), obs (t));
-            };
             /* We simply check that the distance drops below target near the
             found root. This is to ensure that the result is not just a point
             where the distance gets close to 0, but without even crossing the
             target threshold. */
-            if (std::min (sat_distance ((r - 1) * second), sat_distance ((r + 1) * second)) <
-                target_sq)
+            if (std::min (distance_function (r - 1), distance_function (r + 1)) < 0)
               {
                 solution = r * second;
               }
