@@ -35,13 +35,20 @@ public:
   typedef boost::units::quantity<boost::units::si::length> meters;
   typedef boost::units::quantity<boost::units::si::time> time;
 
-  CircularOrbitMobilityModelImpl (radians inclination, radians ascending_node, meters radius,
-                                  radians phase) noexcept;
+  constexpr CircularOrbitMobilityModelImpl (radians inclination, radians ascending_node,
+                                            meters radius, radians phase) noexcept
+      : inclination (inclination), ascending_node (ascending_node), radius (radius), phase (phase)
+  {
+  }
 
   std::tuple<meters, meters, meters>
   getCartesianPositionRightAscensionDeclination (time t) const noexcept;
 
-  meters getRadius () const noexcept;
+  constexpr meters
+  getRadius () const noexcept
+  {
+    return radius;
+  }
 
   meters getSatAltitude () const noexcept;
 
