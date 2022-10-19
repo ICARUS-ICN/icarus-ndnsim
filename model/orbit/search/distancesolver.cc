@@ -54,13 +54,13 @@ class GroundObserver
   using vector3d = std::tuple<quantity<length>, quantity<length>, quantity<length>>;
 
 public:
-  GroundObserver (quantity<plane_angle> latitude, quantity<plane_angle> longitude,
-                  quantity<length> radius) noexcept
+  constexpr GroundObserver (quantity<plane_angle> latitude, quantity<plane_angle> longitude,
+                            quantity<length> radius) noexcept
       : latitude (latitude), longitude (longitude), radius (radius)
   {
   }
 
-  vector3d
+  constexpr vector3d
   operator() (boost::units::quantity<time> t) const noexcept
   {
     using namespace boost::math::double_constants;
@@ -80,7 +80,7 @@ private:
 };
 
 template <typename T>
-auto
+constexpr auto
 sq_distance (std::tuple<T, T, T> a, std::tuple<T, T, T> b) -> auto
 {
   T a1, a2, a3, b1, b2, b3;
