@@ -52,14 +52,6 @@ using icarus::satpos::planet::constants::Earth;
 namespace ns3 {
 namespace icarus {
 
-CircularOrbitMobilityModelImpl::CircularOrbitMobilityModelImpl (radians inclination,
-                                                                radians ascending_node,
-                                                                meters radius,
-                                                                radians phase) noexcept
-    : inclination (inclination), ascending_node (ascending_node), radius (radius), phase (phase)
-{
-}
-
 std::tuple<CircularOrbitMobilityModelImpl::meters, CircularOrbitMobilityModelImpl::meters,
            CircularOrbitMobilityModelImpl::meters>
 CircularOrbitMobilityModelImpl::getCartesianPositionRightAscensionDeclination (
@@ -108,12 +100,6 @@ CircularOrbitMobilityModelImpl::getCartesianPositionRightAscensionDeclination (
                                         z); // z
 
   return std::make_tuple (x, y, z);
-}
-
-CircularOrbitMobilityModelImpl::meters
-CircularOrbitMobilityModelImpl::getRadius () const noexcept
-{
-  return radius;
 }
 
 CircularOrbitMobilityModelImpl::meters
