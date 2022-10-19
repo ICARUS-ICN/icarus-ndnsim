@@ -19,8 +19,8 @@
  */
 
 // Include a header file from your module to test.
-#include "model/circular-orbit.h"
 #include "ns3/circular-orbit.h"
+#include "model/orbit/satpos/planet.h"
 
 // An essential include is test.h
 #include "ns3/constant-position-mobility-model.h"
@@ -44,7 +44,7 @@
 // Do not put your test classes in namespace ns3.  You may find it useful
 // to use the using directive to access the ns3 namespace directly
 using namespace ns3;
-using namespace icarus;
+using namespace ns3::icarus;
 class CircularOrbitTestCase1 : public TestCase
 {
 public:
@@ -131,8 +131,10 @@ private:
   virtual void
   DoRun (void)
   {
-    NS_TEST_ASSERT_MSG_EQ_TOL (mmodel->getGroundDistanceAtElevation (elevation), distance.value (),
-                               1000, "Distance is way off");
+    NS_TEST_ASSERT_MSG_EQ_TOL (
+        mmodel->getGroundDistanceAtElevation (
+            elevation, ::icarus::satpos::planet::constants::Earth.getRadius ()),
+        distance.value (), 1000, "Distance is way off");
   }
 
   Ptr<CircularOrbitMobilityModel> mmodel;

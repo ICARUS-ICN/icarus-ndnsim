@@ -54,8 +54,9 @@ class GroundObserver
   using vector3d = std::tuple<quantity<length>, quantity<length>, quantity<length>>;
 
 public:
-  GroundObserver (quantity<plane_angle> latitude, quantity<plane_angle> longitude) noexcept
-      : latitude (latitude), longitude (longitude)
+  GroundObserver (quantity<plane_angle> latitude, quantity<plane_angle> longitude,
+                  quantity<length> radius) noexcept
+      : latitude (latitude), longitude (longitude), radius (radius)
   {
   }
 
@@ -64,18 +65,18 @@ public:
   {
     using namespace boost::math::double_constants;
 
-    const auto EarthRadius = Earth.getRadius ();
     const auto apparent_longitude = longitude + Earth.getRotationRate () * t;
 
-    const auto x = EarthRadius * cos (apparent_longitude) * cos (latitude);
-    const auto y = EarthRadius * sin (apparent_longitude) * cos (latitude);
-    const auto z = EarthRadius * sin (latitude);
+    const auto x = radius * cos (apparent_longitude) * cos (latitude);
+    const auto y = radius * sin (apparent_longitude) * cos (latitude);
+    const auto z = radius * sin (latitude);
 
     return std::make_tuple (x, y, z);
   }
 
 private:
-  const boost::units::quantity<plane_angle> latitude, longitude;
+  const quantity<plane_angle> latitude, longitude;
+  const quantity<length> radius;
 };
 
 template <typename T>
@@ -199,11 +200,11 @@ private:
 quantity<boost::units::si::time>
 findNextCross (quantity<boost::units::si::time> now, CircularOrbitMobilityModelImpl satellite,
                quantity<length> distance, quantity<plane_angle> latitude,
-               quantity<plane_angle> longitude)
+               quantity<plane_angle> longitude, quantity<length> radius)
 {
 
   const auto orbitalPeriod = satellite.getOrbitalPeriod ();
-  const GroundObserver observer (latitude, longitude);
+  const GroundObserver observer (latitude, longitude, radius);
 
   // Find the first cross, going half a period at a time
   boost::optional<quantity<boost::units::si::time>> sol{};
