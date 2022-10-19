@@ -117,7 +117,7 @@ CircularOrbitMobilityModelImpl::getRadius () const noexcept
 }
 
 CircularOrbitMobilityModelImpl::meters
-CircularOrbitMobilityModelImpl::getGroundAltitude () const noexcept
+CircularOrbitMobilityModelImpl::getSatAltitude () const noexcept
 {
   return getRadius () - Earth.getRadius ();
 }
@@ -126,14 +126,14 @@ CircularOrbitMobilityModelImpl::meters
 CircularOrbitMobilityModelImpl::getGroundDistanceAtElevation (
     CircularOrbitMobilityModelImpl::radians elevation) const noexcept
 {
-  const quantity<length> alt_ground = getGroundAltitude ();
+  const quantity<length> sat_altitude = getSatAltitude ();
   const quantity<length> earth_radius = Earth.getRadius ();
 
   return root<2> (2.0 * pow<2> (earth_radius * sin (elevation)) -
                   2.0 * earth_radius * sin (elevation) *
                       root<2> (pow<2> (earth_radius * sin (elevation)) +
-                               2.0 * earth_radius * alt_ground + pow<2> (alt_ground)) +
-                  2.0 * earth_radius * alt_ground + pow<2> (alt_ground));
+                               2.0 * earth_radius * sat_altitude + pow<2> (sat_altitude)) +
+                  2.0 * earth_radius * sat_altitude + pow<2> (sat_altitude));
 }
 
 quantity<si::time>
