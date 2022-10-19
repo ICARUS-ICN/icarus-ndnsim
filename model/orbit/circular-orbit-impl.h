@@ -43,12 +43,12 @@ public:
 
   meters getRadius () const noexcept;
 
-  meters getGroundAltitude () const noexcept;
+  meters getSatAltitude () const noexcept;
 
-  meters getGroundDistanceAtElevation (radians elevation) const noexcept;
+  meters getGroundDistanceAtElevation (radians elevation, meters ground_radius) const noexcept;
   time getOrbitalPeriod () const noexcept;
-  time getNextTimeAtDistance (time now, meters distance, radians latitude,
-                              radians longitude) const noexcept;
+  time getNextTimeAtDistance (time now, meters distance, radians latitude, radians longitude,
+                              meters radius) const noexcept;
 
 private:
   const radians inclination;

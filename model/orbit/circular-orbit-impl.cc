@@ -124,24 +124,25 @@ CircularOrbitMobilityModelImpl::getSatAltitude () const noexcept
 
 CircularOrbitMobilityModelImpl::meters
 CircularOrbitMobilityModelImpl::getGroundDistanceAtElevation (
-    CircularOrbitMobilityModelImpl::radians elevation) const noexcept
+    CircularOrbitMobilityModelImpl::radians elevation,
+    CircularOrbitMobilityModelImpl::meters ground_radius) const noexcept
 {
   const quantity<length> sat_altitude = getSatAltitude ();
-  const quantity<length> earth_radius = Earth.getRadius ();
 
-  return root<2> (2.0 * pow<2> (earth_radius * sin (elevation)) -
-                  2.0 * earth_radius * sin (elevation) *
-                      root<2> (pow<2> (earth_radius * sin (elevation)) +
-                               2.0 * earth_radius * sat_altitude + pow<2> (sat_altitude)) +
-                  2.0 * earth_radius * sat_altitude + pow<2> (sat_altitude));
+  return root<2> (2.0 * pow<2> (ground_radius * sin (elevation)) -
+                  2.0 * ground_radius * sin (elevation) *
+                      root<2> (pow<2> (ground_radius * sin (elevation)) +
+                               2.0 * ground_radius * sat_altitude + pow<2> (sat_altitude)) +
+                  2.0 * ground_radius * sat_altitude + pow<2> (sat_altitude));
 }
 
 quantity<si::time>
-CircularOrbitMobilityModelImpl::getNextTimeAtDistance (
-    time now, meters distance, quantity<plane_angle> latitude,
-    quantity<plane_angle> longitude) const noexcept
+CircularOrbitMobilityModelImpl::getNextTimeAtDistance (time now, meters distance,
+                                                       quantity<plane_angle> latitude,
+                                                       quantity<plane_angle> longitude,
+                                                       quantity<length> radius) const noexcept
 {
-  return orbit::findNextCross (now, *this, distance, latitude, longitude);
+  return orbit::findNextCross (now, *this, distance, latitude, longitude, radius);
 }
 
 quantity<si::time>

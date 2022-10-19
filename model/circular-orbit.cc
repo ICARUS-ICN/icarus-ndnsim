@@ -213,12 +213,13 @@ CircularOrbitMobilityModel::getRadius () const noexcept
 }
 
 double
-CircularOrbitMobilityModel::getGroundDistanceAtElevation (radians elevation) const noexcept
+CircularOrbitMobilityModel::getGroundDistanceAtElevation (radians elevation,
+                                                          meters ground_radius) const noexcept
 {
   NS_LOG_FUNCTION (this << elevation.value ());
   NS_ABORT_IF (sat == nullptr);
 
-  return sat->getGroundDistanceAtElevation (elevation).value ();
+  return sat->getGroundDistanceAtElevation (elevation, ground_radius).value ();
 }
 
 ns3::Time
@@ -233,10 +234,13 @@ CircularOrbitMobilityModel::getNextTimeAtDistance (meters distance, Ptr<Node> gr
 
   const quantity<si::time> init_time = (t0 ? *t0 : Simulator::Now ()).GetSeconds () * si::seconds;
 
-  const auto pos =
-      CartesianToGeographicCoordinates (groundmodel->GetPosition (), GeographicPositions::WGS84);
+  const Vector pos (groundmodel->GetPosition ());
+  const auto angular_pos = CartesianToGeographicCoordinates (pos, GeographicPositions::WGS84);
 
-  return Seconds (sat->getNextTimeAtDistance (init_time, distance, pos.first, pos.second).value ());
+  return Seconds (sat->getNextTimeAtDistance (init_time, distance, angular_pos.first,
+                                              angular_pos.second,
+                                              pos.GetLength () * boost::units::si::meters)
+                      .value ());
 }
 
 ns3::Time
@@ -246,7 +250,13 @@ CircularOrbitMobilityModel::getNextTimeAtElevation (radians elevation, Ptr<Node>
   NS_LOG_FUNCTION (this << elevation.value ());
   NS_ABORT_IF (sat == nullptr);
 
-  return getNextTimeAtDistance (sat->getGroundDistanceAtElevation (elevation), ground, t0);
+  const Ptr<MobilityModel> groundmodel = ground->GetObject<ConstantPositionMobilityModel> ();
+  NS_ASSERT_MSG (groundmodel, "We only support static ground nodes!");
+
+  const auto ground_radius = groundmodel->GetPosition ().GetLength () * boost::units::si::meters;
+
+  return getNextTimeAtDistance (sat->getGroundDistanceAtElevation (elevation, ground_radius),
+                                ground, t0);
 }
 
 } // namespace icarus

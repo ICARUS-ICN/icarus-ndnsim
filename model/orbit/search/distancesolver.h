@@ -32,7 +32,8 @@ findNextCross (boost::units::quantity<boost::units::si::time> now,
                CircularOrbitMobilityModelImpl satellite,
                boost::units::quantity<boost::units::si::length> distance,
                boost::units::quantity<boost::units::si::plane_angle> latitude,
-               boost::units::quantity<boost::units::si::plane_angle> longitude);
+               boost::units::quantity<boost::units::si::plane_angle> longitude,
+               boost::units::quantity<boost::units::si::length> radius);
 
 } // namespace orbit
 } // namespace icarus
