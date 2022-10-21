@@ -83,11 +83,11 @@ main (int argc, char **argv) -> int
   using namespace boost::units::si;
 
   // Track best satellite every minute
-  Config::SetDefault ("ns3::icarus::GroundNodeSatTracker::TrackingInterval",
+  Config::SetDefault ("ns3::icarus::GroundNodeSatTrackerPeriodic::TrackingInterval",
                       TimeValue (Seconds (10)));
 
   CommandLine cmd;
-  cmd.AddValue ("trackingInterval", "ns3::icarus::GroundNodeSatTracker::TrackingInterval");
+  cmd.AddValue ("trackingInterval", "ns3::icarus::GroundNodeSatTrackerPeriodic::TrackingInterval");
   cmd.Parse (argc, argv);
 
   uint32_t n_nodes = (14 * 20) + 2;

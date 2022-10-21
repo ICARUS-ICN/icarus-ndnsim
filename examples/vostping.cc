@@ -48,11 +48,11 @@ main (int argc, char **argv) -> int
   using boost::units::si::plane_angle;
 
   // Track best satellite every minute
-  Config::SetDefault ("ns3::icarus::GroundNodeSatTracker::TrackingInterval",
+  Config::SetDefault ("ns3::icarus::GroundNodeSatTrackerPeriodic::TrackingInterval",
                       TimeValue (Minutes (1)));
 
   CommandLine cmd;
-  cmd.AddValue ("trackingInterval", "ns3::icarus::GroundNodeSatTracker::TrackingInterval");
+  cmd.AddValue ("trackingInterval", "ns3::icarus::GroundNodeSatTrackerPeriodic::TrackingInterval");
   cmd.Parse (argc, argv);
 
   NodeContainer nodes;
