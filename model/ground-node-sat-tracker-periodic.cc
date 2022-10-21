@@ -55,9 +55,12 @@ GroundNodeSatTrackerPeriodic::GetTypeId (void) noexcept
 }
 
 void
-GroundNodeSatTrackerPeriodic::Start () const noexcept
+GroundNodeSatTrackerPeriodic::DoInitialize ()
 {
   NS_LOG_FUNCTION (this);
+
+  // Chain up initalization
+  GroundNodeSatTracker::DoInitialize ();
 
   if (m_interval == Seconds (0))
     {
