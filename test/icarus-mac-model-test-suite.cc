@@ -100,7 +100,7 @@ SlottedAloha::DoSetup ()
   using boost::units::si::plane_angle;
 
   Config::SetDefault ("ns3::icarus::IcarusNetDevice::DataRate", DataRateValue (m_channelDataRate));
-  Config::SetDefault ("ns3::icarus::GroundNodeSatTracker::TrackingInterval",
+  Config::SetDefault ("ns3::icarus::GroundNodeSatTrackerPeriodic::TrackingInterval",
                       TimeValue (Minutes (1)));
 
   m_nodesContainer.Create (m_nodes);
@@ -226,7 +226,7 @@ RegularAloha::DoSetup ()
   using boost::units::si::plane_angle;
 
   Config::SetDefault ("ns3::icarus::IcarusNetDevice::DataRate", DataRateValue (m_channelDataRate));
-  Config::SetDefault ("ns3::icarus::GroundNodeSatTracker::TrackingInterval",
+  Config::SetDefault ("ns3::icarus::GroundNodeSatTrackerPeriodic::TrackingInterval",
                       TimeValue (Minutes (1)));
 
   m_nodesContainer.Create (m_nodes);
@@ -337,7 +337,7 @@ CrdsaAloha::CrdsaAloha ()
       m_payloadSize (200),
       m_slotsPerFrame (100),
       m_replicasPerPacket (2),
-      m_transmissionDuration (Seconds (10)),
+      m_transmissionDuration (Seconds (20)),
       m_channelDataRate (DataRate ("100Mbps"))
 {
   NS_LOG_FUNCTION (this);
@@ -355,7 +355,7 @@ CrdsaAloha::DoSetup ()
   using boost::units::si::plane_angle;
 
   Config::SetDefault ("ns3::icarus::IcarusNetDevice::DataRate", DataRateValue (m_channelDataRate));
-  Config::SetDefault ("ns3::icarus::GroundNodeSatTracker::TrackingInterval",
+  Config::SetDefault ("ns3::icarus::GroundNodeSatTrackerPeriodic::TrackingInterval",
                       TimeValue (Minutes (1)));
 
   m_nodesContainer.Create (m_nodes);
