@@ -34,8 +34,6 @@ class GroundNodeSatTracker : public Object
 public:
   static TypeId GetTypeId (void) noexcept;
   virtual ~GroundNodeSatTracker () noexcept = default;
-
-  virtual void Start () const noexcept = 0;
 };
 
 } // namespace icarus

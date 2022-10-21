@@ -307,7 +307,6 @@ IcarusHelper::CreateDeviceForNode (Ptr<Node> node, ConstellationHelper &chelper)
 
   auto tracker = m_trackerModelFactory.Create<GroundNodeSatTracker> ();
   node->AggregateObject (tracker);
-  tracker->Start ();
 
   return ground_device;
 }

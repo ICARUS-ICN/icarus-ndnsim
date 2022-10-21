@@ -43,8 +43,6 @@ public:
   static TypeId GetTypeId (void) noexcept;
   virtual ~GroundNodeSatTrackerPeriodic () noexcept = default;
 
-  void Start () const noexcept override;
-
 private:
   Time m_interval;
 
@@ -52,6 +50,8 @@ private:
   mutable Ptr<Constellation> m_constellation = nullptr;
   mutable Ptr<MobilityModel> m_mobilityModel = nullptr;
   mutable Ptr<GroundStaNetDevice> m_netDevice = nullptr;
+
+  void DoInitialize () override;
 
   const Constellation *GetConstellation () const noexcept;
   GroundStaNetDevice *GetNetDevice () const noexcept;
