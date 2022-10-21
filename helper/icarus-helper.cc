@@ -62,7 +62,7 @@ IcarusHelper::IcarusHelper () : m_enableGeoTags (nullptr)
   m_groundStaFactory.SetTypeId ("ns3::icarus::GroundStaNetDevice");
   m_successModelFactory.SetTypeId ("ns3::icarus::GroundSatSuccessElevation");
   m_macModelFactory.SetTypeId ("ns3::icarus::NoneMacModel");
-  m_trackerModelFactory.SetTypeId ("ns3::icarus::GroundNodeSatTracker");
+  m_trackerModelFactory.SetTypeId ("ns3::icarus::GroundNodeSatTrackerPeriodic");
   m_propDelayModelFactory.SetTypeId ("ns3::ConstantSpeedPropagationDelayModel");
   m_propLossModelFactory.SetTypeId ("ns3::FriisPropagationLossModel");
 }

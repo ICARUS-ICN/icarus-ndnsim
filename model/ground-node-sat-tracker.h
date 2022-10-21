@@ -1,7 +1,7 @@
 /* -*- Mode:C++; c-file-style:"gnu"; indent-tabs-mode:nil; -*- */
 /*
  *
- * Copyright (c) 2021 Universidade de Vigo
+ * Copyright (c) 2022 Universidade de Vigo
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 2 as
@@ -23,18 +23,11 @@
 #ifndef GROUND_NODE_SAT_TRACKER_H
 #define GROUND_NODE_SAT_TRACKER_H
 
-#include "ns3/nstime.h"
-#include "ns3/object.h"
-#include "ns3/vector.h"
+#include <ns3/object.h>
 
 namespace ns3 {
 
-class MobilityModel;
-
 namespace icarus {
-
-class Constellation;
-class GroundStaNetDevice;
 
 class GroundNodeSatTracker : public Object
 {
@@ -42,22 +35,7 @@ public:
   static TypeId GetTypeId (void) noexcept;
   virtual ~GroundNodeSatTracker () noexcept = default;
 
-  void Start () const noexcept;
-
-private:
-  Time m_interval;
-
-  // Cache these pointers
-  mutable Ptr<Constellation> m_constellation = nullptr;
-  mutable Ptr<MobilityModel> m_mobilityModel = nullptr;
-  mutable Ptr<GroundStaNetDevice> m_netDevice = nullptr;
-
-  const Constellation *GetConstellation () const noexcept;
-  GroundStaNetDevice *GetNetDevice () const noexcept;
-  Vector3D GetPosition () const noexcept;
-
-  void PeriodicUpdate () const noexcept;
-  void UpdateOnce () const noexcept;
+  virtual void Start () const noexcept = 0;
 };
 
 } // namespace icarus
