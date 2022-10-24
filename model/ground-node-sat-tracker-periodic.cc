@@ -87,44 +87,6 @@ GroundNodeSatTrackerPeriodic::PeriodicUpdate () const noexcept
   ns3::Simulator::Schedule (m_interval, &GroundNodeSatTrackerPeriodic::PeriodicUpdate, this);
 }
 
-const Constellation *
-GroundNodeSatTrackerPeriodic::GetConstellation () const noexcept
-{
-  NS_LOG_FUNCTION (this);
-
-  if (m_constellation == nullptr)
-    {
-      m_constellation =
-          DynamicCast<GroundSatChannel> (GetNetDevice ()->GetChannel ())->GetConstellation ();
-    }
-
-  return PeekPointer (m_constellation);
-}
-
-GroundStaNetDevice *
-GroundNodeSatTrackerPeriodic::GetNetDevice () const noexcept
-{
-  NS_LOG_FUNCTION (this);
-
-  if (m_netDevice == nullptr)
-    {
-      const auto node = GetObject<Node> ();
-
-      for (auto i = 0u; i < node->GetNDevices (); i++)
-        {
-          const auto dev = DynamicCast<GroundStaNetDevice> (node->GetDevice (i));
-          if (dev != nullptr)
-            {
-              m_netDevice = dev;
-            }
-        }
-    }
-
-  NS_ASSERT_MSG (m_netDevice != nullptr, "Node needs to have a GroundStaNetDevice.");
-
-  return PeekPointer (m_netDevice);
-}
-
 Vector3D
 GroundNodeSatTrackerPeriodic::GetPosition () const noexcept
 {

@@ -22,7 +22,14 @@
 
 #include "ground-node-sat-tracker.h"
 
+#include "constellation.h"
+
 #include <ns3/log.h>
+#include <ns3/node.h>
+#include <ns3/ground-sat-channel.h>
+#include <ns3/ground-sta-net-device.h>
+#include <ns3/sat2ground-net-device.h>
+
 namespace ns3 {
 namespace icarus {
 
@@ -37,6 +44,49 @@ GroundNodeSatTracker::GetTypeId (void) noexcept
       TypeId ("ns3::icarus::GroundNodeSatTracker").SetParent<Object> ().SetGroupName ("ICARUS");
 
   return tid;
+}
+
+GroundNodeSatTracker::GroundNodeSatTracker () noexcept
+    : m_constellation (nullptr), m_netDevice (nullptr)
+{
+}
+
+const Constellation *
+GroundNodeSatTracker::GetConstellation () const noexcept
+{
+  NS_LOG_FUNCTION (this);
+
+  if (m_constellation == nullptr)
+    {
+      m_constellation = PeekPointer (
+          DynamicCast<GroundSatChannel> (GetNetDevice ()->GetChannel ())->GetConstellation ());
+    }
+
+  return m_constellation;
+}
+
+GroundStaNetDevice *
+GroundNodeSatTracker::GetNetDevice () const noexcept
+{
+  NS_LOG_FUNCTION (this);
+
+  if (m_netDevice == nullptr)
+    {
+      const auto node = GetObject<Node> ();
+
+      for (auto i = 0u; i < node->GetNDevices (); i++)
+        {
+          const auto dev = DynamicCast<GroundStaNetDevice> (node->GetDevice (i));
+          if (dev != nullptr)
+            {
+              m_netDevice = PeekPointer (dev);
+            }
+        }
+    }
+
+  NS_ASSERT_MSG (m_netDevice != nullptr, "Node needs to have a GroundStaNetDevice.");
+
+  return m_netDevice;
 }
 
 } // namespace icarus

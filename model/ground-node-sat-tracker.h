@@ -29,11 +29,24 @@ namespace ns3 {
 
 namespace icarus {
 
+class Constellation;
+class GroundStaNetDevice;
 class GroundNodeSatTracker : public Object
 {
 public:
   static TypeId GetTypeId (void) noexcept;
+
+  GroundNodeSatTracker () noexcept;
   virtual ~GroundNodeSatTracker () noexcept = default;
+
+protected:
+  const Constellation *GetConstellation () const noexcept;
+  GroundStaNetDevice *GetNetDevice () const noexcept;
+
+private:
+  // Cache these pointers
+  mutable Constellation *m_constellation;
+  mutable GroundStaNetDevice *m_netDevice;
 };
 
 } // namespace icarus
