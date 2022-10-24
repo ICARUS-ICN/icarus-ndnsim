@@ -34,9 +34,6 @@ class MobilityModel;
 
 namespace icarus {
 
-class Constellation;
-class GroundStaNetDevice;
-
 class GroundNodeSatTrackerPeriodic : public GroundNodeSatTracker
 {
 public:
@@ -47,14 +44,10 @@ private:
   Time m_interval;
 
   // Cache these pointers
-  mutable Ptr<Constellation> m_constellation = nullptr;
   mutable Ptr<MobilityModel> m_mobilityModel = nullptr;
-  mutable Ptr<GroundStaNetDevice> m_netDevice = nullptr;
 
   void DoInitialize () override;
 
-  const Constellation *GetConstellation () const noexcept;
-  GroundStaNetDevice *GetNetDevice () const noexcept;
   Vector3D GetPosition () const noexcept;
 
   void PeriodicUpdate () const noexcept;
