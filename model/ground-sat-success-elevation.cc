@@ -29,8 +29,9 @@
 #include "ns3/mobility-model.h"
 #include "ns3/node.h"
 #include "ns3/vector.h"
+#include <boost/units/systems/angle/degrees.hpp>
+#include <boost/units/systems/si/plane_angle.hpp>
 
-#include <boost/math/constants/constants.hpp>
 namespace ns3 {
 namespace icarus {
 
@@ -38,9 +39,10 @@ NS_LOG_COMPONENT_DEFINE ("icarus.GroundSatSuccessElevation");
 
 NS_OBJECT_ENSURE_REGISTERED (GroundSatSuccessElevation);
 
+using namespace boost::units;
+
 namespace {
-using namespace boost::math::double_constants;
-constexpr double MINIMUM_ELEVATION = 25 * degree;
+constexpr auto MINIMUM_ELEVATION (25.0 * degree::degrees);
 } // namespace
 
 TypeId
@@ -54,8 +56,8 @@ GroundSatSuccessElevation::GetTypeId (void)
           .AddAttribute (
               "MinElevation",
               "The minimum elevation of the satellite over the ground station for "
-              "successful communication",
-              DoubleValue (MINIMUM_ELEVATION),
+              "successful communication (in degrees)",
+              DoubleValue (quantity<degree::plane_angle> (MINIMUM_ELEVATION).value ()),
               MakeDoubleAccessor (&GroundSatSuccessElevation::GetMinimumElevationDegrees,
                                   &GroundSatSuccessElevation::SetMinimumElevationDegrees),
               MakeDoubleChecker<double> ());
@@ -66,27 +68,21 @@ GroundSatSuccessElevation::GetTypeId (void)
 double
 GroundSatSuccessElevation::GetMinimumElevationDegrees () const noexcept
 {
-  using namespace boost::math::double_constants;
-
-  return m_minimumElevation * radian;
+  return quantity<degree::plane_angle> (m_minimumElevation).value ();
 }
 
 void
 GroundSatSuccessElevation::SetMinimumElevationDegrees (double minElevation) noexcept
 {
-  using namespace boost::math::double_constants;
-
   NS_LOG_FUNCTION (this << minElevation);
 
-  m_minimumElevation = minElevation * degree;
+  m_minimumElevation = quantity<si::plane_angle> (minElevation * degree::degrees);
 }
 
 bool
 GroundSatSuccessElevation::TramsmitSuccess (const Ptr<Node> &src, const Ptr<Node> &dst,
                                             const Ptr<Packet> &) const noexcept
 {
-  using namespace boost::math::double_constants;
-
   NS_LOG_FUNCTION (this << src << dst);
 
   Ptr<MobilityModel> groundMobilityModel;
@@ -107,8 +103,7 @@ GroundSatSuccessElevation::TramsmitSuccess (const Ptr<Node> &src, const Ptr<Node
   NS_ABORT_MSG_UNLESS (groundMobilityModel != nullptr,
                        "Destination node lacks location information.");
 
-  const double elevation =
-      satMobilityModel->getSatElevation (groundMobilityModel->GetPosition ()).value () * radian;
+  const auto elevation = satMobilityModel->getSatElevation (groundMobilityModel->GetPosition ());
 
   return elevation >= m_minimumElevation;
 }

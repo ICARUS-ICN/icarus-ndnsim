@@ -25,6 +25,9 @@
 
 #include "ground-sat-success-model.h"
 
+#include <boost/units/quantity.hpp>
+#include <boost/units/systems/si/plane_angle.hpp>
+
 namespace ns3 {
 namespace icarus {
 
@@ -41,7 +44,7 @@ public:
   double GetMinimumElevationDegrees () const noexcept;
 
 private:
-  double m_minimumElevation; // In radians
+  boost::units::quantity<boost::units::si::plane_angle> m_minimumElevation;
 };
 
 } // namespace icarus
