@@ -222,6 +222,28 @@ CircularOrbitMobilityModel::getGroundDistanceAtElevation (radians elevation,
   return sat->getGroundDistanceAtElevation (elevation, ground_radius).value ();
 }
 
+CircularOrbitMobilityModel::radians
+CircularOrbitMobilityModel::getSatElevation (Vector groundPosition) const noexcept
+{
+  NS_LOG_FUNCTION (this << groundPosition);
+
+  const Vector ground2Sat (GetPosition () - groundPosition);
+
+  const auto dotProduct = groundPosition.x * ground2Sat.x + groundPosition.y * ground2Sat.y +
+                          groundPosition.z * ground2Sat.z;
+
+  /* The calculation comes from Stanley Q. Kidder, Thomas H. Vonder Haar, 2 -
+   * Orbits and Navigation, Editor(s): Stanley Q. Kidder, Thomas H. Vonder Haar,
+   * Satellite Meteorology, Academic Press, 1995, Pages 15-46, ISBN
+   * 9780124064300, https://doi.org/10.1016/B978-0-08-057200-0.50006-7. 
+   */
+  const auto cosZenith = dotProduct / (groundPosition.GetLength () * ground2Sat.GetLength ());
+
+  const quantity<plane_angle> elevation = asin (cosZenith) * radian; //half_pi - acos (cosZenith);
+
+  return elevation;
+}
+
 ns3::Time
 CircularOrbitMobilityModel::getNextTimeAtDistance (meters distance, Ptr<Node> ground,
                                                    boost::optional<Time> t0) const noexcept

@@ -22,9 +22,9 @@
 
 #include "ground-sat-success-elevation.h"
 
+#include "circular-orbit.h"
 #include "ns3/abort.h"
 #include "ns3/double.h"
-#include "ns3/log-macros-disabled.h"
 #include "ns3/log.h"
 #include "ns3/mobility-model.h"
 #include "ns3/node.h"
@@ -81,21 +81,6 @@ GroundSatSuccessElevation::SetMinimumElevationDegrees (double minElevation) noex
   m_minimumElevation = minElevation * degree;
 }
 
-namespace {
-double
-GetSqSum (const Vector3D &vec) noexcept
-{
-  return vec.x * vec.x + vec.y * vec.y + vec.z * vec.z;
-}
-
-double
-GetDotProduct (const Vector3D &vecA, const Vector3D &vecB) noexcept
-{
-  return vecA.x * vecB.x + vecA.y * vecB.y + vecA.z * vecB.z;
-}
-
-} // namespace
-
 bool
 GroundSatSuccessElevation::TramsmitSuccess (const Ptr<Node> &src, const Ptr<Node> &dst,
                                             const Ptr<Packet> &) const noexcept
@@ -104,35 +89,26 @@ GroundSatSuccessElevation::TramsmitSuccess (const Ptr<Node> &src, const Ptr<Node
 
   NS_LOG_FUNCTION (this << src << dst);
 
-  const auto mobilitySrc = src->GetObject<MobilityModel> ();
-  const auto mobilityDst = dst->GetObject<MobilityModel> ();
+  Ptr<MobilityModel> groundMobilityModel;
+  Ptr<CircularOrbitMobilityModel> satMobilityModel;
 
-  NS_ABORT_MSG_UNLESS (mobilitySrc != nullptr, "Source node lacks location information.");
-  NS_ABORT_MSG_UNLESS (mobilityDst != nullptr, "Destination node lacks location information.");
-
-  auto posSrc = mobilitySrc->GetPosition ();
-  auto posDst = mobilityDst->GetPosition ();
-
-  // Check which position belongs to the satellite (the longest vector)
-  Vector3D &posSat = posDst, &posGround = posSrc;
-  if (GetSqSum (posSrc) > GetSqSum (posDst))
+  if (src->GetObject<CircularOrbitMobilityModel> ())
     {
-      posSat = posSrc;
-      posGround = posDst;
+      satMobilityModel = src->GetObject<CircularOrbitMobilityModel> ();
+      groundMobilityModel = dst->GetObject<MobilityModel> ();
     }
-  // Get the vector pointing from ground to the satellite
-  const auto vectorD = posSat - posGround;
+  else
+    {
+      satMobilityModel = dst->GetObject<CircularOrbitMobilityModel> ();
+      groundMobilityModel = src->GetObject<MobilityModel> ();
+    }
 
-  /* The calculation comes from Stanley Q. Kidder, Thomas H. Vonder Haar, 2 -
-   * Orbits and Navigation, Editor(s): Stanley Q. Kidder, Thomas H. Vonder Haar,
-   * Satellite Meteorology, Academic Press, 1995, Pages 15-46, ISBN
-   * 9780124064300, https://doi.org/10.1016/B978-0-08-057200-0.50006-7. 
-   */
-  const auto cosZenith =
-      GetDotProduct (posGround, vectorD) / (posGround.GetLength () * vectorD.GetLength ());
+  NS_ABORT_MSG_UNLESS (satMobilityModel != nullptr, "Source node lacks location information.");
+  NS_ABORT_MSG_UNLESS (groundMobilityModel != nullptr,
+                       "Destination node lacks location information.");
 
-  const double elevation = half_pi - acos (cosZenith);
-  NS_LOG_DEBUG ("Elevation: " << elevation * radian << " at distance: " << vectorD.GetLength ());
+  const double elevation =
+      satMobilityModel->getSatElevation (groundMobilityModel->GetPosition ()).value () * radian;
 
   return elevation >= m_minimumElevation;
 }
