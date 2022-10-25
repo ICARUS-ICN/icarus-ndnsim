@@ -97,26 +97,6 @@ GroundNodeSatTrackerElevation::DoInitialize ()
   Simulator::ScheduleNow (&GroundNodeSatTrackerElevation::Update, this);
 }
 
-namespace {
-double
-GetDotProduct (const Vector &vecA, const Vector &vecB) noexcept
-{
-  return vecA.x * vecB.x + vecA.y * vecB.y + vecA.z * vecB.z;
-}
-
-auto
-getSatElevation (Vector posSat, Vector posGround) noexcept
-{
-  const auto groundToSat = posSat - posGround;
-  const auto cosZenith = (GetDotProduct (posGround, groundToSat) /
-                          (posGround.GetLength () * groundToSat.GetLength ()));
-
-  auto elevation = asin (cosZenith) * si::radians; //half_pi - acos (cosZenith);
-
-  return elevation;
-}
-} // namespace
-
 std::vector<std::pair<std::size_t, std::size_t>>
 GroundNodeSatTrackerElevation::getVisibleSats () const noexcept
 {
@@ -132,18 +112,16 @@ GroundNodeSatTrackerElevation::getVisibleSats () const noexcept
     {
       for (auto index = 0; index < GetConstellation ()->GetPlaneSize (); index++)
         {
-          const auto sat_position = GetConstellation ()
-                                        ->GetSatellite (plane, index)
-                                        ->GetNode ()
-                                        ->GetObject<MobilityModel> ()
-                                        ->GetPosition ();
-          const auto sat_elevation = getSatElevation (sat_position, pos);
+          const auto sat_elevation = GetConstellation ()
+                                         ->GetSatellite (plane, index)
+                                         ->GetNode ()
+                                         ->GetObject<CircularOrbitMobilityModel> ()
+                                         ->getSatElevation (pos);
           if (sat_elevation > m_elevation)
             {
               NS_LOG_DEBUG ("Adding (" << plane << ", " << index << ") at elevation "
                                        << quantity<degree::plane_angle> (sat_elevation).value ()
-                                       << "° and distance "
-                                       << (pos - sat_position).GetLength () / 1000.0 << "km.");
+                                       << "°");
               satellites.push_back (std::make_pair (plane, index));
             }
         }
