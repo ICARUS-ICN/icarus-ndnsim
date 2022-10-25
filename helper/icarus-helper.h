@@ -155,10 +155,26 @@ public:
                     const AttributeValue &v3 = EmptyAttributeValue (), const std::string &n4 = "",
                     const AttributeValue &v4 = EmptyAttributeValue ());
 
-  void SetTrackerModel (std::string type, const std::string &n1, const AttributeValue &v1,
-                        const std::string &n2, const AttributeValue &v2, const std::string &n3,
-                        const AttributeValue &v3, const std::string &n4, const AttributeValue &v4);
-
+  /**
+   * \param type the type of Tracker model model
+   * \param n1 the name of the attribute to set on the tracker model
+   * \param v1 the value of the attribute to set on the tracker model
+   * \param n2 the name of the attribute to set on the tracker model
+   * \param v2 the value of the attribute to set on the tracker model
+   * \param n3 the name of the attribute to set on the tracker model
+   * \param v3 the value of the attribute to set on the tracker model
+   * \param n4 the name of the attribute to set on the tracker model
+   * \param v4 the value of the attribute to set on the tracker model
+   *
+   * Set the type of tracker model to create and associated to each
+   * ns3::icarus::GroundSatNetDevice created through IcarusHelper::Install.
+   */
+  void
+  SetTrackerModel (std::string type, const std::string &n1 = "",
+                   const AttributeValue &v1 = EmptyAttributeValue (), const std::string &n2 = "",
+                   const AttributeValue &v2 = EmptyAttributeValue (), const std::string &n3 = "",
+                   const AttributeValue &v3 = EmptyAttributeValue (), const std::string &n4 = "",
+                   const AttributeValue &v4 = EmptyAttributeValue ());
   /**
    * \param n1 the name of the attribute to set \param v1 the value of the
    * attribute to set
