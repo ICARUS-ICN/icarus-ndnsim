@@ -37,6 +37,7 @@
 #include "ns3/node.h"
 #include "ns3/assert.h"
 #include "ns3/scheduler.h"
+#include <algorithm>
 #include <boost/units/quantity.hpp>
 #include <boost/units/systems/angle/degrees.hpp>
 #include <boost/units/systems/si/length.hpp>
@@ -156,33 +157,24 @@ GroundNodeSatTrackerElevation::Update () noexcept
   NS_LOG_FUNCTION (this);
 
   // 1.- Find the set of visible satellites
-  auto visible_sats = getVisibleSats ();
+  const auto visible_sats = getVisibleSats ();
+
   // 2.- Choose the one with the longest remaining visibility
-  const auto this_node = GetObject<Node> ();
-  Time max_visibility = Seconds (0);
-  boost::optional<std::pair<std::size_t, std::size_t>> best;
-  for (const auto &sat_info : visible_sats)
+  const auto best = std::max_element (
+      visible_sats.cbegin (), visible_sats.cend (),
+      [] (const auto &a, const auto &b) { return std::get<0> (a) < std::get<0> (b); });
+
+  if (best != visible_sats.cend ())
     {
-      Time visibility_period;
+      Time visibility_time;
       std::size_t plane, index;
 
-      std::tie (visibility_period, plane, index) = sat_info;
-
-      if (visibility_period > max_visibility)
-        {
-          max_visibility = visibility_period;
-          best = std::make_pair (plane, index);
-        }
-    }
-
-  if (best.has_value ())
-    {
-      const Address remoteAddress (
-          GetConstellation ()->GetSatellite (best->first, best->second)->GetAddress ());
+      std::tie (visibility_time, plane, index) = *best;
+      const Address remoteAddress (GetConstellation ()->GetSatellite (plane, index)->GetAddress ());
       GetNetDevice ()->SetRemoteAddress (remoteAddress);
       NS_LOG_DEBUG ("Tracking satellite " << remoteAddress);
 
-      Simulator::Schedule (max_visibility, &GroundNodeSatTrackerElevation::Update, this);
+      Simulator::Schedule (visibility_time, &GroundNodeSatTrackerElevation::Update, this);
     }
   else
     {
