@@ -145,15 +145,21 @@ GroundNodeSatTrackerElevation::Update () noexcept
   boost::optional<std::pair<std::size_t, std::size_t>> best;
   for (auto sat_addr : visible_sats)
     {
-      const auto bye_time = GetConstellation ()
-                                ->GetSatellite (sat_addr.first, sat_addr.second)
-                                ->GetNode ()
-                                ->GetObject<CircularOrbitMobilityModel> ()
-                                ->getNextTimeAtElevation (m_elevation, this_node);
+      const auto &satmmodel = GetConstellation ()
+                                  ->GetSatellite (sat_addr.first, sat_addr.second)
+                                  ->GetNode ()
+                                  ->GetObject<CircularOrbitMobilityModel> ();
+      const Time orbitalPeriod = satmmodel->getOrbitalPeriod ();
+      const Time bye_time = satmmodel->getNextTimeAtElevation (m_elevation, this_node);
       NS_LOG_DEBUG ("Sat: (" << sat_addr.first << ", " << sat_addr.second
                              << ") will be visible for "
                              << (bye_time - Simulator::Now ()).GetSeconds () << "s.");
-      if (bye_time > max_time)
+      // Visible satellites may be existing the visibility cone. Check that the next time at the
+      // cone border is *soon*. Lets say less than half an orbit away.
+      // FIXME: This can be improved by not searching for those late crossings in the first place, but lets keep this simple
+      // for the time being.
+      if (bye_time > max_time && (bye_time - Simulator::Now ()) <
+                                     orbitalPeriod / 2.0) // Discard satellites that are leaving
         {
           max_time = bye_time;
           best = sat_addr;
