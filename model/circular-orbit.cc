@@ -20,6 +20,7 @@
 #include "circular-orbit.h"
 
 #include "ns3/assert.h"
+#include "ns3/log-macros-disabled.h"
 #include "orbit/circular-orbit-impl.h"
 #include "orbit/satpos/planet.h"
 #include "ns3/constant-position-mobility-model.h"
@@ -220,6 +221,14 @@ CircularOrbitMobilityModel::getGroundDistanceAtElevation (radians elevation,
   NS_ABORT_IF (sat == nullptr);
 
   return sat->getGroundDistanceAtElevation (elevation, ground_radius).value ();
+}
+
+Time
+CircularOrbitMobilityModel::getOrbitalPeriod () const noexcept
+{
+  NS_LOG_FUNCTION (this);
+
+  return Seconds (quantity<si::time> (sat->getOrbitalPeriod ()).value ());
 }
 
 CircularOrbitMobilityModel::radians

@@ -59,6 +59,7 @@ public:
   Vector getRawPosition () const;
   double getRadius () const noexcept;
   double getGroundDistanceAtElevation (radians elevation, meters ground_radius) const noexcept;
+  Time getOrbitalPeriod () const noexcept;
   radians getSatElevation (Vector groundPosition) const noexcept;
   ns3::Time getNextTimeAtDistance (meters distance, Ptr<Node> ground,
                                    boost::optional<ns3::Time> t0 = {}) const noexcept;
