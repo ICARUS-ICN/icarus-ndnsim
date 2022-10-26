@@ -42,6 +42,7 @@
 #include <boost/units/systems/si/length.hpp>
 #include <boost/units/systems/si/plane_angle.hpp>
 #include <tuple>
+#include <utility>
 
 namespace ns3 {
 namespace icarus {
@@ -97,32 +98,49 @@ GroundNodeSatTrackerElevation::DoInitialize ()
   Simulator::ScheduleNow (&GroundNodeSatTrackerElevation::Update, this);
 }
 
-std::vector<std::pair<std::size_t, std::size_t>>
+std::vector<std::tuple<Time, std::size_t, std::size_t>>
 GroundNodeSatTrackerElevation::getVisibleSats () const noexcept
 {
   NS_LOG_FUNCTION (this);
 
   auto mmodel = GetObject<Node> ()->GetObject<MobilityModel> ();
   NS_ABORT_MSG_UNLESS (mmodel != nullptr, "Source node lacks location information.");
-  const auto pos = mmodel->GetPosition ();
+  const Vector pos = mmodel->GetPosition ();
 
-  std::vector<std::pair<std::size_t, std::size_t>> satellites;
+  std::vector<std::tuple<Time, std::size_t, std::size_t>> satellites;
 
   for (auto plane = 0; plane < GetConstellation ()->GetNPlanes (); plane++)
     {
       for (auto index = 0; index < GetConstellation ()->GetPlaneSize (); index++)
         {
-          const auto sat_elevation = GetConstellation ()
-                                         ->GetSatellite (plane, index)
-                                         ->GetNode ()
-                                         ->GetObject<CircularOrbitMobilityModel> ()
-                                         ->getSatElevation (pos);
+          const auto satmmodel = GetConstellation ()
+                                     ->GetSatellite (plane, index)
+                                     ->GetNode ()
+                                     ->GetObject<CircularOrbitMobilityModel> ();
+          const auto sat_elevation = satmmodel->getSatElevation (pos);
           if (sat_elevation > m_elevation)
             {
-              NS_LOG_DEBUG ("Adding (" << plane << ", " << index << ") at elevation "
-                                       << quantity<degree::plane_angle> (sat_elevation).value ()
-                                       << "°");
-              satellites.push_back (std::make_pair (plane, index));
+              NS_LOG_DEBUG ("Considering ("
+                            << plane << ", " << index << ") at elevation "
+                            << quantity<degree::plane_angle> (sat_elevation).value () << "°");
+
+              const Time orbitalPeriod = satmmodel->getOrbitalPeriod ();
+              const Time bye_time =
+                  satmmodel->getNextTimeAtElevation (m_elevation, GetObject<Node> ());
+
+              // Visible satellites may be existing the visibility cone. Check that the next time at the
+              // cone border is *soon*. Lets say less than half an orbit away.
+              // FIXME: This can be improved by not searching for those late crossings in the first place, but lets keep this simple
+              // for the time being.
+              if (bye_time - Simulator::Now () < orbitalPeriod / 2.0)
+                { // Discard satellites that are leaving
+
+                  NS_LOG_DEBUG ("Sat: (" << plane << ", " << index << ") will be visible for "
+                                         << (bye_time - Simulator::Now ()).GetSeconds () << "s.");
+
+                  satellites.push_back (
+                      std::make_tuple (bye_time - Simulator::Now (), plane, index));
+                }
             }
         }
     }
@@ -141,28 +159,19 @@ GroundNodeSatTrackerElevation::Update () noexcept
   auto visible_sats = getVisibleSats ();
   // 2.- Choose the one with the longest remaining visibility
   const auto this_node = GetObject<Node> ();
-  Time max_time = Seconds (0);
+  Time max_visibility = Seconds (0);
   boost::optional<std::pair<std::size_t, std::size_t>> best;
-  for (auto sat_addr : visible_sats)
+  for (const auto &sat_info : visible_sats)
     {
-      const auto &satmmodel = GetConstellation ()
-                                  ->GetSatellite (sat_addr.first, sat_addr.second)
-                                  ->GetNode ()
-                                  ->GetObject<CircularOrbitMobilityModel> ();
-      const Time orbitalPeriod = satmmodel->getOrbitalPeriod ();
-      const Time bye_time = satmmodel->getNextTimeAtElevation (m_elevation, this_node);
-      NS_LOG_DEBUG ("Sat: (" << sat_addr.first << ", " << sat_addr.second
-                             << ") will be visible for "
-                             << (bye_time - Simulator::Now ()).GetSeconds () << "s.");
-      // Visible satellites may be existing the visibility cone. Check that the next time at the
-      // cone border is *soon*. Lets say less than half an orbit away.
-      // FIXME: This can be improved by not searching for those late crossings in the first place, but lets keep this simple
-      // for the time being.
-      if (bye_time > max_time && (bye_time - Simulator::Now ()) <
-                                     orbitalPeriod / 2.0) // Discard satellites that are leaving
+      Time visibility_period;
+      std::size_t plane, index;
+
+      std::tie (visibility_period, plane, index) = sat_info;
+
+      if (visibility_period > max_visibility)
         {
-          max_time = bye_time;
-          best = sat_addr;
+          max_visibility = visibility_period;
+          best = std::make_pair (plane, index);
         }
     }
 
@@ -173,8 +182,7 @@ GroundNodeSatTrackerElevation::Update () noexcept
       GetNetDevice ()->SetRemoteAddress (remoteAddress);
       NS_LOG_DEBUG ("Tracking satellite " << remoteAddress);
 
-      Simulator::Schedule (max_time - Simulator::Now (), &GroundNodeSatTrackerElevation::Update,
-                           this);
+      Simulator::Schedule (max_visibility, &GroundNodeSatTrackerElevation::Update, this);
     }
   else
     {

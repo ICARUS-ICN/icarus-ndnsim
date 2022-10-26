@@ -25,6 +25,7 @@
 
 #include "ground-node-sat-tracker.h"
 #include "ns3/vector.h"
+#include "ns3/nstime.h"
 
 #include <boost/units/quantity.hpp>
 #include <boost/units/systems/si/plane_angle.hpp>
@@ -50,7 +51,7 @@ private:
   void DoInitialize () override;
   void Update () noexcept;
 
-  std::vector<std::pair<std::size_t, std::size_t>> getVisibleSats () const noexcept;
+  std::vector<std::tuple<Time, std::size_t, std::size_t>> getVisibleSats () const noexcept;
 };
 
 } // namespace icarus
