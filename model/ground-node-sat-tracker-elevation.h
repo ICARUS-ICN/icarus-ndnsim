@@ -24,6 +24,8 @@
 #define GROUND_NODE_SAT_TRACKER_ELEVATION_H
 
 #include "ground-node-sat-tracker.h"
+
+#include "ndn-cxx/util/signal/signal.hpp"
 #include "ns3/vector.h"
 #include "ns3/nstime.h"
 
@@ -44,6 +46,10 @@ public:
 
   void setElevation (double min_elevation) noexcept;
   double getElevation () const noexcept;
+
+  ::ndn::util::signal::Signal<GroundNodeSatTrackerElevation,
+                              const std::vector<std::tuple<Time, std::size_t, std::size_t>> &>
+      satsAvailable;
 
 private:
   boost::units::quantity<boost::units::si::plane_angle> m_elevation;

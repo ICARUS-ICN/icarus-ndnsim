@@ -27,6 +27,7 @@
 #include "ns3/geographic-positions.h"
 #include "ns3/mobility-helper.h"
 #include "ns3/icarus-helper.h"
+#include "ns3/ground-node-sat-tracker-elevation.h"
 #include <boost/units/systems/si/prefixes.hpp>
 
 NS_LOG_COMPONENT_DEFINE ("icarus.ConstellationTrackerExample");
@@ -97,6 +98,19 @@ main (int argc, char **argv) -> int
             last_time = ns3::Simulator::Now ();
           },
           _1, _2, latitude));
+
+  ground_nodes.Get (0)->GetObject<GroundNodeSatTrackerElevation> ()->satsAvailable.connect (
+      [] (const auto &sats) {
+        for (const auto &sat_info : sats)
+          {
+            Time avail;
+            std::size_t plane, index;
+
+            std::tie (avail, plane, index) = sat_info;
+            std::cerr << "\t(" << plane << ", " << index << ") for " << avail.GetSeconds () << "s."
+                      << std::endl;
+          }
+      });
 
   ns3::Simulator::Stop (duration);
 

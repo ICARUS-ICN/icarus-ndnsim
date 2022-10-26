@@ -159,6 +159,8 @@ GroundNodeSatTrackerElevation::Update () noexcept
   // 1.- Find the set of visible satellites
   const auto visible_sats = getVisibleSats ();
 
+  satsAvailable (visible_sats);
+
   // 2.- Choose the one with the longest remaining visibility
   const auto best = std::max_element (
       visible_sats.cbegin (), visible_sats.cend (),
