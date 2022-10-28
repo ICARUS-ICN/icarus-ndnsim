@@ -197,7 +197,7 @@ private:
 
 } // namespace
 
-quantity<boost::units::si::time>
+boost::optional<quantity<boost::units::si::time>>
 findNextCross (quantity<boost::units::si::time> now, CircularOrbitMobilityModelImpl satellite,
                quantity<length> distance, quantity<plane_angle> latitude,
                quantity<plane_angle> longitude, quantity<length> radius)
@@ -207,24 +207,19 @@ findNextCross (quantity<boost::units::si::time> now, CircularOrbitMobilityModelI
   const GroundObserver observer (latitude, longitude, radius);
 
   // Find the first cross, going half a period at a time
-  boost::optional<quantity<boost::units::si::time>> sol{};
-  do
+  auto sol = DistanceSolver (now, now + orbitalPeriod, observer, satellite, distance) ();
+  // If there is a solution, check whether there is a previous one
+  if (sol)
     {
-      sol = DistanceSolver (now, now + orbitalPeriod, observer, satellite, distance) ();
-      // If there is a solution, check whether there is a previous one
-      if (sol)
+      if (now < *sol - 1 * second)
         {
-          if (now < *sol - 1 * second)
-            {
-              const auto previous =
-                  DistanceSolver (now, *sol - 1 * second, observer, satellite, distance) ();
-              sol = previous ? previous : sol;
-            }
+          const auto previous =
+              DistanceSolver (now, *sol - 1 * second, observer, satellite, distance) ();
+          sol = previous ? previous : sol;
         }
-      now += orbitalPeriod / 2.0;
-  } while (!sol);
+    }
 
-  return *sol;
+  return sol;
 }
 
 } // namespace orbit
