@@ -122,6 +122,15 @@ CircularOrbitMobilityModelImpl::getGroundDistanceAtElevation (
                   2.0 * ground_radius * sat_altitude + pow<2> (sat_altitude));
 }
 
+boost::optional<quantity<si::time>>
+CircularOrbitMobilityModelImpl::tryGetNextTimeAtDistance (time now, meters distance,
+                                                          quantity<plane_angle> latitude,
+                                                          quantity<plane_angle> longitude,
+                                                          quantity<length> radius) const noexcept
+{
+  return orbit::findNextCross (now, *this, distance, latitude, longitude, radius);
+}
+
 quantity<si::time>
 CircularOrbitMobilityModelImpl::getNextTimeAtDistance (time now, meters distance,
                                                        quantity<plane_angle> latitude,
@@ -131,7 +140,7 @@ CircularOrbitMobilityModelImpl::getNextTimeAtDistance (time now, meters distance
   boost::optional<time> sol;
   do
     {
-      sol = orbit::findNextCross (now, *this, distance, latitude, longitude, radius);
+      sol = tryGetNextTimeAtDistance (now, distance, latitude, longitude, radius);
       now += getOrbitalPeriod () / 2.0;
   } while (!sol.has_value ());
 

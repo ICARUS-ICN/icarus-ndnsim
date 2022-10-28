@@ -259,5 +259,47 @@ CircularOrbitMobilityModel::getNextTimeAtElevation (radians elevation, Ptr<Node>
                                 ground, t0);
 }
 
+boost::optional<ns3::Time>
+CircularOrbitMobilityModel::tryGetNextTimeAtDistance (meters distance, Ptr<Node> ground,
+                                                      boost::optional<Time> t0) const noexcept
+{
+  NS_LOG_FUNCTION (this << distance.value () << ground);
+  NS_ABORT_IF (sat == nullptr);
+
+  const Ptr<MobilityModel> groundmodel = ground->GetObject<ConstantPositionMobilityModel> ();
+  NS_ASSERT_MSG (groundmodel, "We only support static ground nodes!");
+
+  const quantity<si::time> init_time = (t0 ? *t0 : Simulator::Now ()).GetSeconds () * si::seconds;
+
+  const Vector pos (groundmodel->GetPosition ());
+  const auto angular_pos = CartesianToGeographicCoordinates (pos, GeographicPositions::WGS84);
+
+  auto sol =
+      sat->tryGetNextTimeAtDistance (init_time, distance, angular_pos.first, angular_pos.second,
+                                     pos.GetLength () * boost::units::si::meters);
+  if (sol.has_value ())
+    {
+      return Seconds (sol->value ());
+    }
+
+  return {};
+}
+
+boost::optional<ns3::Time>
+CircularOrbitMobilityModel::tryGetNextTimeAtElevation (radians elevation, Ptr<Node> ground,
+                                                       boost::optional<Time> t0) const noexcept
+{
+  NS_LOG_FUNCTION (this << elevation.value () << ground);
+  NS_ABORT_IF (sat == nullptr);
+
+  const Ptr<MobilityModel> groundmodel = ground->GetObject<ConstantPositionMobilityModel> ();
+  NS_ASSERT_MSG (groundmodel, "We only support static ground nodes!");
+
+  const auto ground_radius = groundmodel->GetPosition ().GetLength () * boost::units::si::meters;
+
+  return tryGetNextTimeAtDistance (sat->getGroundDistanceAtElevation (elevation, ground_radius),
+                                   ground, t0);
+}
+
 } // namespace icarus
 } // namespace ns3
