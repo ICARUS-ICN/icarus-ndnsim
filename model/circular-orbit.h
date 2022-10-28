@@ -63,6 +63,13 @@ public:
                                    boost::optional<ns3::Time> t0 = {}) const noexcept;
   ns3::Time getNextTimeAtElevation (radians elevation, Ptr<Node> ground,
                                     boost::optional<ns3::Time> t0 = {}) const noexcept;
+  // These two functions only search for a solution in the near future of t0
+  boost::optional<ns3::Time>
+  tryGetNextTimeAtDistance (meters distance, Ptr<Node> ground,
+                            boost::optional<ns3::Time> t0 = {}) const noexcept;
+  boost::optional<ns3::Time>
+  tryGetNextTimeAtElevation (radians elevation, Ptr<Node> ground,
+                             boost::optional<ns3::Time> t0 = {}) const noexcept;
 
 private:
   virtual Vector DoGetPosition (void) const;

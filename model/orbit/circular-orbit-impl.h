@@ -20,6 +20,7 @@
 #ifndef CIRCULAR_ORBIT_IMPL_H
 #define CIRCULAR_ORBIT_IMPL_H
 
+#include <boost/optional/optional.hpp>
 #include <boost/units/quantity.hpp>
 #include <boost/units/systems/si/length.hpp>
 #include <boost/units/systems/si/plane_angle.hpp>
@@ -54,6 +55,8 @@ public:
 
   meters getGroundDistanceAtElevation (radians elevation, meters ground_radius) const noexcept;
   time getOrbitalPeriod () const noexcept;
+  boost::optional<time> tryGetNextTimeAtDistance (time now, meters distance, radians latitude,
+                                                  radians longitude, meters radius) const noexcept;
   time getNextTimeAtDistance (time now, meters distance, radians latitude, radians longitude,
                               meters radius) const noexcept;
 
