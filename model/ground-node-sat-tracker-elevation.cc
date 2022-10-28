@@ -126,21 +126,21 @@ GroundNodeSatTrackerElevation::getVisibleSats () const noexcept
                             << quantity<degree::plane_angle> (sat_elevation).value () << "°");
 
               const Time orbitalPeriod = satmmodel->getOrbitalPeriod ();
-              const Time bye_time =
-                  satmmodel->getNextTimeAtElevation (m_elevation, GetObject<Node> ());
+              const auto bye_time =
+                  satmmodel->tryGetNextTimeAtElevation (m_elevation, GetObject<Node> ());
 
               // Visible satellites may be existing the visibility cone. Check that the next time at the
               // cone border is *soon*. Lets say less than half an orbit away.
               // FIXME: This can be improved by not searching for those late crossings in the first place, but lets keep this simple
               // for the time being.
-              if (bye_time - Simulator::Now () < orbitalPeriod / 2.0)
+              if (bye_time.has_value () && *bye_time - Simulator::Now () < orbitalPeriod / 2.0)
                 { // Discard satellites that are leaving
 
                   NS_LOG_DEBUG ("Sat: (" << plane << ", " << index << ") will be visible for "
-                                         << (bye_time - Simulator::Now ()).GetSeconds () << "s.");
+                                         << (*bye_time - Simulator::Now ()).GetSeconds () << "s.");
 
                   satellites.push_back (
-                      std::make_tuple (bye_time - Simulator::Now (), plane, index));
+                      std::make_tuple (*bye_time - Simulator::Now (), plane, index));
                 }
             }
         }
