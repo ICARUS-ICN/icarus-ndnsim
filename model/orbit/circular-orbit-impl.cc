@@ -128,7 +128,14 @@ CircularOrbitMobilityModelImpl::getNextTimeAtDistance (time now, meters distance
                                                        quantity<plane_angle> longitude,
                                                        quantity<length> radius) const noexcept
 {
-  return orbit::findNextCross (now, *this, distance, latitude, longitude, radius);
+  boost::optional<time> sol;
+  do
+    {
+      sol = orbit::findNextCross (now, *this, distance, latitude, longitude, radius);
+      now += getOrbitalPeriod () / 2.0;
+  } while (!sol.has_value ());
+
+  return *sol;
 }
 
 quantity<si::time>

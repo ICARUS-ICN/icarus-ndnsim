@@ -23,11 +23,13 @@
 
 #include "../circular-orbit-impl.h"
 
+#include <boost/optional/optional.hpp>
+
 namespace ns3 {
 namespace icarus {
 namespace orbit {
 
-boost::units::quantity<boost::units::si::time>
+boost::optional<boost::units::quantity<boost::units::si::time>>
 findNextCross (boost::units::quantity<boost::units::si::time> now,
                CircularOrbitMobilityModelImpl satellite,
                boost::units::quantity<boost::units::si::length> distance,
