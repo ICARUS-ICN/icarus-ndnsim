@@ -110,9 +110,9 @@ GroundNodeSatTrackerElevation::getVisibleSats () const noexcept
 
   std::vector<std::tuple<Time, std::size_t, std::size_t>> satellites;
 
-  for (auto plane = 0; plane < GetConstellation ()->GetNPlanes (); plane++)
+  for (auto plane = 0u; plane < GetConstellation ()->GetNPlanes (); plane++)
     {
-      for (auto index = 0; index < GetConstellation ()->GetPlaneSize (); index++)
+      for (auto index = 0u; index < GetConstellation ()->GetPlaneSize (); index++)
         {
           const auto satmmodel = GetConstellation ()
                                      ->GetSatellite (plane, index)
