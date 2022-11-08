@@ -93,7 +93,7 @@ GroundNodeSatTrackerElevation::DoInitialize ()
 {
   NS_LOG_FUNCTION (this);
 
-  // Chain up initalization
+  // Chain up initialization
   GroundNodeSatTracker::DoInitialize ();
 
   Simulator::ScheduleNow (&GroundNodeSatTrackerElevation::Update, this);
@@ -104,7 +104,7 @@ GroundNodeSatTrackerElevation::getVisibleSats () const noexcept
 {
   NS_LOG_FUNCTION (this);
 
-  auto mmodel = GetObject<Node> ()->GetObject<MobilityModel> ();
+  const auto mmodel = GetObject<Node> ()->GetObject<MobilityModel> ();
   NS_ABORT_MSG_UNLESS (mmodel != nullptr, "Source node lacks location information.");
   const Vector pos = mmodel->GetPosition ();
 
@@ -126,16 +126,13 @@ GroundNodeSatTrackerElevation::getVisibleSats () const noexcept
                             << quantity<degree::plane_angle> (sat_elevation).value () << "°");
 
               const Time orbitalPeriod = satmmodel->getOrbitalPeriod ();
-              const auto bye_time =
-                  satmmodel->tryGetNextTimeAtElevation (m_elevation, GetObject<Node> ());
 
               // Visible satellites may be existing the visibility cone. Check that the next time at the
               // cone border is *soon*. Lets say less than half an orbit away.
-              // FIXME: This can be improved by not searching for those late crossings in the first place, but lets keep this simple
-              // for the time being.
-              if (bye_time.has_value () && *bye_time - Simulator::Now () < orbitalPeriod / 2.0)
+              if (const auto bye_time =
+                      satmmodel->tryGetNextTimeAtElevation (m_elevation, GetObject<Node> ()))
                 { // Discard satellites that are leaving
-
+                  NS_ASSERT (*bye_time - Simulator::Now () < orbitalPeriod / 2.0);
                   NS_LOG_DEBUG ("Sat: (" << plane << ", " << index << ") will be visible for "
                                          << (*bye_time - Simulator::Now ()).GetSeconds () << "s.");
 
