@@ -28,6 +28,7 @@
 #include <boost/units/cmath.hpp>
 #include <boost/units/systems/si/plane_angle.hpp>
 #include <boost/units/systems/si/length.hpp>
+#include <memory>
 
 namespace ns3 {
 
