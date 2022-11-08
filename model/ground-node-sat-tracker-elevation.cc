@@ -161,7 +161,7 @@ GroundNodeSatTrackerElevation::Update () noexcept
   // 2.- Choose the one with the longest remaining visibility
   const auto best = std::max_element (
       visible_sats.cbegin (), visible_sats.cend (),
-      [] (const auto &a, const auto &b) { return std::get<0> (a) < std::get<0> (b); });
+      [] (const auto &a, const auto &b) { return std::get<Time> (a) < std::get<Time> (b); });
 
   if (best != visible_sats.cend ())
     {
