@@ -19,7 +19,7 @@ jobs:
     strategy:
       matrix:
         build: [debug, optimized]
-        compiler: [g++-10, clang++-12]
+        compiler: [g++-12, clang++-14]
 
     # The type of runner that the job will run on
     runs-on: ubuntu-latest
