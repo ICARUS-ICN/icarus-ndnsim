@@ -16,6 +16,6 @@ Authors: Miguel Rodríguez Pérez <miguel@det.uvigo.gal>, Sergio Herrería Alons
 This software is licensed under the GNU General Public License, version 3 (GPL-3.0) or later. For information see LICENSE.
 
 
-Project PID2020-113240RB-I00 financed by MCIN/ AEI/10.13039/501100011033.
-![MCIN-AEI Logo](https://icarus.det.uvigo.es/assets/img/logo-mcin-aei.png)
+Project PID2020-113240RB-I00 financed by MCIU/AEI/10.13039/501100011033.
+![MCIU-AEI Logo](https://icarus.det.uvigo.es/assets/img/logo-mcin-aei.jpeg)
 
